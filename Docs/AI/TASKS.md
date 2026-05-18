@@ -38,3 +38,4 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Add one-click selected Mackup installer action.
 - [x] Make Homebrew/pipx a single selected install method.
 - [x] Add guided creation for missing `.mackup.cfg`.
+- [x] Add development reset to simulate first-run state.

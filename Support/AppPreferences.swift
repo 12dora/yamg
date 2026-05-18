@@ -3,6 +3,7 @@ import Foundation
 protocol AppPreferencesStoring: AnyObject {
     var preferredCLIPath: URL? { get set }
     var configFilePath: URL? { get set }
+    func resetForFirstRunSimulation()
 }
 
 final class AppPreferences: ObservableObject, AppPreferencesStoring {
@@ -35,6 +36,16 @@ final class AppPreferences: ObservableObject, AppPreferencesStoring {
         }
     }
 
+    func resetForFirstRunSimulation() {
+        let missingConfigURL = defaultsDirectory()
+            .appendingPathComponent("YAMG")
+            .appendingPathComponent("Development")
+            .appendingPathComponent("missing-first-run.mackup.cfg")
+
+        preferredCLIPath = nil
+        configFilePath = missingConfigURL
+    }
+
     private func url(forKey key: String) -> URL? {
         guard let path = defaults.string(forKey: key), !path.isEmpty else {
             return nil
@@ -51,5 +62,10 @@ final class AppPreferences: ObservableObject, AppPreferencesStoring {
         } else {
             defaults.removeObject(forKey: key)
         }
+    }
+
+    private func defaultsDirectory() -> URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
     }
 }

@@ -545,6 +545,70 @@
         }
       }
     },
+    "preferences.development.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use this during development to return the app to the first-run setup state. It does not delete your real .mackup.cfg."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开发时可用它让应用回到首次运行配置状态。它不会删除真实的 .mackup.cfg。"
+          }
+        }
+      }
+    },
+    "preferences.development.reset_done": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Development reset applied. Return to Dashboard and refresh."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开发重置已应用。返回仪表盘并刷新。"
+          }
+        }
+      }
+    },
+    "preferences.development.reset_first_run": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset to first-run state"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置为首次运行状态"
+          }
+        }
+      }
+    },
+    "preferences.development.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Development reset"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开发重置"
+          }
+        }
+      }
+    },
     "preferences.saved": {
       "localizations": {
         "en": {

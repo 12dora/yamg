@@ -44,9 +44,33 @@ struct PreferencesView: View {
                 .keyboardShortcut(.defaultAction)
             }
 
+            Divider()
+                .frame(maxWidth: 680)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text(String(localized: "preferences.development.title"))
+                    .font(.headline)
+                Text(String(localized: "preferences.development.detail"))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+
+                Button(role: .destructive) {
+                    viewModel.resetForFirstRunSimulation()
+                } label: {
+                    Label(String(localized: "preferences.development.reset_first_run"), systemImage: "arrow.counterclockwise.circle")
+                }
+            }
+            .frame(maxWidth: 680, alignment: .leading)
+
             if viewModel.state == .saved {
                 Label(String(localized: "preferences.saved"), systemImage: "checkmark.circle")
                     .foregroundStyle(.green)
+            }
+
+            if viewModel.state == .developmentReset {
+                Label(String(localized: "preferences.development.reset_done"), systemImage: "checkmark.circle")
+                    .foregroundStyle(.green)
+                    .textSelection(.enabled)
             }
 
             Spacer()

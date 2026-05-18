@@ -132,3 +132,10 @@ Changed: Features/RootShellView.swift, Features/Dashboard/DashboardView.swift, F
 Tests: plutil -lint YAMG.xcodeproj/project.pbxproj; jq empty Resources/Localizable.xcstrings; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/DashboardViewModelTests -only-testing:YAMGTests/AppSectionTests; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests.
 Next: reopen Debug app for user testing; consider dedicated UI test coverage for first-run wizard when UI automation is stable.
 Blocked: none.
+
+2026-05-18 22:52 CST | Codex
+Done: added Preferences development reset button that clears local CLI override and points config path to a guaranteed-missing development .mackup.cfg path, restoring first-run onboarding without deleting real Mackup config.
+Changed: Support/AppPreferences.swift, Features/Preferences/PreferencesView.swift, Features/Preferences/PreferencesViewModel.swift, Resources/Localizable.xcstrings, YAMGTests/AppPreferencesTests.swift, YAMGTests/PreferencesViewModelTests.swift, Docs/AI/TASKS.md, Docs/AI/HANDOFF.md.
+Tests: jq empty Resources/Localizable.xcstrings; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/AppPreferencesTests -only-testing:YAMGTests/PreferencesViewModelTests; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests.
+Next: user can use Preferences > Development reset > Reset to first-run state, then return to Dashboard and refresh.
+Blocked: none.

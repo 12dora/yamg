@@ -41,6 +41,17 @@ final class AppPreferencesTests: XCTestCase {
         XCTAssertNil(preferences.configFilePath)
     }
 
+    func testDevelopmentResetUsesMissingConfigPathAndClearsCLIOverride() throws {
+        let preferences = try XCTUnwrap(defaults).makePreferences()
+        preferences.preferredCLIPath = URL(fileURLWithPath: "/usr/local/bin/mackup")
+        preferences.configFilePath = URL(fileURLWithPath: "/Users/test/.mackup.cfg")
+
+        preferences.resetForFirstRunSimulation()
+
+        XCTAssertNil(preferences.preferredCLIPath)
+        XCTAssertEqual(preferences.configFilePath?.lastPathComponent, "missing-first-run.mackup.cfg")
+        XCTAssertEqual(preferences.configFilePath?.path.contains("/YAMG/Development/"), true)
+    }
 }
 
 private extension UserDefaults {

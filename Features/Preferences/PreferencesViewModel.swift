@@ -5,6 +5,7 @@ final class PreferencesViewModel: ObservableObject {
     enum State: Equatable {
         case editing
         case saved
+        case developmentReset
     }
 
     @Published var cliPath: String
@@ -29,6 +30,13 @@ final class PreferencesViewModel: ObservableObject {
         cliPath = ""
         configPath = ""
         save()
+    }
+
+    func resetForFirstRunSimulation() {
+        preferences.resetForFirstRunSimulation()
+        cliPath = preferences.preferredCLIPath?.path ?? ""
+        configPath = preferences.configFilePath?.path ?? ""
+        state = .developmentReset
     }
 
     private func normalizedURL(from value: String) -> URL? {

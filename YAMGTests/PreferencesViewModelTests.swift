@@ -45,6 +45,25 @@ final class PreferencesViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.cliPath, "")
         XCTAssertEqual(viewModel.configPath, "")
     }
+
+    func testDevelopmentResetSimulatesMissingConfigWithoutDeletingRealConfig() {
+        let preferences = InMemoryPreferences(
+            preferredCLIPath: URL(fileURLWithPath: "/usr/local/bin/mackup"),
+            configFilePath: URL(fileURLWithPath: "/Users/test/.mackup.cfg")
+        )
+        let viewModel = PreferencesViewModel(preferences: preferences)
+
+        viewModel.resetForFirstRunSimulation()
+
+        XCTAssertNil(preferences.preferredCLIPath)
+        XCTAssertEqual(
+            preferences.configFilePath,
+            URL(fileURLWithPath: "/tmp/yamg-development/missing-first-run.mackup.cfg")
+        )
+        XCTAssertEqual(viewModel.cliPath, "")
+        XCTAssertEqual(viewModel.configPath, "/tmp/yamg-development/missing-first-run.mackup.cfg")
+        XCTAssertEqual(viewModel.state, .developmentReset)
+    }
 }
 
 private final class InMemoryPreferences: AppPreferencesStoring {
@@ -54,5 +73,10 @@ private final class InMemoryPreferences: AppPreferencesStoring {
     init(preferredCLIPath: URL? = nil, configFilePath: URL? = nil) {
         self.preferredCLIPath = preferredCLIPath
         self.configFilePath = configFilePath
+    }
+
+    func resetForFirstRunSimulation() {
+        preferredCLIPath = nil
+        configFilePath = URL(fileURLWithPath: "/tmp/yamg-development/missing-first-run.mackup.cfg")
     }
 }
