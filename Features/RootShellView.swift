@@ -47,6 +47,13 @@ struct RootShellView: View {
             }
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        } else if section == .linkMode {
+            VStack(alignment: .leading, spacing: 16) {
+                sectionHeader(section)
+                LinkModeView(preferences: preferences)
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else if section == .preferences {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)

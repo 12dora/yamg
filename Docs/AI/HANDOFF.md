@@ -118,3 +118,10 @@ Changed: App/YAMGApp.swift, Support/AppPreferences.swift, Support/LocalizationKe
 Tests: plutil -lint YAMG.xcodeproj/project.pbxproj; jq empty Resources/Localizable.xcstrings; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/AppPreferencesTests -only-testing:YAMGTests/PreferencesViewModelTests -only-testing:YAMGTests/StorageViewModelTests -only-testing:YAMGTests/OperationFlowViewModelTests.
 Next: implement P2 Link Mode advanced page.
 Blocked: none.
+
+2026-05-18 22:34 CST | Codex
+Done: implemented P2 Link Mode advanced page as a non-default sidebar entry with risk acknowledgement, confirmation flow, streamed output, logging, and allowed Mackup CLI link commands only.
+Changed: Features/LinkMode/LinkModeView.swift, Features/LinkMode/LinkModeViewModel.swift, Features/AppSection.swift, Features/RootShellView.swift, Support/LocalizationKey.swift, Resources/Localizable.xcstrings, YAMGTests/LinkModeViewModelTests.swift, YAMGTests/AppSectionTests.swift, YAMG.xcodeproj/project.pbxproj, Docs/AI/TASKS.md, Docs/AI/HANDOFF.md.
+Tests: plutil -lint YAMG.xcodeproj/project.pbxproj; jq empty Resources/Localizable.xcstrings; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/LinkModeViewModelTests -only-testing:YAMGTests/AppSectionTests; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests.
+Next: P2 complete; next work should pick the next priority added to TASKS.md.
+Blocked: none.

@@ -9,6 +9,7 @@ final class AppSectionTests: XCTestCase {
                 "section.dashboard.title",
                 "section.applications.title",
                 "section.storage.title",
+                "section.link_mode.title",
                 "section.logs.title",
                 "section.preferences.title"
             ]
@@ -17,11 +18,13 @@ final class AppSectionTests: XCTestCase {
 
     func testSidebarIconsArePresent() {
         XCTAssertEqual(AppSection.dashboard.systemImageName, "rectangle.grid.2x2")
+        XCTAssertEqual(AppSection.linkMode.systemImageName, "link.badge.plus")
         XCTAssertEqual(AppSection.preferences.subtitle, "section.preferences.subtitle")
     }
 
     func testSidebarLocalizationKeysAreStable() {
         XCTAssertEqual(AppSection.dashboard.titleKey, .dashboardTitle)
+        XCTAssertEqual(AppSection.linkMode.titleKey, .linkModeTitle)
         XCTAssertEqual(AppSection.preferences.subtitleKey, .preferencesSubtitle)
     }
 }

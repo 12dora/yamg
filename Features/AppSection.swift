@@ -4,6 +4,7 @@ enum AppSection: String, CaseIterable, Identifiable {
     case dashboard
     case applications
     case storage
+    case linkMode
     case logs
     case preferences
 
@@ -17,6 +18,8 @@ enum AppSection: String, CaseIterable, Identifiable {
             return "section.applications.title"
         case .storage:
             return "section.storage.title"
+        case .linkMode:
+            return "section.link_mode.title"
         case .logs:
             return "section.logs.title"
         case .preferences:
@@ -32,6 +35,8 @@ enum AppSection: String, CaseIterable, Identifiable {
             return .applicationsTitle
         case .storage:
             return .storageTitle
+        case .linkMode:
+            return .linkModeTitle
         case .logs:
             return .logsTitle
         case .preferences:
@@ -47,6 +52,8 @@ enum AppSection: String, CaseIterable, Identifiable {
             return "tray.full"
         case .storage:
             return "externaldrive"
+        case .linkMode:
+            return "link.badge.plus"
         case .logs:
             return "doc.text.magnifyingglass"
         case .preferences:
@@ -62,6 +69,8 @@ enum AppSection: String, CaseIterable, Identifiable {
             return "section.applications.subtitle"
         case .storage:
             return "section.storage.subtitle"
+        case .linkMode:
+            return "section.link_mode.subtitle"
         case .logs:
             return "section.logs.subtitle"
         case .preferences:
@@ -77,6 +86,8 @@ enum AppSection: String, CaseIterable, Identifiable {
             return .applicationsSubtitle
         case .storage:
             return .storageSubtitle
+        case .linkMode:
+            return .linkModeSubtitle
         case .logs:
             return .logsSubtitle
         case .preferences:

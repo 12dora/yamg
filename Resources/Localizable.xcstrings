@@ -113,6 +113,38 @@
         }
       }
     },
+    "section.link_mode.subtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advanced symlink operations for experienced Mackup users."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "面向有经验 Mackup 用户的高级符号链接操作。"
+          }
+        }
+      }
+    },
+    "section.link_mode.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link Mode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "链接模式"
+          }
+        }
+      }
+    },
     "section.preferences.subtitle": {
       "localizations": {
         "en": {
@@ -381,6 +413,198 @@
           "stringUnit": {
             "state": "translated",
             "value": "偏好设置已保存"
+          }
+        }
+      }
+    },
+    "link_mode.acknowledge": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand Link Mode can replace files with symlinks and is not the default backup path."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我理解链接模式可能用符号链接替换文件，并且它不是默认备份路径。"
+          }
+        }
+      }
+    },
+    "link_mode.confirm.install": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run mackup link install?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 mackup link install？"
+          }
+        }
+      }
+    },
+    "link_mode.confirm.link": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run mackup link?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 mackup link？"
+          }
+        }
+      }
+    },
+    "link_mode.confirm.uninstall": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run mackup link uninstall?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 mackup link uninstall？"
+          }
+        }
+      }
+    },
+    "link_mode.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy mode backup and restore remain the recommended MVP workflow. Link Mode only calls Mackup CLI link commands after explicit confirmation."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy mode 的备份和恢复仍是推荐的 MVP 工作流。链接模式只会在明确确认后调用 Mackup CLI link 命令。"
+          }
+        }
+      }
+    },
+    "link_mode.idle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select a Link Mode command and acknowledge the risk before continuing."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请选择链接模式命令并确认风险后继续。"
+          }
+        }
+      }
+    },
+    "link_mode.install": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install links"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装链接"
+          }
+        }
+      }
+    },
+    "link_mode.link": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "链接"
+          }
+        }
+      }
+    },
+    "link_mode.operation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Operation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作"
+          }
+        }
+      }
+    },
+    "link_mode.request": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prepare Link Mode command"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "准备链接模式命令"
+          }
+        }
+      }
+    },
+    "link_mode.uninstall": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uninstall links"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卸载链接"
+          }
+        }
+      }
+    },
+    "link_mode.warning": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advanced high-risk Mackup Link Mode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高级高风险 Mackup 链接模式"
           }
         }
       }
