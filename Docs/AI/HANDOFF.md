@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 20:03 CST | Codex
+Done: implemented P1 Storage editor UI for Mackup-supported `[storage] engine/path/directory` fields only, backed by `MackupConfigEditor`; no migration, sync, copy, delete, or link behavior added.
+Changed: `Config/MackupConfig.swift`, `Features/Storage/StorageView.swift`, `Features/Storage/StorageViewModel.swift`, `Features/RootShellView.swift`, `Support/LocalizationKey.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/StorageViewModelTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `plutil -lint YAMG.xcodeproj/project.pbxproj`; `jq empty Resources/Localizable.xcstrings`; `xcodebuild build -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS'`; `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/StorageViewModelTests`; `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests`.
+Next: implement P1 Backup/restore/dry-run flow with confirmation.
+Blocked: none.
+
 2026-05-18 19:58 CST | Codex
 Done: implemented P1 Application detail via `mackup show <application>` with CLI-output parser, detail view model, selected application detail pane, and tests for parser/view model behavior.
 Changed: `Applications/MackupApplicationDetail.swift`, `Applications/MackupApplicationDetailParser.swift`, `Features/Applications/ApplicationDetailView.swift`, `Features/Applications/ApplicationDetailViewModel.swift`, `Features/Applications/ApplicationsListView.swift`, `Features/Applications/ApplicationsListViewModel.swift`, `MackupCLI/MackupDetectionStatusDescription.swift`, `Support/LocalizationKey.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/ApplicationDetailViewModelTests.swift`, `YAMGTests/MackupApplicationDetailParserTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.

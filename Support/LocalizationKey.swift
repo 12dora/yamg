@@ -22,6 +22,7 @@ enum LocalizationKey: String {
     case applicationsEmpty = "applications.empty"
     case applicationsFailed = "applications.failed"
     case applicationDetailConfigurationFiles = "application.detail.configuration_files"
+    case save = "action.save"
 
     var localizedStringKey: LocalizedStringKey {
         LocalizedStringKey(rawValue)

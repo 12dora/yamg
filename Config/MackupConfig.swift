@@ -19,7 +19,7 @@ struct MackupConfig: Equatable {
     var applicationsToSync: [String]
     var applicationsToIgnore: [String]
 
-    fileprivate var originalText: String
+    var originalText: String
 }
 
 protocol MackupConfigEditing {

@@ -43,6 +43,9 @@
 		5D1A000000000000000000A3 /* ApplicationDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000AA /* ApplicationDetailViewModel.swift */; };
 		5D1A000000000000000000A4 /* MackupApplicationDetailParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000AB /* MackupApplicationDetailParserTests.swift */; };
 		5D1A000000000000000000A5 /* ApplicationDetailViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000AC /* ApplicationDetailViewModelTests.swift */; };
+		5D1A000000000000000000AD /* StorageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B1 /* StorageView.swift */; };
+		5D1A000000000000000000AE /* StorageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B2 /* StorageViewModel.swift */; };
+		5D1A000000000000000000AF /* StorageViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B3 /* StorageViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,6 +87,9 @@
 		5D1A000000000000000000AA /* ApplicationDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationDetailViewModel.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000AB /* MackupApplicationDetailParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupApplicationDetailParserTests.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000AC /* ApplicationDetailViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationDetailViewModelTests.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000B1 /* StorageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageView.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000B2 /* StorageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageViewModel.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000B3 /* StorageViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageViewModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +151,7 @@
 			children = (
 				5D1A0000000000000000009E /* Applications */,
 				5D1A00000000000000000090 /* Dashboard */,
+				5D1A000000000000000000B0 /* Storage */,
 				5D1A00000000000000000021 /* AppSection.swift */,
 				5D1A00000000000000000022 /* RootShellView.swift */,
 			);
@@ -165,6 +172,7 @@
 				5D1A0000000000000000002F /* MackupDetectorTests.swift */,
 				5D1A0000000000000000002D /* MackupProcessRunnerTests.swift */,
 				5D1A00000000000000000081 /* ProcessLogStoreTests.swift */,
+				5D1A000000000000000000B3 /* StorageViewModelTests.swift */,
 			);
 			path = YAMGTests;
 			sourceTree = "<group>";
@@ -266,6 +274,15 @@
 				5D1A0000000000000000009B /* ApplicationsListViewModel.swift */,
 			);
 			path = Applications;
+			sourceTree = "<group>";
+		};
+		5D1A000000000000000000B0 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				5D1A000000000000000000B1 /* StorageView.swift */,
+				5D1A000000000000000000B2 /* StorageViewModel.swift */,
+			);
+			path = Storage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -381,6 +398,8 @@
 				5D1A0000000000000000008B /* DashboardViewModel.swift in Sources */,
 				5D1A00000000000000000086 /* LocalizationKey.swift in Sources */,
 				5D1A00000000000000000072 /* RootShellView.swift in Sources */,
+				5D1A000000000000000000AD /* StorageView.swift in Sources */,
+				5D1A000000000000000000AE /* StorageViewModel.swift in Sources */,
 				5D1A00000000000000000091 /* MackupApplication.swift in Sources */,
 				5D1A0000000000000000009F /* MackupApplicationDetail.swift in Sources */,
 				5D1A000000000000000000A0 /* MackupApplicationDetailParser.swift in Sources */,
@@ -417,6 +436,7 @@
 				5D1A0000000000000000007D /* MackupDetectorTests.swift in Sources */,
 				5D1A0000000000000000007B /* MackupProcessRunnerTests.swift in Sources */,
 				5D1A0000000000000000007F /* ProcessLogStoreTests.swift in Sources */,
+				5D1A000000000000000000AF /* StorageViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

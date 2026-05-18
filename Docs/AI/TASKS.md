@@ -22,7 +22,7 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Onboarding MVP.
 - [x] Applications list via `mackup list`.
 - [x] Application detail via `mackup show`.
-- [ ] Storage editor.
+- [x] Storage editor.
 - [ ] Backup/restore/dry-run flow with confirmation.
 
 ## P2

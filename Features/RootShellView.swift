@@ -35,6 +35,13 @@ struct RootShellView: View {
             }
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        } else if section == .storage {
+            VStack(alignment: .leading, spacing: 16) {
+                sectionHeader(section)
+                StorageView()
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
