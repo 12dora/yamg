@@ -64,9 +64,9 @@ YAMG 不做增量同步、定时任务、版本快照、文件 diff、加密、�
 | 配置位置 | 字段 | 默认值 | 合法值 | 生效规则 | GUI 控件 |
 |---|---|---|---|---|---|
 | 配置文件路径 | `--config-file` | 自动查找 | 家目录内绝对或相对路径 | 显式指定优先；不存在则报错 | 高级设置“配置文件路径”选择器 |
-| `[storage]` | `engine` | `dropbox` | `dropbox`、`google_drive`、`icloud`、`file_system` | 控制路径检测逻辑 | Storage 分段选择 |
-| `[storage]` | `path` | 无 | 绝对路径或相对家目录路径 | `file_system` 必填；源码用 `os.path.join(HOME, cfg_path)`，绝对路径会覆盖前缀 | Storage 文件夹选择器 |
-| `[storage]` | `directory` | `Mackup` | 目录名或子路径；不能为 `.mackup` 或 XDG 自定义应用目录 | 拼接到 storage path 之后 | 文本框，带非法值校验 |
+| `[storage]` | `engine` | `dropbox` | `dropbox`、`google_drive`、`icloud`、`file_system` | 控制路径检测逻辑；Dropbox、Google Drive、iCloud 仅在 Mackup 兼容检测成功时可选 | Storage provider 按钮组 |
+| `[storage]` | `path` | 无 | 绝对路径或相对家目录路径 | `file_system` 必填；Dropbox、Google Drive、iCloud 由 Mackup 自动检测，不写 `path` | GUI 中合并为 “Mackup folder” 文件夹选择器 |
+| `[storage]` | `directory` | `Mackup` | 目录名或子路径；不能为 `.mackup` 或 XDG 自定义应用目录 | 拼接到 storage path 之后；选择默认 `<provider>/Mackup` 时可省略 | GUI 中合并为 “Mackup folder” 文件夹选择器 |
 | `[applications_to_sync]` | 每行一个 app slug | 空集合 | `mackup list` 中的 slug，可包含自定义 app | 非空时只同步该集合，再扣除 ignore | Applications 勾选“仅同步选中应用” |
 | `[applications_to_ignore]` | 每行一个 app slug | 空集合 | `mackup list` 中的 slug，可包含自定义 app | 从候选集合中移除，优先级高于 sync | Applications 勾选“排除应用” |
 | 自定义应用 CFG `[application]` | `name` | 无 | 显示名 | `appsdb.py` 读取后用于 `show` | Custom Apps 名称字段 |
@@ -159,11 +159,11 @@ YAMG 采用 macOS 原生 Sidebar + Detail View。理由：任务入口固定、�
 | Dashboard | 环境状态、当前存储、上次 YAMG 执行记录、快捷备份/恢复 | `backup`、`restore`、`--version` |
 | Applications | 本机已安装应用列表、搜索、筛选；Mackup 可识别时展示详情 | `.app` 扫描、`show <application>` |
 | Application Detail | Mackup CFG 路径只读展示；未被 Mackup 支持时显示 CLI 错误 | `show <application>` |
-| Storage | 后端选择、目录名、file_system path | `[storage]` |
+| Storage | 后端检测与一个 Mackup folder 选择器，保存时写入 Mackup 的 `engine/path/directory` | `[storage]` |
 | Custom Apps | 自定义 CFG 编辑器 | Mackup 支持的 `~/.mackup/*.cfg` 与 XDG 自定义目录 |
-| Link Mode | link install/link/link uninstall | `link install`、`link`、`link uninstall` |
+| Link Mode | 默认隐藏；在 Preferences 开启后显示 link install/link/link uninstall | `link install`、`link`、`link uninstall` |
 | Logs | 最近命令输出 | stdout/stderr 记录 |
-| Preferences | 语言、菜单栏图标、CLI 路径、配置文件路径 | YAMG 元数据 + Mackup 直通配置 |
+| Preferences | 语言、菜单栏图标、CLI 路径、配置文件路径、Link Mode 显示开关 | YAMG 元数据 + Mackup 直通配置 |
 
 菜单栏提供 File、Edit、View、Run、Window、Help。Run 菜单只包含 CLI 已有动作：Backup、Restore、Dry Run Backup、Dry Run Restore、Link Install、Link、Link Uninstall。Menu Bar Extra 建议提供，功能限制为显示 Mackup 状态、上次 YAMG 命令时间、打开主窗口、触发 Backup/Restore；不做定时或后台自动同步。
 
@@ -197,7 +197,8 @@ English: Welcome to Yet Another Mackup GUI. YAMG is a free and open-source GUI f
 
 ### 5.4 存储位置选择
 
-列表展示 Dropbox、Google Drive、iCloud Drive、File System 四项。每项显示检测状态、实际路径、可用空间、是否存在 `<path>/<directory>`。这一步只写 `.mackup.cfg`，不复制用户数据。  
+列表展示 Dropbox、Google Drive、iCloud Drive、File System 四项。Dropbox、Google Drive、iCloud Drive 复用 Mackup 的检测规则，检测到本地路径时才可点击，未检测到时置灰并显示原因；File System 始终可选。用户必须选择 provider 与 Mackup folder 后才能创建 `.mackup.cfg`。GUI 只显示一个 Mackup folder，保存时按 Mackup 规范拆写 `file_system` 的 `path` 与 `directory`，自动 provider 默认不写 `path`。这一步只写 `.mackup.cfg`，不复制用户数据。
+
 中文错误：未找到 iCloud Drive 文件夹。请确认 iCloud Drive 已启用。  
 English: iCloud Drive was not found. Make sure iCloud Drive is enabled.
 
@@ -247,7 +248,7 @@ Dashboard 显示 Mackup 状态、当前存储后端、Mackup 文件夹路径、�
 
 ### Storage
 
-Storage 页面编辑 `[storage]`。切换后端时，YAMG 只修改配置并提示用户按 Mackup 文档完成迁移：先在所有机器执行 `mackup link uninstall`（若使用 link mode），手动复制 Mackup 文件夹到新位置，修改配置，再在主机执行 `backup`、其他机器执行 `restore`。Mackup 没有自动迁移命令，因此 YAMG 不提供一键迁移。
+Storage 页面编辑 `[storage]`。界面只提供 provider 与 Mackup folder 两个决策点，避免把 Mackup 的 `path`/`directory` 拆成两个容易混淆的输入；保存时仍严格写回 Mackup 支持的字段。切换后端时，YAMG 只修改配置并提示用户按 Mackup 文档完成迁移：先在所有机器执行 `mackup link uninstall`（若使用 link mode），手动复制 Mackup 文件夹到新位置，修改配置，再在主机执行 `backup`、其他机器执行 `restore`。Mackup 没有自动迁移命令，因此 YAMG 不提供一键迁移。
 
 ### Custom Apps
 

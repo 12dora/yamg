@@ -12,6 +12,7 @@ final class PreferencesViewModel: ObservableObject {
 
     @Published var cliPath: String
     @Published var configPath: String
+    @Published var showsLinkMode: Bool
     @Published private(set) var state: State = .editing
 
     private let preferences: AppPreferencesStoring
@@ -28,11 +29,13 @@ final class PreferencesViewModel: ObservableObject {
         self.defaultConfigPath = defaultConfigPath
         self.cliPath = preferences.preferredCLIPath?.path ?? ""
         self.configPath = preferences.configFilePath?.path ?? ""
+        self.showsLinkMode = preferences.showsLinkMode
     }
 
     func save() {
         preferences.preferredCLIPath = normalizedURL(from: cliPath)
         preferences.configFilePath = normalizedURL(from: configPath)
+        preferences.showsLinkMode = showsLinkMode
         state = .saved
     }
 
@@ -50,8 +53,10 @@ final class PreferencesViewModel: ObservableObject {
 
             preferences.preferredCLIPath = nil
             preferences.configFilePath = nil
+            preferences.showsLinkMode = false
             cliPath = ""
             configPath = ""
+            showsLinkMode = false
             state = .reset
         } catch {
             state = .failed(error.localizedDescription)
@@ -62,6 +67,7 @@ final class PreferencesViewModel: ObservableObject {
         preferences.resetForFirstRunSimulation()
         cliPath = preferences.preferredCLIPath?.path ?? ""
         configPath = preferences.configFilePath?.path ?? ""
+        showsLinkMode = preferences.showsLinkMode
         state = .developmentReset
     }
 

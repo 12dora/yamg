@@ -157,24 +157,89 @@ struct DashboardView: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
-            Picker(String(localized: "storage.engine"), selection: $viewModel.selectedStorageEngine) {
-                ForEach(MackupStorageEngine.allCases, id: \.self) { engine in
-                    Text(engine.displayName).tag(engine)
+            storageEngineChooser
+
+            selectedPathRow(
+                text: viewModel.selectedStorageFolderPath,
+                placeholder: String(localized: "storage.folder.placeholder"),
+                systemImage: "folder"
+            ) {
+                chooseFolder { url in
+                    viewModel.selectStorageFolder(url)
                 }
             }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 520)
+            .frame(maxWidth: 700)
+
+            if let selectedAvailability = viewModel.selectedStorageAvailability {
+                Label(
+                    selectedAvailability.detail,
+                    systemImage: selectedAvailability.isAvailable ? "checkmark.circle" : "exclamationmark.triangle"
+                )
+                .font(.callout)
+                .foregroundStyle(selectedAvailability.isAvailable ? Color.secondary : Color.orange)
+                .textSelection(.enabled)
+            }
 
             Button {
                 viewModel.createDefaultConfig()
             } label: {
                 Label(String(localized: "setup.config.create"), systemImage: "doc.badge.plus")
             }
-            .disabled(isCreatingConfig)
+            .disabled(isCreatingConfig || !viewModel.canCreateConfig)
 
             setupStateView
         }
         .frame(maxWidth: 780, alignment: .leading)
+    }
+
+    private var storageEngineChooser: some View {
+        HStack(spacing: 8) {
+            ForEach(viewModel.storageAvailability) { item in
+                Button {
+                    viewModel.selectStorageEngine(item.engine)
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: item.isAvailable ? "checkmark.circle" : "slash.circle")
+                        Text(item.engine.displayName)
+                            .lineLimit(1)
+                    }
+                    .frame(minWidth: 112)
+                }
+                .buttonStyle(.bordered)
+                .disabled(!item.isAvailable)
+                .help(item.detail)
+            }
+        }
+    }
+
+    private func selectedPathRow(
+        text: String,
+        placeholder: String,
+        systemImage: String,
+        onChoose: @escaping () -> Void
+    ) -> some View {
+        HStack(spacing: 8) {
+            Label {
+                Text(text.isEmpty ? placeholder : text)
+                    .foregroundStyle(text.isEmpty ? .secondary : .primary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .textSelection(.enabled)
+            } icon: {
+                Image(systemName: systemImage)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(minWidth: 420, maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(.quaternary.opacity(0.55), in: RoundedRectangle(cornerRadius: 6))
+
+            Button {
+                onChoose()
+            } label: {
+                Label(String(localized: "action.choose"), systemImage: "folder")
+            }
+        }
     }
 
     @ViewBuilder
@@ -266,6 +331,18 @@ struct DashboardView: View {
                 .font(.title.weight(.semibold))
             Text(section.subtitleKey.localizedStringKey)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    private func chooseFolder(onSelection: (URL) -> Void) {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.canCreateDirectories = true
+
+        if panel.runModal() == .OK, let url = panel.url {
+            onSelection(url)
         }
     }
 

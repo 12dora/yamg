@@ -94,4 +94,10 @@ enum AppSection: String, CaseIterable, Identifiable {
             return .preferencesSubtitle
         }
     }
+
+    static func visibleSections(showsLinkMode: Bool) -> [AppSection] {
+        allCases.filter { section in
+            section != .linkMode || showsLinkMode
+        }
+    }
 }

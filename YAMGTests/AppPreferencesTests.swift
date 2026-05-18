@@ -23,10 +23,18 @@ final class AppPreferencesTests: XCTestCase {
 
         preferences.preferredCLIPath = cliPath
         preferences.configFilePath = configPath
+        preferences.showsLinkMode = true
 
         let reloaded = try XCTUnwrap(defaults).makePreferences()
         XCTAssertEqual(reloaded.preferredCLIPath, cliPath)
         XCTAssertEqual(reloaded.configFilePath, configPath)
+        XCTAssertTrue(reloaded.showsLinkMode)
+    }
+
+    func testLinkModeIsHiddenByDefault() throws {
+        let preferences = try XCTUnwrap(defaults).makePreferences()
+
+        XCTAssertFalse(preferences.showsLinkMode)
     }
 
     func testClearingPathsRemovesStoredValues() throws {
@@ -45,12 +53,14 @@ final class AppPreferencesTests: XCTestCase {
         let preferences = try XCTUnwrap(defaults).makePreferences()
         preferences.preferredCLIPath = URL(fileURLWithPath: "/usr/local/bin/mackup")
         preferences.configFilePath = URL(fileURLWithPath: "/Users/test/.mackup.cfg")
+        preferences.showsLinkMode = true
 
         preferences.resetForFirstRunSimulation()
 
         XCTAssertNil(preferences.preferredCLIPath)
         XCTAssertEqual(preferences.configFilePath?.lastPathComponent, "missing-first-run.mackup.cfg")
         XCTAssertEqual(preferences.configFilePath?.path.contains("/YAMG/Development/"), true)
+        XCTAssertFalse(preferences.showsLinkMode)
     }
 }
 

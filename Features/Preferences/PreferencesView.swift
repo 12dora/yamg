@@ -42,6 +42,9 @@ struct PreferencesView: View {
                 }
 
                 detailRow(String(localized: "preferences.config_path.detail"))
+
+                Toggle(String(localized: "preferences.show_link_mode"), isOn: $viewModel.showsLinkMode)
+                    .toggleStyle(.checkbox)
             }
             .frame(maxWidth: 760, alignment: .leading)
 

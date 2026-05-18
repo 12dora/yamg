@@ -20,13 +20,15 @@ final class PreferencesViewModelTests: XCTestCase {
     func testLoadsExistingPathsFromPreferences() {
         let preferences = InMemoryPreferences(
             preferredCLIPath: URL(fileURLWithPath: "/opt/homebrew/bin/mackup"),
-            configFilePath: URL(fileURLWithPath: "/tmp/yamg/.mackup.cfg")
+            configFilePath: URL(fileURLWithPath: "/tmp/yamg/.mackup.cfg"),
+            showsLinkMode: true
         )
 
         let viewModel = PreferencesViewModel(preferences: preferences)
 
         XCTAssertEqual(viewModel.cliPath, "/opt/homebrew/bin/mackup")
         XCTAssertEqual(viewModel.configPath, "/tmp/yamg/.mackup.cfg")
+        XCTAssertTrue(viewModel.showsLinkMode)
     }
 
     func testSaveNormalizesWhitespaceAndTildePaths() {
@@ -34,6 +36,7 @@ final class PreferencesViewModelTests: XCTestCase {
         let viewModel = PreferencesViewModel(preferences: preferences)
         viewModel.cliPath = "  ~/bin/mackup  "
         viewModel.configPath = "  "
+        viewModel.showsLinkMode = true
 
         viewModel.save()
 
@@ -42,6 +45,7 @@ final class PreferencesViewModelTests: XCTestCase {
             URL(fileURLWithPath: NSString(string: "~/bin/mackup").expandingTildeInPath)
         )
         XCTAssertNil(preferences.configFilePath)
+        XCTAssertTrue(preferences.showsLinkMode)
         XCTAssertEqual(viewModel.state, .saved)
     }
 
@@ -59,8 +63,10 @@ final class PreferencesViewModelTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: configFile.path))
         XCTAssertNil(preferences.preferredCLIPath)
         XCTAssertNil(preferences.configFilePath)
+        XCTAssertFalse(preferences.showsLinkMode)
         XCTAssertEqual(viewModel.cliPath, "")
         XCTAssertEqual(viewModel.configPath, "")
+        XCTAssertFalse(viewModel.showsLinkMode)
         XCTAssertEqual(viewModel.state, .reset)
     }
 
@@ -119,7 +125,8 @@ final class PreferencesViewModelTests: XCTestCase {
     func testDevelopmentResetSimulatesMissingConfigWithoutDeletingRealConfig() {
         let preferences = InMemoryPreferences(
             preferredCLIPath: URL(fileURLWithPath: "/usr/local/bin/mackup"),
-            configFilePath: URL(fileURLWithPath: "/Users/test/.mackup.cfg")
+            configFilePath: URL(fileURLWithPath: "/Users/test/.mackup.cfg"),
+            showsLinkMode: true
         )
         let viewModel = PreferencesViewModel(preferences: preferences)
 
@@ -130,8 +137,10 @@ final class PreferencesViewModelTests: XCTestCase {
             preferences.configFilePath,
             URL(fileURLWithPath: "/tmp/yamg-development/missing-first-run.mackup.cfg")
         )
+        XCTAssertFalse(preferences.showsLinkMode)
         XCTAssertEqual(viewModel.cliPath, "")
         XCTAssertEqual(viewModel.configPath, "/tmp/yamg-development/missing-first-run.mackup.cfg")
+        XCTAssertFalse(viewModel.showsLinkMode)
         XCTAssertEqual(viewModel.state, .developmentReset)
     }
 }
@@ -139,14 +148,17 @@ final class PreferencesViewModelTests: XCTestCase {
 private final class InMemoryPreferences: AppPreferencesStoring {
     var preferredCLIPath: URL?
     var configFilePath: URL?
+    var showsLinkMode: Bool
 
-    init(preferredCLIPath: URL? = nil, configFilePath: URL? = nil) {
+    init(preferredCLIPath: URL? = nil, configFilePath: URL? = nil, showsLinkMode: Bool = false) {
         self.preferredCLIPath = preferredCLIPath
         self.configFilePath = configFilePath
+        self.showsLinkMode = showsLinkMode
     }
 
     func resetForFirstRunSimulation() {
         preferredCLIPath = nil
         configFilePath = URL(fileURLWithPath: "/tmp/yamg-development/missing-first-run.mackup.cfg")
+        showsLinkMode = false
     }
 }

@@ -13,23 +13,42 @@ final class StorageViewModel: ObservableObject {
 
     @Published private(set) var state: State = .idle
     @Published var engine: MackupStorageEngine = .dropbox
-    @Published var path: String = ""
-    @Published var directory: String = ""
+    @Published var storageFolderPath: String = ""
+    @Published private(set) var storageAvailability: [MackupStorageAvailability] = []
     @Published private(set) var configPath: URL?
 
     private let editor: MackupConfigEditing
+    private let storageDetector: MackupStorageDetecting
     private let configFilePath: URL?
     private var loadedConfig: MackupConfig?
 
-    var requiresStoragePath: Bool {
-        engine == .fileSystem
+    var selectedAvailability: MackupStorageAvailability? {
+        storageAvailability.first { $0.engine == engine }
+    }
+
+    var canSave: Bool {
+        guard let selectedAvailability, selectedAvailability.isAvailable else {
+            return false
+        }
+
+        guard !storageFolderPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return false
+        }
+
+        if engine == .fileSystem {
+            return true
+        }
+
+        return automaticStorageDirectory() != nil
     }
 
     init(
         editor: MackupConfigEditing = MackupConfigEditor(),
+        storageDetector: MackupStorageDetecting = MackupStorageDetector(),
         configFilePath: URL? = nil
     ) {
         self.editor = editor
+        self.storageDetector = storageDetector
         self.configFilePath = configFilePath
     }
 
@@ -37,12 +56,12 @@ final class StorageViewModel: ObservableObject {
         state = .loading
 
         do {
+            storageAvailability = storageDetector.availability()
             let config = try editor.load(path: configFilePath)
             loadedConfig = config
             configPath = config.fileURL
             engine = config.storage.engine
-            path = config.storage.path ?? ""
-            directory = config.storage.directory ?? ""
+            storageFolderPath = storageFolderPath(for: config.storage)
             state = .editing
         } catch {
             state = .failed(error.localizedDescription)
@@ -54,11 +73,7 @@ final class StorageViewModel: ObservableObject {
 
         do {
             var config = try currentConfig()
-            config.storage = MackupStorage(
-                engine: engine,
-                path: normalizedOptional(path),
-                directory: normalizedOptional(directory)
-            )
+            config.storage = storageFromSelection()
             try editor.save(config)
             loadedConfig = config
             configPath = config.fileURL
@@ -68,12 +83,27 @@ final class StorageViewModel: ObservableObject {
         }
     }
 
-    func selectStoragePath(_ url: URL) {
-        path = url.path
+    func selectStorageFolder(_ url: URL) {
+        storageFolderPath = url.standardizedFileURL.path
     }
 
-    func selectStorageDirectory(_ url: URL) {
-        directory = url.lastPathComponent
+    func selectEngine(_ engine: MackupStorageEngine) {
+        guard engine == .fileSystem || storageAvailability.first(where: { $0.engine == engine })?.isAvailable == true else {
+            return
+        }
+
+        self.engine = engine
+
+        if engine == .fileSystem {
+            return
+        }
+
+        if let detectedPath = storageAvailability.first(where: { $0.engine == engine })?.detectedPath {
+            storageFolderPath = URL(fileURLWithPath: detectedPath)
+                .appendingPathComponent("Mackup", isDirectory: true)
+                .standardizedFileURL
+                .path
+        }
     }
 
     private func currentConfig() throws -> MackupConfig {
@@ -86,8 +116,63 @@ final class StorageViewModel: ObservableObject {
         return config
     }
 
-    private func normalizedOptional(_ value: String) -> String? {
-        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? nil : trimmed
+    private func storageFolderPath(for storage: MackupStorage) -> String {
+        let directory = storage.directory ?? "Mackup"
+
+        if let path = storage.path, !path.isEmpty {
+            return URL(fileURLWithPath: path)
+                .appendingPathComponent(directory, isDirectory: true)
+                .standardizedFileURL
+                .path
+        }
+
+        if let detectedPath = storageAvailability.first(where: { $0.engine == storage.engine })?.detectedPath {
+            return URL(fileURLWithPath: detectedPath)
+                .appendingPathComponent(directory, isDirectory: true)
+                .standardizedFileURL
+                .path
+        }
+
+        return ""
+    }
+
+    private func storageFromSelection() -> MackupStorage {
+        let selectedURL = URL(fileURLWithPath: storageFolderPath)
+        let directory = selectedURL.lastPathComponent
+        let rootPath = selectedURL.deletingLastPathComponent().path
+
+        switch engine {
+        case .dropbox, .googleDrive, .iCloud:
+            let directory = automaticStorageDirectory()
+            return MackupStorage(
+                engine: engine,
+                path: nil,
+                directory: directory == "Mackup" ? nil : directory
+            )
+        case .fileSystem:
+            return MackupStorage(
+                engine: engine,
+                path: rootPath,
+                directory: directory
+            )
+        }
+    }
+
+    private func automaticStorageDirectory() -> String? {
+        guard let detectedPath = selectedAvailability?.detectedPath else {
+            return nil
+        }
+
+        let selectedPath = URL(fileURLWithPath: storageFolderPath).standardizedFileURL.path
+        let rootPath = URL(fileURLWithPath: detectedPath).standardizedFileURL.path
+        let relativePath: String
+
+        if selectedPath.hasPrefix(rootPath + "/") {
+            relativePath = String(selectedPath.dropFirst(rootPath.count + 1))
+        } else {
+            return nil
+        }
+
+        return relativePath.isEmpty ? nil : relativePath
     }
 }

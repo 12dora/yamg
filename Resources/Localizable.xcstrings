@@ -486,13 +486,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Create a minimal Mackup config with a supported storage engine. You can edit storage details later."
+            "value": "Choose an available storage provider and a Mackup folder before creating the config. Dropbox, Google Drive, and iCloud paths are detected with Mackup-compatible rules."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "创建仅包含受支持存储后端的最小 Mackup 配置。稍后可继续编辑存储细节。"
+            "value": "创建配置前请选择可用的存储提供商和 Mackup 文件夹。Dropbox、Google Drive 与 iCloud 路径会按 Mackup 兼容规则自动检测。"
           }
         }
       }
@@ -605,6 +605,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "可选的 .mackup.cfg 路径。YAMG 将该偏好保存到 UserDefaults，不写入配置文件。"
+          }
+        }
+      }
+    },
+    "preferences.show_link_mode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Link Mode in sidebar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在侧边栏显示链接模式"
           }
         }
       }
@@ -1677,6 +1693,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dropbox、Google Drive 和 iCloud 路径由 Mackup 检测。只有需要覆盖默认值时才在这里选择。"
+          }
+        }
+      }
+    },
+    "storage.folder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mackup folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mackup 文件夹"
+          }
+        }
+      }
+    },
+    "storage.folder.placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a Mackup storage folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择 Mackup 存储文件夹"
           }
         }
       }

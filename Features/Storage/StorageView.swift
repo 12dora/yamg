@@ -35,59 +35,27 @@ struct StorageView: View {
                 } label: {
                     Label(String(localized: "action.save"), systemImage: "square.and.arrow.down")
                 }
-                .disabled(viewModel.state == .loading || viewModel.state == .saving)
+                .disabled(viewModel.state == .loading || viewModel.state == .saving || !viewModel.canSave)
             }
 
             VStack(alignment: .leading, spacing: 10) {
-                settingRow(label: String(localized: "storage.engine")) {
-                    Picker(String(localized: "storage.engine"), selection: $viewModel.engine) {
-                        ForEach(MackupStorageEngine.allCases, id: \.self) { engine in
-                            Text(engine.displayName).tag(engine)
-                        }
-                    }
-                    .labelsHidden()
-                    .pickerStyle(.segmented)
-                }
+                storageEngineChooser
 
-                settingRow(label: String(localized: "storage.path")) {
+                settingRow(label: String(localized: "storage.folder")) {
                     selectedPathRow(
-                        text: viewModel.path,
-                        placeholder: String(localized: "storage.path.placeholder"),
+                        text: viewModel.storageFolderPath,
+                        placeholder: String(localized: "storage.folder.placeholder"),
                         systemImage: "folder"
                     ) {
                         chooseFolder { url in
-                            viewModel.selectStoragePath(url)
-                        }
-                    }
-                }
-
-                settingRow(label: String(localized: "storage.directory")) {
-                    selectedPathRow(
-                        text: viewModel.directory,
-                        placeholder: String(localized: "storage.directory.placeholder"),
-                        systemImage: "folder.badge.gearshape"
-                    ) {
-                        chooseFolder { url in
-                            viewModel.selectStorageDirectory(url)
+                            viewModel.selectStorageFolder(url)
                         }
                     }
                 }
             }
             .frame(maxWidth: 760, alignment: .leading)
 
-            if viewModel.engine != .fileSystem {
-                Text(String(localized: "storage.path.auto_detected"))
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-
-            if viewModel.engine == .fileSystem {
-                Text(String(localized: "storage.file_system.detail"))
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            }
+            storageDetail
 
             if case .failed(let message) = viewModel.state {
                 Label(message, systemImage: "exclamationmark.triangle")
@@ -128,6 +96,46 @@ struct StorageView: View {
             return path
         }
         return String(localized: "storage.config.pending")
+    }
+
+    private var storageEngineChooser: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(String(localized: "storage.engine"))
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 8) {
+                ForEach(viewModel.storageAvailability) { item in
+                    Button {
+                        viewModel.selectEngine(item.engine)
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: item.isAvailable ? "checkmark.circle" : "slash.circle")
+                            Text(item.engine.displayName)
+                                .lineLimit(1)
+                        }
+                        .frame(minWidth: 112)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(!item.isAvailable)
+                    .help(item.detail)
+                }
+            }
+        }
+    }
+
+    private var storageDetail: some View {
+        Group {
+            if let selectedAvailability = viewModel.selectedAvailability {
+                Label(
+                    selectedAvailability.detail,
+                    systemImage: selectedAvailability.isAvailable ? "checkmark.circle" : "exclamationmark.triangle"
+                )
+                .font(.callout)
+                .foregroundStyle(selectedAvailability.isAvailable ? Color.secondary : Color.orange)
+                .textSelection(.enabled)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
     }
 
     private func settingRow<Content: View>(

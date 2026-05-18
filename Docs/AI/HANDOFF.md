@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-19 00:48 CST | Codex
+Done: tightened Mackup storage setup to match upstream semantics: Dashboard/Storage require both a usable provider and Mackup folder; Dropbox/Google Drive/iCloud use Mackup-compatible auto-detection and are disabled when unavailable; Storage now has one unified folder picker but writes `file_system` as `path` + `directory`; Link Mode is hidden by default behind a Preferences checkbox.
+Changed: `Config/MackupStorageDetector.swift`, `Features/Dashboard/*`, `Features/Storage/*`, `Features/Preferences/*`, `Features/AppSection.swift`, `Features/RootShellView.swift`, `Support/AppPreferences.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/*Storage*`, `YAMGTests/DashboardViewModelTests.swift`, `YAMGTests/AppPreferencesTests.swift`, `YAMGTests/AppSectionTests.swift`, `README.md`, `YAMG_PRD.md`.
+Tests: `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests` passed.
+Next: run app UI smoke screenshots for all pages and commit.
+Blocked: none.
+
 2026-05-18 23:43 CST | Codex
 Done: addressed UX follow-up fixes: Applications now scans installed `.app` bundles so local apps like Raycast appear while Mackup details still use `mackup show`; Storage and Preferences paths are GUI picker driven; created configs remain graphically editable via Dashboard/Storage; Link Mode shows explicit command guidance; sidebar rows use full-width buttons; layouts are denser with lightweight animations; Preferences reset deletes matching selected/default `.mackup.cfg` files.
 Changed: `Applications/InstalledApplicationScanner.swift`, `Applications/MackupApplication.swift`, `Applications/MackupApplicationListParser.swift`, `Features/Applications/*`, `Features/Dashboard/DashboardView.swift`, `Features/LinkMode/LinkModeView.swift`, `Features/Preferences/*`, `Features/RootShellView.swift`, `Features/Storage/*`, `Resources/Localizable.xcstrings`, `YAMGTests/InstalledApplicationScannerTests.swift`, `YAMGTests/ApplicationsListViewModelTests.swift`, `YAMGTests/PreferencesViewModelTests.swift`, `YAMGTests/StorageViewModelTests.swift`, `README.md`, `YAMG_PRD.md`, `YAMG.xcodeproj/project.pbxproj`.

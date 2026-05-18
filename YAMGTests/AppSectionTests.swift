@@ -27,4 +27,9 @@ final class AppSectionTests: XCTestCase {
         XCTAssertEqual(AppSection.linkMode.titleKey, .linkModeTitle)
         XCTAssertEqual(AppSection.preferences.subtitleKey, .preferencesSubtitle)
     }
+
+    func testVisibleSectionsHideLinkModeByDefault() {
+        XCTAssertFalse(AppSection.visibleSections(showsLinkMode: false).contains(.linkMode))
+        XCTAssertTrue(AppSection.visibleSections(showsLinkMode: true).contains(.linkMode))
+    }
 }

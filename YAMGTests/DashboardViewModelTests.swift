@@ -56,6 +56,7 @@ final class DashboardViewModelTests: XCTestCase {
                     checkedURLs: []
                 )
             ),
+            storageDetector: fileSystemOnlyStorageDetector(),
             configPath: configPath
         )
 
@@ -64,6 +65,7 @@ final class DashboardViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.cliState, .unavailable)
         XCTAssertEqual(viewModel.configState, .missing(configPath))
         XCTAssertTrue(viewModel.shouldShowInstallGuide)
+        XCTAssertEqual(viewModel.selectedStorageEngine, .fileSystem)
     }
 
     func testRefreshReportsInvalidVersionOutput() async {
@@ -165,9 +167,38 @@ final class DashboardViewModelTests: XCTestCase {
                 report: MackupDetectionReport(status: .notFound, executableURL: nil, version: nil, checkedURLs: [])
             ),
             configEditor: editor,
+            storageDetector: FakeStorageDetector(
+                items: [
+                    MackupStorageAvailability(
+                        engine: .dropbox,
+                        detectedPath: nil,
+                        isAvailable: false,
+                        detail: "missing"
+                    ),
+                    MackupStorageAvailability(
+                        engine: .googleDrive,
+                        detectedPath: nil,
+                        isAvailable: false,
+                        detail: "missing"
+                    ),
+                    MackupStorageAvailability(
+                        engine: .iCloud,
+                        detectedPath: temporaryDirectory.appendingPathComponent("iCloud").path,
+                        isAvailable: true,
+                        detail: temporaryDirectory.appendingPathComponent("iCloud").path
+                    ),
+                    MackupStorageAvailability(
+                        engine: .fileSystem,
+                        detectedPath: nil,
+                        isAvailable: true,
+                        detail: "Choose"
+                    )
+                ]
+            ),
             configPath: configPath
         )
-        viewModel.selectedStorageEngine = .iCloud
+        viewModel.selectStorageEngine(.iCloud)
+        viewModel.selectStorageFolder(temporaryDirectory.appendingPathComponent("iCloud/Mackup"))
 
         viewModel.createDefaultConfig()
 
@@ -179,6 +210,103 @@ final class DashboardViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.configState, .present(configPath))
         XCTAssertEqual(viewModel.setupState, .configCreated(configPath))
     }
+
+    func testCreateDefaultConfigRequiresStorageProviderAndFolder() {
+        let editor = CapturingConfigEditor()
+        let configPath = temporaryDirectory.appendingPathComponent(".mackup.cfg")
+        let viewModel = DashboardViewModel(
+            detector: FakeExecutableResolver(
+                report: MackupDetectionReport(status: .notFound, executableURL: nil, version: nil, checkedURLs: [])
+            ),
+            configEditor: editor,
+            storageDetector: FakeStorageDetector(
+                items: [
+                    MackupStorageAvailability(engine: .dropbox, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .googleDrive, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .iCloud, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .fileSystem, detectedPath: nil, isAvailable: true, detail: "Choose")
+                ]
+            ),
+            configPath: configPath
+        )
+
+        viewModel.createDefaultConfig()
+
+        XCTAssertNil(editor.savedConfig)
+        XCTAssertEqual(
+            viewModel.setupState,
+            .configCreateFailed("Choose an available storage provider and Mackup folder before creating the config.")
+        )
+    }
+
+    func testCreateDefaultConfigWritesFileSystemPathAndDirectory() throws {
+        let editor = CapturingConfigEditor()
+        let configPath = temporaryDirectory.appendingPathComponent(".mackup.cfg")
+        let viewModel = DashboardViewModel(
+            detector: FakeExecutableResolver(
+                report: MackupDetectionReport(status: .notFound, executableURL: nil, version: nil, checkedURLs: [])
+            ),
+            configEditor: editor,
+            storageDetector: FakeStorageDetector(
+                items: [
+                    MackupStorageAvailability(engine: .dropbox, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .googleDrive, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .iCloud, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .fileSystem, detectedPath: nil, isAvailable: true, detail: "Choose")
+                ]
+            ),
+            configPath: configPath
+        )
+        viewModel.selectStorageEngine(.fileSystem)
+        viewModel.selectStorageFolder(URL(fileURLWithPath: "/Users/test/Sync/Mackup"))
+
+        viewModel.createDefaultConfig()
+
+        XCTAssertEqual(
+            try XCTUnwrap(editor.savedConfig).storage,
+            MackupStorage(engine: .fileSystem, path: "/Users/test/Sync", directory: "Mackup")
+        )
+    }
+
+    func testCreateDefaultConfigWritesAutomaticProviderRelativeDirectory() throws {
+        let editor = CapturingConfigEditor()
+        let configPath = temporaryDirectory.appendingPathComponent(".mackup.cfg")
+        let viewModel = DashboardViewModel(
+            detector: FakeExecutableResolver(
+                report: MackupDetectionReport(status: .notFound, executableURL: nil, version: nil, checkedURLs: [])
+            ),
+            configEditor: editor,
+            storageDetector: FakeStorageDetector(
+                items: [
+                    MackupStorageAvailability(engine: .dropbox, detectedPath: "/Users/test/Dropbox", isAvailable: true, detail: "/Users/test/Dropbox"),
+                    MackupStorageAvailability(engine: .googleDrive, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .iCloud, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .fileSystem, detectedPath: nil, isAvailable: true, detail: "Choose")
+                ]
+            ),
+            configPath: configPath
+        )
+        viewModel.selectStorageEngine(.dropbox)
+        viewModel.selectStorageFolder(URL(fileURLWithPath: "/Users/test/Dropbox/Dotfiles/Mackup"))
+
+        viewModel.createDefaultConfig()
+
+        XCTAssertEqual(
+            try XCTUnwrap(editor.savedConfig).storage,
+            MackupStorage(engine: .dropbox, path: nil, directory: "Dotfiles/Mackup")
+        )
+    }
+}
+
+private func fileSystemOnlyStorageDetector() -> FakeStorageDetector {
+    FakeStorageDetector(
+        items: [
+            MackupStorageAvailability(engine: .dropbox, detectedPath: nil, isAvailable: false, detail: "missing"),
+            MackupStorageAvailability(engine: .googleDrive, detectedPath: nil, isAvailable: false, detail: "missing"),
+            MackupStorageAvailability(engine: .iCloud, detectedPath: nil, isAvailable: false, detail: "missing"),
+            MackupStorageAvailability(engine: .fileSystem, detectedPath: nil, isAvailable: true, detail: "Choose")
+        ]
+    )
 }
 
 private struct FakeExecutableResolver: MackupExecutableResolving {
@@ -238,5 +366,13 @@ private final class CapturingConfigEditor: MackupConfigEditing {
 
     func save(_ config: MackupConfig) throws {
         savedConfig = config
+    }
+}
+
+private struct FakeStorageDetector: MackupStorageDetecting {
+    let items: [MackupStorageAvailability]
+
+    func availability() -> [MackupStorageAvailability] {
+        items
     }
 }

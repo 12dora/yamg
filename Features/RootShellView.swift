@@ -11,7 +11,7 @@ struct RootShellView: View {
     var body: some View {
         NavigationView {
             List {
-                ForEach(AppSection.allCases) { section in
+                ForEach(visibleSections) { section in
                     Button {
                         selection = section
                     } label: {
@@ -29,6 +29,15 @@ struct RootShellView: View {
             detailView
         }
         .frame(minWidth: 960, minHeight: 640)
+        .onChange(of: preferences.showsLinkMode) { showsLinkMode in
+            if !showsLinkMode, selection == .linkMode {
+                selection = .dashboard
+            }
+        }
+    }
+
+    private var visibleSections: [AppSection] {
+        AppSection.visibleSections(showsLinkMode: preferences.showsLinkMode)
     }
 
     private func sidebarRow(for section: AppSection) -> some View {
