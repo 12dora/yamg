@@ -13,6 +13,7 @@ final class ApplicationsListViewModel: ObservableObject {
     @Published private(set) var state: State = .idle
 
     private let injectedRunner: MackupCommandRunning?
+    private let installedApplicationScanner: InstalledApplicationScanning?
     private let detector: MackupExecutableResolving
     private let parser: MackupApplicationListParser
     private let preferredCLIPath: URL?
@@ -21,6 +22,7 @@ final class ApplicationsListViewModel: ObservableObject {
 
     init(preferredCLIPath: URL? = nil) {
         self.injectedRunner = nil
+        self.installedApplicationScanner = InstalledApplicationScanner()
         self.detector = MackupDetector()
         self.parser = MackupApplicationListParser()
         self.preferredCLIPath = preferredCLIPath
@@ -37,11 +39,22 @@ final class ApplicationsListViewModel: ObservableObject {
         }
     ) {
         self.injectedRunner = runner
+        self.installedApplicationScanner = nil
         self.detector = MackupDetector()
         self.parser = parser
         self.preferredCLIPath = preferredCLIPath
         self.makeRunner = { MackupProcessRunner(executableURL: $0) }
         self.makeIsolatedListRunner = makeIsolatedListRunner
+    }
+
+    init(installedApplicationScanner: InstalledApplicationScanning) {
+        self.injectedRunner = nil
+        self.installedApplicationScanner = installedApplicationScanner
+        self.detector = MackupDetector()
+        self.parser = MackupApplicationListParser()
+        self.preferredCLIPath = nil
+        self.makeRunner = { MackupProcessRunner(executableURL: $0) }
+        self.makeIsolatedListRunner = { try MackupIsolatedListRunnerFactory.makeRunner(executableURL: $0) }
     }
 
     init(
@@ -52,6 +65,7 @@ final class ApplicationsListViewModel: ObservableObject {
         makeIsolatedListRunner: @escaping (URL) throws -> MackupCommandRunning
     ) {
         self.injectedRunner = nil
+        self.installedApplicationScanner = nil
         self.detector = detector
         self.parser = parser
         self.preferredCLIPath = preferredCLIPath
@@ -61,6 +75,16 @@ final class ApplicationsListViewModel: ObservableObject {
 
     func refresh() async {
         state = .loading
+
+        if let installedApplicationScanner {
+            do {
+                let applications = try installedApplicationScanner.scanInstalledApplications()
+                state = applications.isEmpty ? .empty : .loaded(applications)
+            } catch {
+                state = .failed(error.localizedDescription)
+            }
+            return
+        }
 
         do {
             let runner = try await resolvedRunner()

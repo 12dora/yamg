@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 23:43 CST | Codex
+Done: addressed UX follow-up fixes: Applications now scans installed `.app` bundles so local apps like Raycast appear while Mackup details still use `mackup show`; Storage and Preferences paths are GUI picker driven; created configs remain graphically editable via Dashboard/Storage; Link Mode shows explicit command guidance; sidebar rows use full-width buttons; layouts are denser with lightweight animations; Preferences reset deletes matching selected/default `.mackup.cfg` files.
+Changed: `Applications/InstalledApplicationScanner.swift`, `Applications/MackupApplication.swift`, `Applications/MackupApplicationListParser.swift`, `Features/Applications/*`, `Features/Dashboard/DashboardView.swift`, `Features/LinkMode/LinkModeView.swift`, `Features/Preferences/*`, `Features/RootShellView.swift`, `Features/Storage/*`, `Resources/Localizable.xcstrings`, `YAMGTests/InstalledApplicationScannerTests.swift`, `YAMGTests/ApplicationsListViewModelTests.swift`, `YAMGTests/PreferencesViewModelTests.swift`, `YAMGTests/StorageViewModelTests.swift`, `README.md`, `YAMG_PRD.md`, `YAMG.xcodeproj/project.pbxproj`.
+Tests: `jq empty Resources/Localizable.xcstrings`; `plutil -lint YAMG.xcodeproj/project.pbxproj`; `git diff --check`; targeted `xcodebuild test ...` for InstalledApplicationScanner, ApplicationsListViewModel, StorageViewModel, PreferencesViewModel, DashboardViewModel, LinkModeViewModel passed 31 tests; full `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests` passed 83 tests.
+Next: open the app for hands-on UI smoke testing if needed.
+Blocked: none.
+
 2026-05-18 20:09 CST | Codex
 Done: implemented P1 backup/restore flow on Dashboard with dry-run enabled by default, explicit confirmation before running, streamed output display, and `ProcessLogStore` recording; commands are limited to Mackup CLI `backup`/`restore` via `MackupCommandRunning`.
 Changed: `Features/Operations/OperationFlowView.swift`, `Features/Operations/OperationFlowViewModel.swift`, `Features/Dashboard/DashboardView.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/OperationFlowViewModelTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.

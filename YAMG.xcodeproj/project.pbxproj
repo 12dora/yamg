@@ -36,6 +36,8 @@
 		5D1A00000000000000000094 /* ApplicationsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000009B /* ApplicationsListViewModel.swift */; };
 		5D1A00000000000000000095 /* MackupApplicationListParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000009C /* MackupApplicationListParserTests.swift */; };
 		5D1A00000000000000000096 /* ApplicationsListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000009D /* ApplicationsListViewModelTests.swift */; };
+		5D1A000000000000000000D1 /* InstalledApplicationScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000D2 /* InstalledApplicationScanner.swift */; };
+		5D1A000000000000000000D3 /* InstalledApplicationScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000D4 /* InstalledApplicationScannerTests.swift */; };
 		5D1A0000000000000000009F /* MackupApplicationDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000A6 /* MackupApplicationDetail.swift */; };
 		5D1A000000000000000000A0 /* MackupApplicationDetailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000A7 /* MackupApplicationDetailParser.swift */; };
 		5D1A000000000000000000A1 /* MackupDetectionStatusDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000A8 /* MackupDetectionStatusDescription.swift */; };
@@ -93,6 +95,8 @@
 		5D1A0000000000000000009B /* ApplicationsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationsListViewModel.swift; sourceTree = "<group>"; };
 		5D1A0000000000000000009C /* MackupApplicationListParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupApplicationListParserTests.swift; sourceTree = "<group>"; };
 		5D1A0000000000000000009D /* ApplicationsListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationsListViewModelTests.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000D2 /* InstalledApplicationScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledApplicationScanner.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000D4 /* InstalledApplicationScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledApplicationScannerTests.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000A6 /* MackupApplicationDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupApplicationDetail.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000A7 /* MackupApplicationDetailParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupApplicationDetailParser.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000A8 /* MackupDetectionStatusDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupDetectionStatusDescription.swift; sourceTree = "<group>"; };
@@ -195,6 +199,7 @@
 				5D1A000000000000000000C4 /* AppPreferencesTests.swift */,
 				5D1A0000000000000000009D /* ApplicationsListViewModelTests.swift */,
 				5D1A0000000000000000008F /* DashboardViewModelTests.swift */,
+				5D1A000000000000000000D4 /* InstalledApplicationScannerTests.swift */,
 				5D1A0000000000000000002B /* MackupCommandTests.swift */,
 				5D1A000000000000000000AB /* MackupApplicationDetailParserTests.swift */,
 				5D1A0000000000000000009C /* MackupApplicationListParserTests.swift */,
@@ -297,6 +302,7 @@
 				5D1A000000000000000000A7 /* MackupApplicationDetailParser.swift */,
 				5D1A00000000000000000098 /* MackupApplication.swift */,
 				5D1A00000000000000000099 /* MackupApplicationListParser.swift */,
+				5D1A000000000000000000D2 /* InstalledApplicationScanner.swift */,
 			);
 			path = Applications;
 			sourceTree = "<group>";
@@ -461,6 +467,7 @@
 				5D1A0000000000000000008A /* DashboardView.swift in Sources */,
 				5D1A0000000000000000008B /* DashboardViewModel.swift in Sources */,
 				5D1A000000000000000000CF /* CommandLineToolRunner.swift in Sources */,
+				5D1A000000000000000000D1 /* InstalledApplicationScanner.swift in Sources */,
 				5D1A000000000000000000C8 /* LinkModeView.swift in Sources */,
 				5D1A000000000000000000C9 /* LinkModeViewModel.swift in Sources */,
 				5D1A00000000000000000086 /* LocalizationKey.swift in Sources */,
@@ -502,6 +509,7 @@
 				5D1A000000000000000000C3 /* AppPreferencesTests.swift in Sources */,
 				5D1A00000000000000000096 /* ApplicationsListViewModelTests.swift in Sources */,
 				5D1A0000000000000000008C /* DashboardViewModelTests.swift in Sources */,
+				5D1A000000000000000000D3 /* InstalledApplicationScannerTests.swift in Sources */,
 				5D1A00000000000000000079 /* MackupCommandTests.swift in Sources */,
 				5D1A000000000000000000A4 /* MackupApplicationDetailParserTests.swift in Sources */,
 				5D1A00000000000000000095 /* MackupApplicationListParserTests.swift in Sources */,

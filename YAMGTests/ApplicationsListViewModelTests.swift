@@ -3,6 +3,27 @@ import XCTest
 
 @MainActor
 final class ApplicationsListViewModelTests: XCTestCase {
+    func testRefreshLoadsInstalledApplicationsFromScanner() async {
+        let viewModel = ApplicationsListViewModel(
+            installedApplicationScanner: FakeInstalledApplicationScanner(
+                applications: [
+                    MackupApplication(name: "raycast", displayName: "Raycast"),
+                    MackupApplication(name: "visual-studio-code", displayName: "Visual Studio Code")
+                ]
+            )
+        )
+
+        await viewModel.refresh()
+
+        XCTAssertEqual(
+            viewModel.state,
+            .loaded([
+                MackupApplication(name: "raycast", displayName: "Raycast"),
+                MackupApplication(name: "visual-studio-code", displayName: "Visual Studio Code")
+            ])
+        )
+    }
+
     func testRefreshLoadsApplicationsFromListOutput() async {
         let viewModel = ApplicationsListViewModel(
             runner: FakeMackupCommandRunner(
@@ -99,6 +120,14 @@ final class ApplicationsListViewModelTests: XCTestCase {
         await viewModel.refresh()
 
         XCTAssertEqual(viewModel.state, .empty)
+    }
+}
+
+private struct FakeInstalledApplicationScanner: InstalledApplicationScanning {
+    let applications: [MackupApplication]
+
+    func scanInstalledApplications() throws -> [MackupApplication] {
+        applications
     }
 }
 

@@ -157,8 +157,8 @@ YAMG 采用 macOS 原生 Sidebar + Detail View。理由：任务入口固定、�
 | 一级导航 | 主要内容 | 对应 Mackup 能力 |
 |---|---|---|
 | Dashboard | 环境状态、当前存储、上次 YAMG 执行记录、快捷备份/恢复 | `backup`、`restore`、`--version` |
-| Applications | 支持应用列表、搜索、筛选、同步/忽略选择 | `list`、`.mackup.cfg` |
-| Application Detail | 应用 CFG 路径只读展示 | `show <application>` |
+| Applications | 本机已安装应用列表、搜索、筛选；Mackup 可识别时展示详情 | `.app` 扫描、`show <application>` |
+| Application Detail | Mackup CFG 路径只读展示；未被 Mackup 支持时显示 CLI 错误 | `show <application>` |
 | Storage | 后端选择、目录名、file_system path | `[storage]` |
 | Custom Apps | 自定义 CFG 编辑器 | Mackup 支持的 `~/.mackup/*.cfg` 与 XDG 自定义目录 |
 | Link Mode | link install/link/link uninstall | `link install`、`link`、`link uninstall` |
@@ -203,7 +203,7 @@ English: iCloud Drive was not found. Make sure iCloud Drive is enabled.
 
 ### 5.5 应用选择
 
-应用列表必须来自 `mackup list` 与 Mackup `applications` 目录，不维护独立库。支持搜索、全选、仅已安装过滤器。过滤器只影响展示，不改变 Mackup 能力。每项可展开展示 `mackup show <slug>` 输出的文件路径。  
+应用选择应优先让用户看到本机确实安装的应用，来源为标准 Applications 目录中的 `.app` 包；Mackup 详情仍通过 `mackup show <slug>` 获取，未被 Mackup 支持的应用显示 CLI 错误而不伪装为可同步项。过滤器只影响展示，不改变 Mackup 能力。每项可展开展示 `mackup show <slug>` 输出的文件路径。
 保存时写入 `[applications_to_sync]` 或 `[applications_to_ignore]`。若用户不做选择，默认遵循 Mackup：同步所有支持应用减去 ignore 集合。
 
 ### 5.6 冲突预检
@@ -232,7 +232,7 @@ Dashboard 显示 Mackup 状态、当前存储后端、Mackup 文件夹路径、�
 
 ### Applications
 
-列表数据来自 `mackup list`，详情来自 `mackup show <application>`。状态包括：
+列表数据来自本机 `.app` 扫描，详情来自 `mackup show <application>`。YAMG 使用应用显示名生成 slug，例如 `Raycast.app` 显示为 Raycast，并尝试用 `raycast` 查询 Mackup 详情；若 Mackup 不支持该 slug，则在详情区显示 Mackup 的错误输出。状态包括：
 
 | 状态 | 判断方法 | 注意 |
 |---|---|---|

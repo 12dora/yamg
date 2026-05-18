@@ -22,13 +22,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Supported apps from Mackup list and show."
+            "value": "Installed Mac apps with Mackup details where available."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "来自 Mackup list 和 show 的受支持应用。"
+            "value": "已安装的 Mac 应用，并在可用时显示 Mackup 详情。"
           }
         }
       }
@@ -449,6 +449,22 @@
         }
       }
     },
+    "setup.config.edit_storage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit storage settings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑存储设置"
+          }
+        }
+      }
+    },
     "setup.config.creating": {
       "localizations": {
         "en": {
@@ -529,6 +545,22 @@
         }
       }
     },
+    "preferences.cli_path.placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-detect Mackup"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动检测 Mackup"
+          }
+        }
+      }
+    },
     "preferences.config_path": {
       "localizations": {
         "en": {
@@ -541,6 +573,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mackup 配置路径"
+          }
+        }
+      }
+    },
+    "preferences.config_path.placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use default ~/.mackup.cfg"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用默认 ~/.mackup.cfg"
           }
         }
       }
@@ -566,13 +614,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Preferences reset and the selected .mackup.cfg was deleted if it existed."
+            "value": "Preferences reset and matching .mackup.cfg files were deleted if they existed."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "偏好设置已重置，选中的 .mackup.cfg 如存在已删除。"
+            "value": "偏好设置已重置，匹配的 .mackup.cfg 如存在已删除。"
           }
         }
       }
@@ -845,6 +893,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "运行 mackup link uninstall。Mackup 会移除链接并把文件复制回本机。"
+          }
+        }
+      }
+    },
+    "link_mode.command.install.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First-time link setup: copy into storage, delete originals, create symlinks."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "首次链接设置：复制到存储、删除原文件、创建符号链接。"
+          }
+        }
+      }
+    },
+    "link_mode.command.link.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreate local symlinks from files already present in storage."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "根据存储中已有文件重新创建本地符号链接。"
+          }
+        }
+      }
+    },
+    "link_mode.command.uninstall.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Mackup-managed symlinks and copy files back to local paths."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除 Mackup 管理的符号链接，并把文件复制回本地路径。"
           }
         }
       }
@@ -1222,13 +1318,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "mackup list completed without application rows."
+            "value": "No .app bundles were found in the standard Applications folders."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "mackup list 已完成，但没有输出应用条目。"
+            "value": "标准 Applications 文件夹中没有找到 .app 应用包。"
           }
         }
       }
@@ -1533,6 +1629,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "目录"
+          }
+        }
+      }
+    },
+    "storage.path.placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a storage root folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择存储根目录"
+          }
+        }
+      }
+    },
+    "storage.directory.placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the Mackup folder name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择 Mackup 文件夹名称"
+          }
+        }
+      }
+    },
+    "storage.path.auto_detected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dropbox, Google Drive, and iCloud paths are detected by Mackup. Choose values here only when overriding Mackup defaults."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dropbox、Google Drive 和 iCloud 路径由 Mackup 检测。只有需要覆盖默认值时才在这里选择。"
           }
         }
       }

@@ -79,6 +79,43 @@ final class PreferencesViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.state, .reset)
     }
 
+    func testResetDeletesBothSelectedAndDefaultConfigFiles() throws {
+        let selectedConfigFile = temporaryDirectory.appendingPathComponent("selected/.mackup.cfg")
+        let defaultConfigFile = temporaryDirectory.appendingPathComponent("default/.mackup.cfg")
+        try FileManager.default.createDirectory(
+            at: selectedConfigFile.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try FileManager.default.createDirectory(
+            at: defaultConfigFile.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try "[storage]\nengine = icloud\n".write(to: selectedConfigFile, atomically: true, encoding: .utf8)
+        try "[storage]\nengine = dropbox\n".write(to: defaultConfigFile, atomically: true, encoding: .utf8)
+        let preferences = InMemoryPreferences(configFilePath: selectedConfigFile)
+        let viewModel = PreferencesViewModel(
+            preferences: preferences,
+            defaultConfigPath: defaultConfigFile
+        )
+
+        viewModel.reset()
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: selectedConfigFile.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: defaultConfigFile.path))
+        XCTAssertNil(preferences.configFilePath)
+        XCTAssertEqual(viewModel.state, .reset)
+    }
+
+    func testPathSelectionsUpdatePreferenceFields() {
+        let viewModel = PreferencesViewModel(preferences: InMemoryPreferences())
+
+        viewModel.selectCLIPath(URL(fileURLWithPath: "/opt/homebrew/bin/mackup"))
+        viewModel.selectConfigPath(URL(fileURLWithPath: "/Users/test/.mackup.cfg"))
+
+        XCTAssertEqual(viewModel.cliPath, "/opt/homebrew/bin/mackup")
+        XCTAssertEqual(viewModel.configPath, "/Users/test/.mackup.cfg")
+    }
+
     func testDevelopmentResetSimulatesMissingConfigWithoutDeletingRealConfig() {
         let preferences = InMemoryPreferences(
             preferredCLIPath: URL(fileURLWithPath: "/usr/local/bin/mackup"),

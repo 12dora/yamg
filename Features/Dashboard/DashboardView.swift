@@ -2,9 +2,11 @@ import SwiftUI
 
 struct DashboardView: View {
     @StateObject private var viewModel: DashboardViewModel
+    private let preferences: AppPreferencesStoring
 
     @MainActor
     init(preferences: AppPreferencesStoring = AppPreferences()) {
+        self.preferences = preferences
         _viewModel = StateObject(
             wrappedValue: DashboardViewModel(
                 preferredCLIPath: preferences.preferredCLIPath,
@@ -15,15 +17,16 @@ struct DashboardView: View {
     }
 
     init(viewModel: DashboardViewModel) {
+        self.preferences = AppPreferences()
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
                 header
 
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 10) {
                     statusRow(
                         title: LocalizationKey.onboardingCLIStatus.localizedStringKey,
                         systemImage: cliIconName,
@@ -40,7 +43,7 @@ struct DashboardView: View {
                         detailText: configDetailText
                     )
                 }
-                .frame(maxWidth: 720, alignment: .leading)
+                .frame(maxWidth: 780, alignment: .leading)
 
                 Divider()
                     .frame(maxWidth: 720)
@@ -49,14 +52,14 @@ struct DashboardView: View {
                     installGuide
 
                     Divider()
-                        .frame(maxWidth: 720)
+                        .frame(maxWidth: 780)
                 }
 
                 if viewModel.shouldShowConfigWizard {
                     configWizard
 
                     Divider()
-                        .frame(maxWidth: 720)
+                        .frame(maxWidth: 780)
                 }
 
                 OperationFlowView(
@@ -171,7 +174,7 @@ struct DashboardView: View {
 
             setupStateView
         }
-        .frame(maxWidth: 720, alignment: .leading)
+        .frame(maxWidth: 780, alignment: .leading)
     }
 
     @ViewBuilder
@@ -194,9 +197,23 @@ struct DashboardView: View {
             Label(String(localized: "setup.config.creating"), systemImage: "clock")
                 .foregroundStyle(.secondary)
         case .configCreated(let url):
-            Label(String(localized: "setup.config.created \(url.path)"), systemImage: "checkmark.circle")
-                .foregroundStyle(.green)
-                .textSelection(.enabled)
+            VStack(alignment: .leading, spacing: 8) {
+                Label(String(localized: "setup.config.created \(url.path)"), systemImage: "checkmark.circle")
+                    .foregroundStyle(.green)
+                    .textSelection(.enabled)
+
+                NavigationLink {
+                    VStack(alignment: .leading, spacing: 10) {
+                        sectionHeader(.storage)
+                        StorageView(preferences: preferences)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                } label: {
+                    Label(String(localized: "setup.config.edit_storage"), systemImage: "slider.horizontal.3")
+                }
+            }
         case .configCreateFailed(let message):
             Label(message, systemImage: "exclamationmark.triangle")
                 .foregroundStyle(.red)
@@ -240,6 +257,15 @@ struct DashboardView: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
             }
+        }
+    }
+
+    private func sectionHeader(_ section: AppSection) -> some View {
+        Group {
+            Text(section.titleKey.localizedStringKey)
+                .font(.title.weight(.semibold))
+            Text(section.subtitleKey.localizedStringKey)
+                .foregroundStyle(.secondary)
         }
     }
 

@@ -21,6 +21,10 @@ final class StorageViewModel: ObservableObject {
     private let configFilePath: URL?
     private var loadedConfig: MackupConfig?
 
+    var requiresStoragePath: Bool {
+        engine == .fileSystem
+    }
+
     init(
         editor: MackupConfigEditing = MackupConfigEditor(),
         configFilePath: URL? = nil
@@ -69,7 +73,7 @@ final class StorageViewModel: ObservableObject {
     }
 
     func selectStorageDirectory(_ url: URL) {
-        directory = url.path
+        directory = url.lastPathComponent
     }
 
     private func currentConfig() throws -> MackupConfig {

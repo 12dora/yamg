@@ -19,7 +19,7 @@ struct LinkModeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 8) {
                     Label(String(localized: "link_mode.warning"), systemImage: "exclamationmark.triangle")
                         .font(.headline)
@@ -27,9 +27,10 @@ struct LinkModeView: View {
                     Text(String(localized: "link_mode.detail"))
                         .foregroundStyle(.secondary)
                 }
-                .frame(maxWidth: 760, alignment: .leading)
+                .frame(maxWidth: 820, alignment: .leading)
 
                 guide
+                commandGuide
 
                 Picker(String(localized: "link_mode.operation"), selection: $viewModel.selectedOperation) {
                     ForEach(LinkModeViewModel.Operation.allCases) { operation in
@@ -37,7 +38,7 @@ struct LinkModeView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(maxWidth: 520)
+                .frame(maxWidth: 480)
 
                 Toggle(String(localized: "operations.verbose"), isOn: $viewModel.verbose)
                 Toggle(String(localized: "link_mode.acknowledge"), isOn: $viewModel.acknowledgedRisk)
@@ -57,9 +58,9 @@ struct LinkModeView: View {
                         Text(viewModel.output)
                             .font(.system(.callout, design: .monospaced))
                             .textSelection(.enabled)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: 760, minHeight: 120, maxHeight: 260)
+                    .frame(maxWidth: 820, minHeight: 120, maxHeight: 260)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -69,7 +70,7 @@ struct LinkModeView: View {
     }
 
     private var guide: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             guideRow(
                 title: String(localized: "link_mode.guide.install.title"),
                 detail: String(localized: "link_mode.guide.install.detail")
@@ -83,16 +84,46 @@ struct LinkModeView: View {
                 detail: String(localized: "link_mode.guide.uninstall.detail")
             )
         }
-        .frame(maxWidth: 760, alignment: .leading)
+        .frame(maxWidth: 820, alignment: .leading)
+    }
+
+    private var commandGuide: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            commandGuideRow(
+                command: "mackup link install",
+                detail: String(localized: "link_mode.command.install.detail")
+            )
+            commandGuideRow(
+                command: "mackup link",
+                detail: String(localized: "link_mode.command.link.detail")
+            )
+            commandGuideRow(
+                command: "mackup link uninstall",
+                detail: String(localized: "link_mode.command.uninstall.detail")
+            )
+        }
+        .font(.callout)
+        .frame(maxWidth: 820, alignment: .leading)
     }
 
     private func guideRow(title: String, detail: String) -> some View {
-        HStack(alignment: .top, spacing: 18) {
+        HStack(alignment: .top, spacing: 12) {
             Text(title)
                 .font(.callout.weight(.semibold))
-                .frame(width: 120, alignment: .leading)
+                .frame(width: 112, alignment: .leading)
             Text(detail)
                 .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func commandGuideRow(command: String, detail: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(command)
+                .font(.system(.callout, design: .monospaced))
+                .textSelection(.enabled)
+                .frame(width: 180, alignment: .leading)
+            Text(detail)
                 .foregroundStyle(.secondary)
         }
     }

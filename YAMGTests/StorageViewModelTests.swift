@@ -85,7 +85,7 @@ final class StorageViewModelTests: XCTestCase {
         viewModel.selectStorageDirectory(URL(fileURLWithPath: "/Users/test/Backup Root/Mackup"))
 
         XCTAssertEqual(viewModel.path, "/Users/test/Backup Root")
-        XCTAssertEqual(viewModel.directory, "/Users/test/Backup Root/Mackup")
+        XCTAssertEqual(viewModel.directory, "Mackup")
     }
 
     func testStorageEngineDisplayNamesAreUserFacing() {

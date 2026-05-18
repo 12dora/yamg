@@ -13,21 +13,37 @@ struct PreferencesView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Form {
-                TextField(String(localized: "preferences.cli_path"), text: $viewModel.cliPath)
-                    .textFieldStyle(.roundedBorder)
-                Text(String(localized: "preferences.cli_path.detail"))
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
+                settingRow(label: String(localized: "preferences.cli_path")) {
+                    selectedPathRow(
+                        text: viewModel.cliPath,
+                        placeholder: String(localized: "preferences.cli_path.placeholder"),
+                        systemImage: "terminal"
+                    ) {
+                        chooseFile { url in
+                            viewModel.selectCLIPath(url)
+                        }
+                    }
+                }
 
-                TextField(String(localized: "preferences.config_path"), text: $viewModel.configPath)
-                    .textFieldStyle(.roundedBorder)
-                Text(String(localized: "preferences.config_path.detail"))
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+                detailRow(String(localized: "preferences.cli_path.detail"))
+
+                settingRow(label: String(localized: "preferences.config_path")) {
+                    selectedPathRow(
+                        text: viewModel.configPath,
+                        placeholder: String(localized: "preferences.config_path.placeholder"),
+                        systemImage: "doc.text"
+                    ) {
+                        chooseConfigFile { url in
+                            viewModel.selectConfigPath(url)
+                        }
+                    }
+                }
+
+                detailRow(String(localized: "preferences.config_path.detail"))
             }
-            .frame(maxWidth: 680)
+            .frame(maxWidth: 760, alignment: .leading)
 
             HStack {
                 Button(role: .destructive) {
@@ -45,7 +61,7 @@ struct PreferencesView: View {
             }
 
             Divider()
-                .frame(maxWidth: 680)
+                .frame(maxWidth: 760)
 
             VStack(alignment: .leading, spacing: 10) {
                 Text(String(localized: "preferences.development.title"))
@@ -60,7 +76,7 @@ struct PreferencesView: View {
                     Label(String(localized: "preferences.development.reset_first_run"), systemImage: "arrow.counterclockwise.circle")
                 }
             }
-            .frame(maxWidth: 680, alignment: .leading)
+            .frame(maxWidth: 760, alignment: .leading)
 
             if viewModel.state == .saved {
                 Label(String(localized: "preferences.saved"), systemImage: "checkmark.circle")
@@ -88,5 +104,81 @@ struct PreferencesView: View {
             Spacer()
         }
         .animation(.easeInOut(duration: 0.18), value: viewModel.state)
+    }
+
+    private func settingRow<Content: View>(
+        label: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Text(label)
+                .foregroundStyle(.secondary)
+                .frame(width: 150, alignment: .leading)
+
+            content()
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func detailRow(_ text: String) -> some View {
+        HStack(spacing: 12) {
+            Color.clear
+                .frame(width: 150, height: 0)
+
+            Text(text)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func selectedPathRow(
+        text: String,
+        placeholder: String,
+        systemImage: String,
+        onChoose: @escaping () -> Void
+    ) -> some View {
+        HStack(spacing: 8) {
+            Label {
+                Text(text.isEmpty ? placeholder : text)
+                    .foregroundStyle(text.isEmpty ? .secondary : .primary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .textSelection(.enabled)
+            } icon: {
+                Image(systemName: systemImage)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(minWidth: 420, maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(.quaternary.opacity(0.55), in: RoundedRectangle(cornerRadius: 6))
+
+            Button {
+                onChoose()
+            } label: {
+                Label(String(localized: "action.choose"), systemImage: "folder")
+            }
+        }
+    }
+
+    private func chooseFile(onSelection: (URL) -> Void) {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+
+        if panel.runModal() == .OK, let url = panel.url {
+            onSelection(url)
+        }
+    }
+
+    private func chooseConfigFile(onSelection: (URL) -> Void) {
+        let panel = NSSavePanel()
+        panel.canCreateDirectories = true
+        panel.nameFieldStringValue = ".mackup.cfg"
+
+        if panel.runModal() == .OK, let url = panel.url {
+            onSelection(url)
+        }
     }
 }

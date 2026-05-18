@@ -15,7 +15,7 @@ struct StorageView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text(statusText)
                     .foregroundStyle(.secondary)
@@ -38,47 +38,56 @@ struct StorageView: View {
                 .disabled(viewModel.state == .loading || viewModel.state == .saving)
             }
 
-            Form {
-                Picker(String(localized: "storage.engine"), selection: $viewModel.engine) {
-                    ForEach(MackupStorageEngine.allCases, id: \.self) { engine in
-                        Text(engine.displayName).tag(engine)
+            VStack(alignment: .leading, spacing: 10) {
+                settingRow(label: String(localized: "storage.engine")) {
+                    Picker(String(localized: "storage.engine"), selection: $viewModel.engine) {
+                        ForEach(MackupStorageEngine.allCases, id: \.self) { engine in
+                            Text(engine.displayName).tag(engine)
+                        }
                     }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
                 }
-                .pickerStyle(.segmented)
 
-                HStack(spacing: 8) {
-                    TextField(String(localized: "storage.path"), text: $viewModel.path)
-                        .textFieldStyle(.roundedBorder)
-
-                    Button {
+                settingRow(label: String(localized: "storage.path")) {
+                    selectedPathRow(
+                        text: viewModel.path,
+                        placeholder: String(localized: "storage.path.placeholder"),
+                        systemImage: "folder"
+                    ) {
                         chooseFolder { url in
                             viewModel.selectStoragePath(url)
                         }
-                    } label: {
-                        Label(String(localized: "action.choose"), systemImage: "folder")
                     }
                 }
 
-                HStack(spacing: 8) {
-                    TextField(String(localized: "storage.directory"), text: $viewModel.directory)
-                        .textFieldStyle(.roundedBorder)
-
-                    Button {
+                settingRow(label: String(localized: "storage.directory")) {
+                    selectedPathRow(
+                        text: viewModel.directory,
+                        placeholder: String(localized: "storage.directory.placeholder"),
+                        systemImage: "folder.badge.gearshape"
+                    ) {
                         chooseFolder { url in
                             viewModel.selectStorageDirectory(url)
                         }
-                    } label: {
-                        Label(String(localized: "action.choose"), systemImage: "folder")
                     }
                 }
-
-                if viewModel.engine == .fileSystem {
-                    Text(String(localized: "storage.file_system.detail"))
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
             }
-            .frame(maxWidth: 680)
+            .frame(maxWidth: 760, alignment: .leading)
+
+            if viewModel.engine != .fileSystem {
+                Text(String(localized: "storage.path.auto_detected"))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            if viewModel.engine == .fileSystem {
+                Text(String(localized: "storage.file_system.detail"))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
 
             if case .failed(let message) = viewModel.state {
                 Label(message, systemImage: "exclamationmark.triangle")
@@ -119,6 +128,50 @@ struct StorageView: View {
             return path
         }
         return String(localized: "storage.config.pending")
+    }
+
+    private func settingRow<Content: View>(
+        label: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Text(label)
+                .foregroundStyle(.secondary)
+                .frame(width: 112, alignment: .leading)
+
+            content()
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func selectedPathRow(
+        text: String,
+        placeholder: String,
+        systemImage: String,
+        onChoose: @escaping () -> Void
+    ) -> some View {
+        HStack(spacing: 8) {
+            Label {
+                Text(text.isEmpty ? placeholder : text)
+                    .foregroundStyle(text.isEmpty ? .secondary : .primary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .textSelection(.enabled)
+            } icon: {
+                Image(systemName: systemImage)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(minWidth: 360, maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(.quaternary.opacity(0.55), in: RoundedRectangle(cornerRadius: 6))
+
+            Button {
+                onChoose()
+            } label: {
+                Label(String(localized: "action.choose"), systemImage: "folder")
+            }
+        }
     }
 
     private func chooseFolder(onSelection: (URL) -> Void) {

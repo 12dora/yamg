@@ -19,7 +19,7 @@ struct ApplicationsListView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text(statusText)
                     .foregroundStyle(.secondary)
@@ -36,9 +36,9 @@ struct ApplicationsListView: View {
                 .disabled(viewModel.state == .loading)
             }
 
-            HStack(alignment: .top, spacing: 16) {
+            HStack(alignment: .top, spacing: 12) {
                 content
-                    .frame(minWidth: 260, idealWidth: 320, maxWidth: 360)
+                    .frame(minWidth: 300, idealWidth: 340, maxWidth: 400)
 
                 Divider()
 
@@ -54,6 +54,7 @@ struct ApplicationsListView: View {
                 await viewModel.refresh()
             }
         }
+        .animation(.easeInOut(duration: 0.18), value: viewModel.state)
     }
 
     @ViewBuilder
@@ -67,9 +68,20 @@ struct ApplicationsListView: View {
                 .controlSize(.small)
         case .loaded(let applications):
             List(applications, selection: $selectedApplicationName) { application in
-                Text(application.name)
-                    .textSelection(.enabled)
-                    .tag(application.name)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(application.displayName)
+                        .lineLimit(1)
+
+                    if application.displayName != application.name {
+                        Text(application.name)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
+                .contentShape(Rectangle())
+                .tag(application.name)
             }
             .frame(minHeight: 320)
             .onAppear {

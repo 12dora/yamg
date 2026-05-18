@@ -15,7 +15,7 @@ struct MackupApplicationListParser {
             throw MackupApplicationListParserError.noApplicationsFound
         }
 
-        return uniqueNames.map(MackupApplication.init(name:))
+        return uniqueNames.map { MackupApplication(name: $0) }
     }
 
     private func applicationName(from line: String) -> String? {

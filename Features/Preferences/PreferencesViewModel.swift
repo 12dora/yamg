@@ -38,12 +38,14 @@ final class PreferencesViewModel: ObservableObject {
 
     func reset() {
         do {
-            let targetConfigPath = normalizedURL(from: configPath)
-                ?? preferences.configFilePath
-                ?? defaultConfigPath
+            let configPathsToDelete = uniqueURLs([
+                normalizedURL(from: configPath),
+                preferences.configFilePath,
+                defaultConfigPath
+            ])
 
-            if fileManager.fileExists(atPath: targetConfigPath.path) {
-                try fileManager.removeItem(at: targetConfigPath)
+            for configPath in configPathsToDelete where fileManager.fileExists(atPath: configPath.path) {
+                try fileManager.removeItem(at: configPath)
             }
 
             preferences.preferredCLIPath = nil
@@ -63,6 +65,14 @@ final class PreferencesViewModel: ObservableObject {
         state = .developmentReset
     }
 
+    func selectCLIPath(_ url: URL) {
+        cliPath = url.path
+    }
+
+    func selectConfigPath(_ url: URL) {
+        configPath = url.path
+    }
+
     private func normalizedURL(from value: String) -> URL? {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
@@ -70,5 +80,22 @@ final class PreferencesViewModel: ObservableObject {
         }
 
         return URL(fileURLWithPath: NSString(string: trimmed).expandingTildeInPath)
+    }
+
+    private func uniqueURLs(_ urls: [URL?]) -> [URL] {
+        var seen = Set<String>()
+        var result: [URL] = []
+
+        for url in urls.compactMap({ $0 }) {
+            let path = url.standardizedFileURL.path
+            guard !seen.contains(path) else {
+                continue
+            }
+
+            seen.insert(path)
+            result.append(url)
+        }
+
+        return result
     }
 }
