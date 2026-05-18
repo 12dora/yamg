@@ -4,6 +4,8 @@ struct MackupInstallOption: Equatable, Identifiable {
     let id: String
     let title: String
     let command: String
+    let executableName: String
+    let arguments: [String]
 }
 
 struct MackupInstallGuide: Equatable {
@@ -14,12 +16,16 @@ struct MackupInstallGuide: Equatable {
             MackupInstallOption(
                 id: "homebrew",
                 title: "Homebrew",
-                command: "brew install mackup"
+                command: "brew install mackup",
+                executableName: "brew",
+                arguments: ["install", "mackup"]
             ),
             MackupInstallOption(
                 id: "pipx",
                 title: "pipx",
-                command: "pipx install mackup"
+                command: "pipx install mackup",
+                executableName: "pipx",
+                arguments: ["install", "mackup"]
             )
         ]
     )

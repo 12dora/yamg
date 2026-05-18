@@ -10,9 +10,19 @@ struct RootShellView: View {
 
     var body: some View {
         NavigationView {
-            List(AppSection.allCases, selection: $selection) { section in
-                Label(section.titleKey.localizedStringKey, systemImage: section.systemImageName)
-                    .tag(section as AppSection?)
+            List {
+                ForEach(AppSection.allCases) { section in
+                    Button {
+                        selection = section
+                    } label: {
+                        Label(section.titleKey.localizedStringKey, systemImage: section.systemImageName)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.vertical, 4)
+                    .listRowBackground((selection ?? .dashboard) == section ? Color.accentColor.opacity(0.16) : Color.clear)
+                    .accessibilityIdentifier("sidebar-\(section.rawValue)")
+                }
             }
             .navigationTitle(LocalizationKey.appTitle.localizedStringKey)
             .listStyle(SidebarListStyle())

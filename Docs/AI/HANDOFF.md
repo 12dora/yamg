@@ -125,3 +125,10 @@ Changed: Features/LinkMode/LinkModeView.swift, Features/LinkMode/LinkModeViewMod
 Tests: plutil -lint YAMG.xcodeproj/project.pbxproj; jq empty Resources/Localizable.xcstrings; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/LinkModeViewModelTests -only-testing:YAMGTests/AppSectionTests; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests.
 Next: P2 complete; next work should pick the next priority added to TASKS.md.
 Blocked: none.
+
+2026-05-18 22:46 CST | Codex
+Done: fixed sidebar click handling by using explicit selectable sidebar buttons; improved first-run Dashboard setup with single selected install method, one-click Homebrew/pipx installer execution, and guided creation of a minimal Mackup-supported .mackup.cfg.
+Changed: Features/RootShellView.swift, Features/Dashboard/DashboardView.swift, Features/Dashboard/DashboardViewModel.swift, Features/Dashboard/MackupInstallGuide.swift, Support/CommandLineToolRunner.swift, Resources/Localizable.xcstrings, YAMGTests/DashboardViewModelTests.swift, YAMG.xcodeproj/project.pbxproj, Docs/AI/TASKS.md, Docs/AI/HANDOFF.md.
+Tests: plutil -lint YAMG.xcodeproj/project.pbxproj; jq empty Resources/Localizable.xcstrings; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/DashboardViewModelTests -only-testing:YAMGTests/AppSectionTests; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests.
+Next: reopen Debug app for user testing; consider dedicated UI test coverage for first-run wizard when UI automation is stable.
+Blocked: none.

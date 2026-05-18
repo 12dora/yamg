@@ -58,6 +58,7 @@
 		5D1A000000000000000000C8 /* LinkModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000CA /* LinkModeView.swift */; };
 		5D1A000000000000000000C9 /* LinkModeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000CB /* LinkModeViewModel.swift */; };
 		5D1A000000000000000000CC /* LinkModeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000CD /* LinkModeViewModelTests.swift */; };
+		5D1A000000000000000000CF /* CommandLineToolRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000D0 /* CommandLineToolRunner.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -114,6 +115,7 @@
 		5D1A000000000000000000CA /* LinkModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkModeView.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000CB /* LinkModeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkModeViewModel.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000CD /* LinkModeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkModeViewModelTests.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000D0 /* CommandLineToolRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLineToolRunner.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,6 +230,7 @@
 			isa = PBXGroup;
 			children = (
 				5D1A000000000000000000BE /* AppPreferences.swift */,
+				5D1A000000000000000000D0 /* CommandLineToolRunner.swift */,
 				5D1A00000000000000000088 /* LocalizationKey.swift */,
 			);
 			path = Support;
@@ -457,6 +460,7 @@
 				5D1A00000000000000000094 /* ApplicationsListViewModel.swift in Sources */,
 				5D1A0000000000000000008A /* DashboardView.swift in Sources */,
 				5D1A0000000000000000008B /* DashboardViewModel.swift in Sources */,
+				5D1A000000000000000000CF /* CommandLineToolRunner.swift in Sources */,
 				5D1A000000000000000000C8 /* LinkModeView.swift in Sources */,
 				5D1A000000000000000000C9 /* LinkModeViewModel.swift in Sources */,
 				5D1A00000000000000000086 /* LocalizationKey.swift in Sources */,

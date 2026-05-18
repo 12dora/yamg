@@ -30,3 +30,11 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Homebrew/pipx install entry.
 - [x] Preferences for CLI/config path.
 - [x] Link Mode advanced page.
+
+## UX Fixes
+
+- [x] Fix sidebar item selection/click handling.
+- [x] Add first-run setup guide for installing Mackup.
+- [x] Add one-click selected Mackup installer action.
+- [x] Make Homebrew/pipx a single selected install method.
+- [x] Add guided creation for missing `.mackup.cfg`.

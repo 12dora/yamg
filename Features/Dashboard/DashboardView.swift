@@ -51,6 +51,13 @@ struct DashboardView: View {
                     .frame(maxWidth: 720)
             }
 
+            if viewModel.shouldShowConfigWizard {
+                configWizard
+
+                Divider()
+                    .frame(maxWidth: 720)
+            }
+
             OperationFlowView(
                 viewModel: OperationFlowViewModel(
                     preferredCLIPath: viewModel.preferredCLIPath,
@@ -97,12 +104,16 @@ struct DashboardView: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
-            ForEach(viewModel.installGuide.options) { option in
-                HStack(spacing: 10) {
-                    Text(option.title)
-                        .font(.callout.weight(.medium))
-                        .frame(width: 88, alignment: .leading)
+            Picker(String(localized: "install.method"), selection: $viewModel.selectedInstallOptionID) {
+                ForEach(viewModel.installGuide.options) { option in
+                    Text(option.title).tag(option.id)
+                }
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 360)
 
+            if let option = viewModel.selectedInstallOption {
+                HStack(spacing: 10) {
                     Text(option.command)
                         .font(.system(.callout, design: .monospaced))
                         .textSelection(.enabled)
@@ -114,10 +125,93 @@ struct DashboardView: View {
                     } label: {
                         Label(String(localized: "action.copy"), systemImage: "doc.on.doc")
                     }
+
+                    Button {
+                        Task {
+                            await viewModel.installSelectedMackup()
+                        }
+                    } label: {
+                        Label(String(localized: "install.run"), systemImage: "arrow.down.circle")
+                    }
+                    .disabled(isInstalling)
                 }
             }
+
+            setupStateView
         }
         .frame(maxWidth: 720, alignment: .leading)
+    }
+
+    private var configWizard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(String(localized: "setup.config.title"))
+                .font(.headline)
+            Text(String(localized: "setup.config.detail"))
+                .font(.callout)
+                .foregroundStyle(.secondary)
+
+            Picker(String(localized: "storage.engine"), selection: $viewModel.selectedStorageEngine) {
+                ForEach(MackupStorageEngine.allCases, id: \.self) { engine in
+                    Text(engine.rawValue).tag(engine)
+                }
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 520)
+
+            Button {
+                viewModel.createDefaultConfig()
+            } label: {
+                Label(String(localized: "setup.config.create"), systemImage: "doc.badge.plus")
+            }
+            .disabled(isCreatingConfig)
+
+            setupStateView
+        }
+        .frame(maxWidth: 720, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private var setupStateView: some View {
+        switch viewModel.setupState {
+        case .idle:
+            EmptyView()
+        case .installing(let method):
+            Label(String(localized: "install.running \(method)"), systemImage: "clock")
+                .foregroundStyle(.secondary)
+        case .installFinished(let output):
+            Label(output.isEmpty ? String(localized: "install.finished") : output, systemImage: "checkmark.circle")
+                .foregroundStyle(.green)
+                .textSelection(.enabled)
+        case .installFailed(let message):
+            Label(message, systemImage: "exclamationmark.triangle")
+                .foregroundStyle(.red)
+                .textSelection(.enabled)
+        case .creatingConfig:
+            Label(String(localized: "setup.config.creating"), systemImage: "clock")
+                .foregroundStyle(.secondary)
+        case .configCreated(let url):
+            Label(String(localized: "setup.config.created \(url.path)"), systemImage: "checkmark.circle")
+                .foregroundStyle(.green)
+                .textSelection(.enabled)
+        case .configCreateFailed(let message):
+            Label(message, systemImage: "exclamationmark.triangle")
+                .foregroundStyle(.red)
+                .textSelection(.enabled)
+        }
+    }
+
+    private var isInstalling: Bool {
+        if case .installing = viewModel.setupState {
+            return true
+        }
+        return false
+    }
+
+    private var isCreatingConfig: Bool {
+        if case .creatingConfig = viewModel.setupState {
+            return true
+        }
+        return false
     }
 
     private func statusRow(

@@ -310,13 +310,77 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "YAMG does not install dependencies automatically. Copy one command into your terminal, then refresh detection."
+            "value": "Choose one install method. YAMG can run the selected installer or you can copy the command."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "YAMG 不会自动安装依赖。请复制其中一条命令到终端执行，然后刷新检测。"
+            "value": "请选择一种安装方式。YAMG 可以运行所选安装器，也可以复制命令手动执行。"
+          }
+        }
+      }
+    },
+    "install.finished": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mackup install command finished."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mackup 安装命令已完成。"
+          }
+        }
+      }
+    },
+    "install.method": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install method"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装方式"
+          }
+        }
+      }
+    },
+    "install.run": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装"
+          }
+        }
+      }
+    },
+    "install.running %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running %@..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在运行 %@..."
           }
         }
       }
@@ -333,6 +397,86 @@
           "stringUnit": {
             "state": "translated",
             "value": "安装 Mackup"
+          }
+        }
+      }
+    },
+    "setup.config.create": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create config file"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建配置文件"
+          }
+        }
+      }
+    },
+    "setup.config.created %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Created %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已创建 %@"
+          }
+        }
+      }
+    },
+    "setup.config.creating": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creating config file..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在创建配置文件..."
+          }
+        }
+      }
+    },
+    "setup.config.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a minimal Mackup config with a supported storage engine. You can edit storage details later."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建仅包含受支持存储后端的最小 Mackup 配置。稍后可继续编辑存储细节。"
+          }
+        }
+      }
+    },
+    "setup.config.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Mackup config"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建 Mackup 配置"
           }
         }
       }
