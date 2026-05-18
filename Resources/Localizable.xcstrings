@@ -561,18 +561,34 @@
         }
       }
     },
-    "preferences.development.detail": {
+    "preferences.reset_done": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use this during development to return the app to the first-run setup state. It does not delete your real .mackup.cfg."
+            "value": "Preferences reset and the selected .mackup.cfg was deleted if it existed."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "开发时可用它让应用回到首次运行配置状态。它不会删除真实的 .mackup.cfg。"
+            "value": "偏好设置已重置，选中的 .mackup.cfg 如存在已删除。"
+          }
+        }
+      }
+    },
+    "preferences.development.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use this during development to return the app to the first-run setup state without deleting your real .mackup.cfg."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开发时可用它让应用回到首次运行配置状态，但不会删除真实的 .mackup.cfg。"
           }
         }
       }

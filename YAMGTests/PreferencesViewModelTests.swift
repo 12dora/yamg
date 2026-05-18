@@ -3,6 +3,20 @@ import XCTest
 
 @MainActor
 final class PreferencesViewModelTests: XCTestCase {
+    private var temporaryDirectory: URL!
+
+    override func setUpWithError() throws {
+        temporaryDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true)
+    }
+
+    override func tearDownWithError() throws {
+        if let temporaryDirectory {
+            try? FileManager.default.removeItem(at: temporaryDirectory)
+        }
+    }
+
     func testLoadsExistingPathsFromPreferences() {
         let preferences = InMemoryPreferences(
             preferredCLIPath: URL(fileURLWithPath: "/opt/homebrew/bin/mackup"),
@@ -31,19 +45,38 @@ final class PreferencesViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.state, .saved)
     }
 
-    func testResetClearsStoredPaths() {
+    func testResetClearsStoredPathsAndDeletesSelectedConfigFile() throws {
+        let configFile = temporaryDirectory.appendingPathComponent(".mackup.cfg")
+        try "[storage]\nengine = dropbox\n".write(to: configFile, atomically: true, encoding: .utf8)
         let preferences = InMemoryPreferences(
             preferredCLIPath: URL(fileURLWithPath: "/usr/local/bin/mackup"),
-            configFilePath: URL(fileURLWithPath: "/tmp/.mackup.cfg")
+            configFilePath: configFile
         )
         let viewModel = PreferencesViewModel(preferences: preferences)
 
         viewModel.reset()
 
+        XCTAssertFalse(FileManager.default.fileExists(atPath: configFile.path))
         XCTAssertNil(preferences.preferredCLIPath)
         XCTAssertNil(preferences.configFilePath)
         XCTAssertEqual(viewModel.cliPath, "")
         XCTAssertEqual(viewModel.configPath, "")
+        XCTAssertEqual(viewModel.state, .reset)
+    }
+
+    func testResetDeletesDefaultConfigWhenNoCustomPathIsSet() throws {
+        let defaultConfigFile = temporaryDirectory.appendingPathComponent(".mackup.cfg")
+        try "[storage]\nengine = dropbox\n".write(to: defaultConfigFile, atomically: true, encoding: .utf8)
+        let preferences = InMemoryPreferences()
+        let viewModel = PreferencesViewModel(
+            preferences: preferences,
+            defaultConfigPath: defaultConfigFile
+        )
+
+        viewModel.reset()
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: defaultConfigFile.path))
+        XCTAssertEqual(viewModel.state, .reset)
     }
 
     func testDevelopmentResetSimulatesMissingConfigWithoutDeletingRealConfig() {

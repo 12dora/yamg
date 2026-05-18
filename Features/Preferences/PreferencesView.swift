@@ -13,7 +13,7 @@ struct PreferencesView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 14) {
             Form {
                 TextField(String(localized: "preferences.cli_path"), text: $viewModel.cliPath)
                     .textFieldStyle(.roundedBorder)
@@ -30,7 +30,7 @@ struct PreferencesView: View {
             .frame(maxWidth: 680)
 
             HStack {
-                Button {
+                Button(role: .destructive) {
                     viewModel.reset()
                 } label: {
                     Label(String(localized: "action.reset"), systemImage: "arrow.counterclockwise")
@@ -67,13 +67,26 @@ struct PreferencesView: View {
                     .foregroundStyle(.green)
             }
 
+            if viewModel.state == .reset {
+                Label(String(localized: "preferences.reset_done"), systemImage: "checkmark.circle")
+                    .foregroundStyle(.green)
+                    .textSelection(.enabled)
+            }
+
             if viewModel.state == .developmentReset {
                 Label(String(localized: "preferences.development.reset_done"), systemImage: "checkmark.circle")
                     .foregroundStyle(.green)
                     .textSelection(.enabled)
             }
 
+            if case .failed(let message) = viewModel.state {
+                Label(message, systemImage: "exclamationmark.triangle")
+                    .foregroundStyle(.red)
+                    .textSelection(.enabled)
+            }
+
             Spacer()
         }
+        .animation(.easeInOut(duration: 0.18), value: viewModel.state)
     }
 }
