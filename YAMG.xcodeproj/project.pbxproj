@@ -17,6 +17,8 @@
 		5D1A00000000000000000077 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000025 /* XCTest.framework */; };
 		5D1A00000000000000000078 /* MackupCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000002A /* MackupCommand.swift */; };
 		5D1A00000000000000000079 /* MackupCommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000002B /* MackupCommandTests.swift */; };
+		5D1A0000000000000000007A /* MackupProcessRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000002C /* MackupProcessRunner.swift */; };
+		5D1A0000000000000000007B /* MackupProcessRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000002D /* MackupProcessRunnerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,8 @@
 		5D1A00000000000000000029 /* YAMGUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YAMGUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D1A0000000000000000002A /* MackupCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupCommand.swift; sourceTree = "<group>"; };
 		5D1A0000000000000000002B /* MackupCommandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupCommandTests.swift; sourceTree = "<group>"; };
+		5D1A0000000000000000002C /* MackupProcessRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupProcessRunner.swift; sourceTree = "<group>"; };
+		5D1A0000000000000000002D /* MackupProcessRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupProcessRunnerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +105,7 @@
 			children = (
 				5D1A00000000000000000023 /* AppSectionTests.swift */,
 				5D1A0000000000000000002B /* MackupCommandTests.swift */,
+				5D1A0000000000000000002D /* MackupProcessRunnerTests.swift */,
 			);
 			path = YAMGTests;
 			sourceTree = "<group>";
@@ -131,6 +136,7 @@
 			isa = PBXGroup;
 			children = (
 				5D1A0000000000000000002A /* MackupCommand.swift */,
+				5D1A0000000000000000002C /* MackupProcessRunner.swift */,
 			);
 			path = MackupCLI;
 			sourceTree = "<group>";
@@ -272,6 +278,7 @@
 				5D1A00000000000000000071 /* AppSection.swift in Sources */,
 				5D1A00000000000000000072 /* RootShellView.swift in Sources */,
 				5D1A00000000000000000078 /* MackupCommand.swift in Sources */,
+				5D1A0000000000000000007A /* MackupProcessRunner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,6 +288,7 @@
 			files = (
 				5D1A00000000000000000074 /* AppSectionTests.swift in Sources */,
 				5D1A00000000000000000079 /* MackupCommandTests.swift in Sources */,
+				5D1A0000000000000000007B /* MackupProcessRunnerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

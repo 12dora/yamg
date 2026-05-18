@@ -11,7 +11,7 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Create SwiftUI macOS Xcode project.
 - [x] Add app shell: Sidebar, Dashboard, Applications, Storage, Logs, Preferences.
 - [x] Implement `MackupCommand` and argv builder.
-- [ ] Implement `MackupProcessRunner` with streamed stdout/stderr.
+- [x] Implement `MackupProcessRunner` with streamed stdout/stderr.
 - [ ] Implement `MackupDetector` and version parser.
 - [ ] Implement `ProcessLogStore`.
 - [ ] Implement `.mackup.cfg` read/write.

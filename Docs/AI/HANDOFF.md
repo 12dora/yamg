@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 19:16 CST | Codex
+Done: implemented `MackupProcessRunner` with `Process.executableURL`, safe argument passing, streamed stdout/stderr events, exit result events, cancellation cleanup, and missing executable validation.
+Changed: `MackupCLI/MackupProcessRunner.swift`, `YAMGTests/MackupProcessRunnerTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests`.
+Next: implement `MackupDetector` and version parser.
+Blocked: none.
+
 2026-05-18 19:10 CST | Codex
 Done: implemented `MackupCommand` and argv builder for the allowed Mackup CLI surface; validated version/ignored upstream state before coding.
 Changed: `MackupCLI/MackupCommand.swift`, `YAMGTests/MackupCommandTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
