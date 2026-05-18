@@ -15,7 +15,7 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Implement `MackupDetector` and version parser.
 - [x] Implement `ProcessLogStore`.
 - [x] Implement `.mackup.cfg` read/write.
-- [ ] Add `Localizable.xcstrings` zh-Hans/en baseline.
+- [x] Add `Localizable.xcstrings` zh-Hans/en baseline.
 
 ## P1
 

@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 19:27 CST | Codex
+Done: added `Localizable.xcstrings` zh-Hans/en baseline and wired current app shell copy through localization keys.
+Changed: `Resources/Localizable.xcstrings`, `Support/LocalizationKey.swift`, `Features/AppSection.swift`, `Features/RootShellView.swift`, `YAMGTests/AppSectionTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `jq empty Resources/Localizable.xcstrings`; `plutil -lint YAMG.xcodeproj/project.pbxproj`; `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests`.
+Next: start P1 Onboarding MVP.
+Blocked: none.
+
 2026-05-18 19:24 CST | Codex
 Done: implemented `.mackup.cfg` read/write for Mackup-supported fields only: `[storage]`, `[applications_to_sync]`, and `[applications_to_ignore]`; preserves unknown sections and storage keys without writing YAMG metadata.
 Changed: `Config/MackupConfig.swift`, `YAMGTests/MackupConfigTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.

@@ -12,15 +12,30 @@ enum AppSection: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .dashboard:
-            return "Dashboard"
+            return "section.dashboard.title"
         case .applications:
-            return "Applications"
+            return "section.applications.title"
         case .storage:
-            return "Storage"
+            return "section.storage.title"
         case .logs:
-            return "Logs"
+            return "section.logs.title"
         case .preferences:
-            return "Preferences"
+            return "section.preferences.title"
+        }
+    }
+
+    var titleKey: LocalizationKey {
+        switch self {
+        case .dashboard:
+            return .dashboardTitle
+        case .applications:
+            return .applicationsTitle
+        case .storage:
+            return .storageTitle
+        case .logs:
+            return .logsTitle
+        case .preferences:
+            return .preferencesTitle
         }
     }
 
@@ -42,15 +57,30 @@ enum AppSection: String, CaseIterable, Identifiable {
     var subtitle: String {
         switch self {
         case .dashboard:
-            return "Status, recent runs, and quick actions."
+            return "section.dashboard.subtitle"
         case .applications:
-            return "Supported apps from Mackup list and show."
+            return "section.applications.subtitle"
         case .storage:
-            return "Storage engine and directory settings."
+            return "section.storage.subtitle"
         case .logs:
-            return "Streamed stdout and stderr history."
+            return "section.logs.subtitle"
         case .preferences:
-            return "CLI path, config path, and UI preferences."
+            return "section.preferences.subtitle"
+        }
+    }
+
+    var subtitleKey: LocalizationKey {
+        switch self {
+        case .dashboard:
+            return .dashboardSubtitle
+        case .applications:
+            return .applicationsSubtitle
+        case .storage:
+            return .storageSubtitle
+        case .logs:
+            return .logsSubtitle
+        case .preferences:
+            return .preferencesSubtitle
         }
     }
 }

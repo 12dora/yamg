@@ -5,12 +5,23 @@ final class AppSectionTests: XCTestCase {
     func testSidebarSectionsAreStable() {
         XCTAssertEqual(
             AppSection.allCases.map(\.title),
-            ["Dashboard", "Applications", "Storage", "Logs", "Preferences"]
+            [
+                "section.dashboard.title",
+                "section.applications.title",
+                "section.storage.title",
+                "section.logs.title",
+                "section.preferences.title"
+            ]
         )
     }
 
     func testSidebarIconsArePresent() {
         XCTAssertEqual(AppSection.dashboard.systemImageName, "rectangle.grid.2x2")
-        XCTAssertEqual(AppSection.preferences.subtitle, "CLI path, config path, and UI preferences.")
+        XCTAssertEqual(AppSection.preferences.subtitle, "section.preferences.subtitle")
+    }
+
+    func testSidebarLocalizationKeysAreStable() {
+        XCTAssertEqual(AppSection.dashboard.titleKey, .dashboardTitle)
+        XCTAssertEqual(AppSection.preferences.subtitleKey, .preferencesSubtitle)
     }
 }

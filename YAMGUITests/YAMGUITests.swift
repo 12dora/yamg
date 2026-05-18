@@ -5,6 +5,6 @@ final class YAMGUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        XCTAssertTrue(app.staticTexts["Dashboard"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["section-title-dashboard"].waitForExistence(timeout: 5))
     }
 }

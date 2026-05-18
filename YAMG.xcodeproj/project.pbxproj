@@ -25,6 +25,8 @@
 		5D1A0000000000000000007F /* ProcessLogStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000081 /* ProcessLogStoreTests.swift */; };
 		5D1A00000000000000000082 /* MackupConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000084 /* MackupConfig.swift */; };
 		5D1A00000000000000000083 /* MackupConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000085 /* MackupConfigTests.swift */; };
+		5D1A00000000000000000086 /* LocalizationKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000088 /* LocalizationKey.swift */; };
+		5D1A00000000000000000087 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000089 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +50,8 @@
 		5D1A00000000000000000081 /* ProcessLogStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessLogStoreTests.swift; sourceTree = "<group>"; };
 		5D1A00000000000000000084 /* MackupConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupConfig.swift; sourceTree = "<group>"; };
 		5D1A00000000000000000085 /* MackupConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupConfigTests.swift; sourceTree = "<group>"; };
+		5D1A00000000000000000088 /* LocalizationKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationKey.swift; sourceTree = "<group>"; };
+		5D1A00000000000000000089 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +140,7 @@
 		5D1A00000000000000000015 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				5D1A00000000000000000089 /* Localizable.xcstrings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -143,6 +148,7 @@
 		5D1A00000000000000000016 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				5D1A00000000000000000088 /* LocalizationKey.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -199,6 +205,7 @@
 			buildPhases = (
 				5D1A00000000000000000030 /* Sources */,
 				5D1A00000000000000000031 /* Frameworks */,
+				5D1A00000000000000000032 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -294,12 +301,21 @@
 			files = (
 				5D1A00000000000000000070 /* YAMGApp.swift in Sources */,
 				5D1A00000000000000000071 /* AppSection.swift in Sources */,
+				5D1A00000000000000000086 /* LocalizationKey.swift in Sources */,
 				5D1A00000000000000000072 /* RootShellView.swift in Sources */,
 				5D1A00000000000000000078 /* MackupCommand.swift in Sources */,
 				5D1A00000000000000000082 /* MackupConfig.swift in Sources */,
 				5D1A0000000000000000007C /* MackupDetector.swift in Sources */,
 				5D1A0000000000000000007A /* MackupProcessRunner.swift in Sources */,
 				5D1A0000000000000000007E /* ProcessLogStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5D1A00000000000000000032 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5D1A00000000000000000087 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
