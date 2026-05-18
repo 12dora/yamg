@@ -21,19 +21,33 @@ struct RootShellView: View {
     private var detailView: some View {
         let section = selection ?? .dashboard
 
-        VStack(alignment: .leading, spacing: 16) {
-            Text(section.titleKey.localizedStringKey)
-                .font(.largeTitle.weight(.semibold))
-                .accessibilityIdentifier("section-title-\(section.rawValue)")
+        if section == .dashboard {
+            VStack(alignment: .leading, spacing: 16) {
+                sectionHeader(section)
+                DashboardView()
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        } else {
+            VStack(alignment: .leading, spacing: 16) {
+                sectionHeader(section)
 
-            Text(section.subtitleKey.localizedStringKey)
-                .font(.body)
-                .foregroundStyle(.secondary)
-
-            Spacer()
+                Spacer()
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    @ViewBuilder
+    private func sectionHeader(_ section: AppSection) -> some View {
+        Text(section.titleKey.localizedStringKey)
+            .font(.largeTitle.weight(.semibold))
+            .accessibilityIdentifier("section-title-\(section.rawValue)")
+
+        Text(section.subtitleKey.localizedStringKey)
+            .font(.body)
+            .foregroundStyle(.secondary)
     }
 }
 

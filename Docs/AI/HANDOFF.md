@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 19:40 CST | Codex
+Done: implemented P1 Onboarding MVP dashboard showing Mackup CLI detection/version state and default `.mackup.cfg` presence without invoking backup/restore/link behavior.
+Changed: `Features/Dashboard/DashboardView.swift`, `Features/Dashboard/DashboardViewModel.swift`, `Features/RootShellView.swift`, `Support/LocalizationKey.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/DashboardViewModelTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `plutil -lint YAMG.xcodeproj/project.pbxproj`; `jq empty Resources/Localizable.xcstrings`; `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests` passed. Full `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS'` ran unit tests successfully but failed when UI test runner timed out enabling automation mode.
+Next: implement P1 Applications list via `mackup list`.
+Blocked: UI test automation mode timeout in this shell environment.
+
 2026-05-18 19:27 CST | Codex
 Done: added `Localizable.xcstrings` zh-Hans/en baseline and wired current app shell copy through localization keys.
 Changed: `Resources/Localizable.xcstrings`, `Support/LocalizationKey.swift`, `Features/AppSection.swift`, `Features/RootShellView.swift`, `YAMGTests/AppSectionTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.

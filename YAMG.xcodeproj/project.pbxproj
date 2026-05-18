@@ -27,6 +27,9 @@
 		5D1A00000000000000000083 /* MackupConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000085 /* MackupConfigTests.swift */; };
 		5D1A00000000000000000086 /* LocalizationKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000088 /* LocalizationKey.swift */; };
 		5D1A00000000000000000087 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000089 /* Localizable.xcstrings */; };
+		5D1A0000000000000000008A /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000008D /* DashboardView.swift */; };
+		5D1A0000000000000000008B /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000008E /* DashboardViewModel.swift */; };
+		5D1A0000000000000000008C /* DashboardViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000008F /* DashboardViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +55,9 @@
 		5D1A00000000000000000085 /* MackupConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupConfigTests.swift; sourceTree = "<group>"; };
 		5D1A00000000000000000088 /* LocalizationKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationKey.swift; sourceTree = "<group>"; };
 		5D1A00000000000000000089 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		5D1A0000000000000000008D /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		5D1A0000000000000000008E /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
+		5D1A0000000000000000008F /* DashboardViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +116,7 @@
 		5D1A00000000000000000012 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				5D1A00000000000000000090 /* Dashboard */,
 				5D1A00000000000000000021 /* AppSection.swift */,
 				5D1A00000000000000000022 /* RootShellView.swift */,
 			);
@@ -120,6 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				5D1A00000000000000000023 /* AppSectionTests.swift */,
+				5D1A0000000000000000008F /* DashboardViewModelTests.swift */,
 				5D1A0000000000000000002B /* MackupCommandTests.swift */,
 				5D1A00000000000000000085 /* MackupConfigTests.swift */,
 				5D1A0000000000000000002F /* MackupDetectorTests.swift */,
@@ -194,6 +202,15 @@
 				5D1A00000000000000000029 /* YAMGUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5D1A00000000000000000090 /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				5D1A0000000000000000008D /* DashboardView.swift */,
+				5D1A0000000000000000008E /* DashboardViewModel.swift */,
+			);
+			path = Dashboard;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -301,6 +318,8 @@
 			files = (
 				5D1A00000000000000000070 /* YAMGApp.swift in Sources */,
 				5D1A00000000000000000071 /* AppSection.swift in Sources */,
+				5D1A0000000000000000008A /* DashboardView.swift in Sources */,
+				5D1A0000000000000000008B /* DashboardViewModel.swift in Sources */,
 				5D1A00000000000000000086 /* LocalizationKey.swift in Sources */,
 				5D1A00000000000000000072 /* RootShellView.swift in Sources */,
 				5D1A00000000000000000078 /* MackupCommand.swift in Sources */,
@@ -324,6 +343,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5D1A00000000000000000074 /* AppSectionTests.swift in Sources */,
+				5D1A0000000000000000008C /* DashboardViewModelTests.swift in Sources */,
 				5D1A00000000000000000079 /* MackupCommandTests.swift in Sources */,
 				5D1A00000000000000000083 /* MackupConfigTests.swift in Sources */,
 				5D1A0000000000000000007D /* MackupDetectorTests.swift in Sources */,

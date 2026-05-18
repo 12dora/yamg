@@ -13,6 +13,11 @@ enum LocalizationKey: String {
     case logsSubtitle = "section.logs.subtitle"
     case preferencesTitle = "section.preferences.title"
     case preferencesSubtitle = "section.preferences.subtitle"
+    case onboardingTitle = "onboarding.title"
+    case onboardingSubtitle = "onboarding.subtitle"
+    case onboardingCLIStatus = "onboarding.cli.status"
+    case onboardingConfigStatus = "onboarding.config.status"
+    case refresh = "action.refresh"
 
     var localizedStringKey: LocalizedStringKey {
         LocalizedStringKey(rawValue)
