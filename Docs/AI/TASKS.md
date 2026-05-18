@@ -6,6 +6,7 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 
 - [x] Init Git excluding `mackup/`.
 - [x] Create low-token AI handoff docs.
+- [x] Create reusable coding AI start prompt.
 - [x] Set YAMG version to upstream local Mackup version `0.10.3`.
 - [ ] Create SwiftUI macOS Xcode project.
 - [ ] Add app shell: Sidebar, Dashboard, Applications, Storage, Logs, Preferences.
@@ -29,4 +30,3 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [ ] Homebrew/pipx install entry.
 - [ ] Preferences for CLI/config path.
 - [ ] Link Mode advanced page.
-
