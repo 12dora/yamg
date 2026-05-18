@@ -1,0 +1,15 @@
+.DS_Store
+xcuserdata/
+DerivedData/
+.build/
+*.xcuserstate
+*.swp
+
+# Upstream reference source. Keep local only; do not vendor Mackup in YAMG git.
+mackup/
+
+# Local runtime/output
+Logs/
+tmp/
+.env
+
