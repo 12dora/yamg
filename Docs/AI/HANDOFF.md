@@ -7,6 +7,13 @@ Tests: `plutil -lint YAMG.xcodeproj/project.pbxproj`; `jq empty Resources/Locali
 Next: start P2 Homebrew/pipx install entry or preferences for CLI/config path.
 Blocked: none.
 
+2026-05-18 23:11 CST | Codex
+Done: fixed follow-up UX issues: storage config remains graphically editable after creation, storage engines use friendly names, supported applications retry through an isolated Mackup CLI list environment when the user's storage config is unusable, storage path/directory use folder pickers, Link Mode includes command guidance, sidebar rows are full-width selectable, layouts are denser with lightweight animations, and Preferences reset deletes the selected/default .mackup.cfg.
+Changed: Applications/MackupApplicationListParser.swift, Config/MackupConfig.swift, Features/Applications/ApplicationsListViewModel.swift, Features/Dashboard/DashboardView.swift, Features/LinkMode/LinkModeView.swift, Features/Preferences/PreferencesView.swift, Features/Preferences/PreferencesViewModel.swift, Features/RootShellView.swift, Features/Storage/StorageView.swift, Features/Storage/StorageViewModel.swift, MackupCLI/MackupProcessRunner.swift, Resources/Localizable.xcstrings, YAMGTests/ApplicationsListViewModelTests.swift, YAMGTests/MackupApplicationListParserTests.swift, YAMGTests/MackupProcessRunnerTests.swift, YAMGTests/PreferencesViewModelTests.swift, YAMGTests/StorageViewModelTests.swift, Docs/AI/TASKS.md, Docs/AI/HANDOFF.md.
+Tests: jq empty Resources/Localizable.xcstrings; git diff --check; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests.
+Next: run the app and manually verify the first-run, Storage, Applications, Link Mode, sidebar, and Preferences reset flows.
+Blocked: none.
+
 2026-05-18 20:03 CST | Codex
 Done: implemented P1 Storage editor UI for Mackup-supported `[storage] engine/path/directory` fields only, backed by `MackupConfigEditor`; no migration, sync, copy, delete, or link behavior added.
 Changed: `Config/MackupConfig.swift`, `Features/Storage/StorageView.swift`, `Features/Storage/StorageViewModel.swift`, `Features/RootShellView.swift`, `Support/LocalizationKey.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/StorageViewModelTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.

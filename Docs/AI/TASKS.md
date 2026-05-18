@@ -39,3 +39,11 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Make Homebrew/pipx a single selected install method.
 - [x] Add guided creation for missing `.mackup.cfg`.
 - [x] Add development reset to simulate first-run state.
+- [x] Keep graphical storage config editing after `.mackup.cfg` creation.
+- [x] Show friendly storage provider names instead of raw Mackup config values.
+- [x] Load supported applications even when user storage config breaks `mackup list`.
+- [x] Add GUI folder pickers for storage path and directory fields.
+- [x] Add Link Mode operation guide text.
+- [x] Make sidebar rows selectable across their full width.
+- [x] Tighten main UI spacing and add lightweight state animations.
+- [x] Make Preferences reset delete the selected/default `.mackup.cfg`.
