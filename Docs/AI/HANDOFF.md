@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 19:46 CST | Codex
+Done: implemented P1 Applications list using `mackup list` through `MackupCommandRunning`, with output parsing, loading/empty/error states, and Applications sidebar content.
+Changed: `Applications/MackupApplication.swift`, `Applications/MackupApplicationListParser.swift`, `Features/Applications/ApplicationsListView.swift`, `Features/Applications/ApplicationsListViewModel.swift`, `Features/RootShellView.swift`, `Support/LocalizationKey.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/ApplicationsListViewModelTests.swift`, `YAMGTests/MackupApplicationListParserTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `plutil -lint YAMG.xcodeproj/project.pbxproj`; `jq empty Resources/Localizable.xcstrings`; `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests`.
+Next: implement P1 Application detail via `mackup show <application>`.
+Blocked: none.
+
 2026-05-18 19:40 CST | Codex
 Done: implemented P1 Onboarding MVP dashboard showing Mackup CLI detection/version state and default `.mackup.cfg` presence without invoking backup/restore/link behavior.
 Changed: `Features/Dashboard/DashboardView.swift`, `Features/Dashboard/DashboardViewModel.swift`, `Features/RootShellView.swift`, `Support/LocalizationKey.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/DashboardViewModelTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.

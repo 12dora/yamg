@@ -18,6 +18,9 @@ enum LocalizationKey: String {
     case onboardingCLIStatus = "onboarding.cli.status"
     case onboardingConfigStatus = "onboarding.config.status"
     case refresh = "action.refresh"
+    case applicationsCount = "applications.count %lld"
+    case applicationsEmpty = "applications.empty"
+    case applicationsFailed = "applications.failed"
 
     var localizedStringKey: LocalizedStringKey {
         LocalizedStringKey(rawValue)

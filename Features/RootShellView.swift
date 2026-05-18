@@ -28,6 +28,13 @@ struct RootShellView: View {
             }
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        } else if section == .applications {
+            VStack(alignment: .leading, spacing: 16) {
+                sectionHeader(section)
+                ApplicationsListView()
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
