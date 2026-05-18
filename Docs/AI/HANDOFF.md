@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 19:58 CST | Codex
+Done: implemented P1 Application detail via `mackup show <application>` with CLI-output parser, detail view model, selected application detail pane, and tests for parser/view model behavior.
+Changed: `Applications/MackupApplicationDetail.swift`, `Applications/MackupApplicationDetailParser.swift`, `Features/Applications/ApplicationDetailView.swift`, `Features/Applications/ApplicationDetailViewModel.swift`, `Features/Applications/ApplicationsListView.swift`, `Features/Applications/ApplicationsListViewModel.swift`, `MackupCLI/MackupDetectionStatusDescription.swift`, `Support/LocalizationKey.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/ApplicationDetailViewModelTests.swift`, `YAMGTests/MackupApplicationDetailParserTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `plutil -lint YAMG.xcodeproj/project.pbxproj`; `jq empty Resources/Localizable.xcstrings`; `xcodebuild build -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS'`. Attempted `xcodebuild test ... -only-testing:YAMGTests` and narrower detail tests; both compiled but hung at XCTest host startup in this shell, so they were interrupted rather than reported as passing.
+Next: implement P1 Storage editor UI.
+Blocked: XCTest host startup hangs in current shell environment after app launch; build succeeds.
+
 2026-05-18 19:46 CST | Codex
 Done: implemented P1 Applications list using `mackup list` through `MackupCommandRunning`, with output parsing, loading/empty/error states, and Applications sidebar content.
 Changed: `Applications/MackupApplication.swift`, `Applications/MackupApplicationListParser.swift`, `Features/Applications/ApplicationsListView.swift`, `Features/Applications/ApplicationsListViewModel.swift`, `Features/RootShellView.swift`, `Support/LocalizationKey.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/ApplicationsListViewModelTests.swift`, `YAMGTests/MackupApplicationListParserTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.

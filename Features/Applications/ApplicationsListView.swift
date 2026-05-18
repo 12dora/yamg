@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ApplicationsListView: View {
     @StateObject private var viewModel: ApplicationsListViewModel
+    @State private var selectedApplicationName: String?
 
     @MainActor
     init() {
@@ -30,7 +31,15 @@ struct ApplicationsListView: View {
                 .disabled(viewModel.state == .loading)
             }
 
-            content
+            HStack(alignment: .top, spacing: 16) {
+                content
+                    .frame(minWidth: 260, idealWidth: 320, maxWidth: 360)
+
+                Divider()
+
+                ApplicationDetailView(selectedApplicationName: selectedApplicationName)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
         }
         .task {
             if viewModel.state == .idle {
@@ -49,11 +58,27 @@ struct ApplicationsListView: View {
             ProgressView()
                 .controlSize(.small)
         case .loaded(let applications):
-            List(applications) { application in
+            List(applications, selection: $selectedApplicationName) { application in
                 Text(application.name)
                     .textSelection(.enabled)
+                    .tag(application.name)
             }
             .frame(minHeight: 320)
+            .onAppear {
+                if selectedApplicationName == nil {
+                    selectedApplicationName = applications.first?.name
+                }
+            }
+            .onChange(of: applications) { newApplications in
+                guard let selectedApplicationName else {
+                    self.selectedApplicationName = newApplications.first?.name
+                    return
+                }
+
+                if !newApplications.contains(where: { $0.name == selectedApplicationName }) {
+                    self.selectedApplicationName = newApplications.first?.name
+                }
+            }
         case .empty:
             unavailableView(
                 title: String(localized: "applications.empty"),

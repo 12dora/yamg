@@ -1,0 +1,97 @@
+import SwiftUI
+
+struct ApplicationDetailView: View {
+    let selectedApplicationName: String?
+    @StateObject private var viewModel: ApplicationDetailViewModel
+
+    @MainActor
+    init(selectedApplicationName: String?) {
+        self.selectedApplicationName = selectedApplicationName
+        _viewModel = StateObject(wrappedValue: ApplicationDetailViewModel())
+    }
+
+    init(selectedApplicationName: String?, viewModel: ApplicationDetailViewModel) {
+        self.selectedApplicationName = selectedApplicationName
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
+    var body: some View {
+        Group {
+            if let selectedApplicationName {
+                detailContent
+                    .task(id: selectedApplicationName) {
+                        await viewModel.load(applicationName: selectedApplicationName)
+                    }
+            } else {
+                unavailableView(
+                    title: String(localized: "application.detail.placeholder"),
+                    systemImage: "sidebar.right",
+                    detail: String(localized: "application.detail.placeholder.detail")
+                )
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var detailContent: some View {
+        switch viewModel.state {
+        case .idle:
+            EmptyView()
+        case .loading(let applicationName):
+            VStack(alignment: .leading, spacing: 12) {
+                Text(applicationName)
+                    .font(.title3.weight(.semibold))
+                ProgressView()
+                    .controlSize(.small)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        case .loaded(let detail):
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(detail.displayName)
+                        .font(.title3.weight(.semibold))
+                    Text(detail.applicationName)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+
+                Divider()
+
+                Text(String(localized: "application.detail.configuration_files"))
+                    .font(.headline)
+
+                if detail.configurationFiles.isEmpty {
+                    Text(String(localized: "application.detail.no_files"))
+                        .foregroundStyle(.secondary)
+                } else {
+                    List(detail.configurationFiles, id: \.self) { file in
+                        Text(file)
+                            .textSelection(.enabled)
+                    }
+                    .frame(minHeight: 240)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        case .failed(let applicationName, let message):
+            unavailableView(
+                title: applicationName,
+                systemImage: "exclamationmark.triangle",
+                detail: message
+            )
+        }
+    }
+
+    private func unavailableView(title: String, systemImage: String, detail: String) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .font(.largeTitle)
+                .foregroundStyle(.secondary)
+            Text(title)
+                .font(.headline)
+            Text(detail)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, minHeight: 240)
+    }
+}

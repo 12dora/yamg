@@ -36,6 +36,13 @@
 		5D1A00000000000000000094 /* ApplicationsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000009B /* ApplicationsListViewModel.swift */; };
 		5D1A00000000000000000095 /* MackupApplicationListParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000009C /* MackupApplicationListParserTests.swift */; };
 		5D1A00000000000000000096 /* ApplicationsListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000009D /* ApplicationsListViewModelTests.swift */; };
+		5D1A0000000000000000009F /* MackupApplicationDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000A6 /* MackupApplicationDetail.swift */; };
+		5D1A000000000000000000A0 /* MackupApplicationDetailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000A7 /* MackupApplicationDetailParser.swift */; };
+		5D1A000000000000000000A1 /* MackupDetectionStatusDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000A8 /* MackupDetectionStatusDescription.swift */; };
+		5D1A000000000000000000A2 /* ApplicationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000A9 /* ApplicationDetailView.swift */; };
+		5D1A000000000000000000A3 /* ApplicationDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000AA /* ApplicationDetailViewModel.swift */; };
+		5D1A000000000000000000A4 /* MackupApplicationDetailParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000AB /* MackupApplicationDetailParserTests.swift */; };
+		5D1A000000000000000000A5 /* ApplicationDetailViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000AC /* ApplicationDetailViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +77,13 @@
 		5D1A0000000000000000009B /* ApplicationsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationsListViewModel.swift; sourceTree = "<group>"; };
 		5D1A0000000000000000009C /* MackupApplicationListParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupApplicationListParserTests.swift; sourceTree = "<group>"; };
 		5D1A0000000000000000009D /* ApplicationsListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationsListViewModelTests.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000A6 /* MackupApplicationDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupApplicationDetail.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000A7 /* MackupApplicationDetailParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupApplicationDetailParser.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000A8 /* MackupDetectionStatusDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupDetectionStatusDescription.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000A9 /* ApplicationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationDetailView.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000AA /* ApplicationDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationDetailViewModel.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000AB /* MackupApplicationDetailParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupApplicationDetailParserTests.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000AC /* ApplicationDetailViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationDetailViewModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,9 +155,11 @@
 			isa = PBXGroup;
 			children = (
 				5D1A00000000000000000023 /* AppSectionTests.swift */,
+				5D1A000000000000000000AC /* ApplicationDetailViewModelTests.swift */,
 				5D1A0000000000000000009D /* ApplicationsListViewModelTests.swift */,
 				5D1A0000000000000000008F /* DashboardViewModelTests.swift */,
 				5D1A0000000000000000002B /* MackupCommandTests.swift */,
+				5D1A000000000000000000AB /* MackupApplicationDetailParserTests.swift */,
 				5D1A0000000000000000009C /* MackupApplicationListParserTests.swift */,
 				5D1A00000000000000000085 /* MackupConfigTests.swift */,
 				5D1A0000000000000000002F /* MackupDetectorTests.swift */,
@@ -182,6 +198,7 @@
 			children = (
 				5D1A0000000000000000002A /* MackupCommand.swift */,
 				5D1A0000000000000000002E /* MackupDetector.swift */,
+				5D1A000000000000000000A8 /* MackupDetectionStatusDescription.swift */,
 				5D1A0000000000000000002C /* MackupProcessRunner.swift */,
 			);
 			path = MackupCLI;
@@ -232,6 +249,8 @@
 		5D1A00000000000000000097 /* Applications */ = {
 			isa = PBXGroup;
 			children = (
+				5D1A000000000000000000A6 /* MackupApplicationDetail.swift */,
+				5D1A000000000000000000A7 /* MackupApplicationDetailParser.swift */,
 				5D1A00000000000000000098 /* MackupApplication.swift */,
 				5D1A00000000000000000099 /* MackupApplicationListParser.swift */,
 			);
@@ -241,6 +260,8 @@
 		5D1A0000000000000000009E /* Applications */ = {
 			isa = PBXGroup;
 			children = (
+				5D1A000000000000000000A9 /* ApplicationDetailView.swift */,
+				5D1A000000000000000000AA /* ApplicationDetailViewModel.swift */,
 				5D1A0000000000000000009A /* ApplicationsListView.swift */,
 				5D1A0000000000000000009B /* ApplicationsListViewModel.swift */,
 			);
@@ -351,6 +372,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5D1A00000000000000000070 /* YAMGApp.swift in Sources */,
+				5D1A000000000000000000A2 /* ApplicationDetailView.swift in Sources */,
+				5D1A000000000000000000A3 /* ApplicationDetailViewModel.swift in Sources */,
 				5D1A00000000000000000071 /* AppSection.swift in Sources */,
 				5D1A00000000000000000093 /* ApplicationsListView.swift in Sources */,
 				5D1A00000000000000000094 /* ApplicationsListViewModel.swift in Sources */,
@@ -359,10 +382,13 @@
 				5D1A00000000000000000086 /* LocalizationKey.swift in Sources */,
 				5D1A00000000000000000072 /* RootShellView.swift in Sources */,
 				5D1A00000000000000000091 /* MackupApplication.swift in Sources */,
+				5D1A0000000000000000009F /* MackupApplicationDetail.swift in Sources */,
+				5D1A000000000000000000A0 /* MackupApplicationDetailParser.swift in Sources */,
 				5D1A00000000000000000092 /* MackupApplicationListParser.swift in Sources */,
 				5D1A00000000000000000078 /* MackupCommand.swift in Sources */,
 				5D1A00000000000000000082 /* MackupConfig.swift in Sources */,
 				5D1A0000000000000000007C /* MackupDetector.swift in Sources */,
+				5D1A000000000000000000A1 /* MackupDetectionStatusDescription.swift in Sources */,
 				5D1A0000000000000000007A /* MackupProcessRunner.swift in Sources */,
 				5D1A0000000000000000007E /* ProcessLogStore.swift in Sources */,
 			);
@@ -381,9 +407,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				5D1A00000000000000000074 /* AppSectionTests.swift in Sources */,
+				5D1A000000000000000000A5 /* ApplicationDetailViewModelTests.swift in Sources */,
 				5D1A00000000000000000096 /* ApplicationsListViewModelTests.swift in Sources */,
 				5D1A0000000000000000008C /* DashboardViewModelTests.swift in Sources */,
 				5D1A00000000000000000079 /* MackupCommandTests.swift in Sources */,
+				5D1A000000000000000000A4 /* MackupApplicationDetailParserTests.swift in Sources */,
 				5D1A00000000000000000095 /* MackupApplicationListParserTests.swift in Sources */,
 				5D1A00000000000000000083 /* MackupConfigTests.swift in Sources */,
 				5D1A0000000000000000007D /* MackupDetectorTests.swift in Sources */,

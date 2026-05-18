@@ -1,34 +1,33 @@
 import Foundation
 
 @MainActor
-final class ApplicationsListViewModel: ObservableObject {
+final class ApplicationDetailViewModel: ObservableObject {
     enum State: Equatable {
         case idle
-        case loading
-        case loaded([MackupApplication])
-        case empty
-        case failed(String)
+        case loading(String)
+        case loaded(MackupApplicationDetail)
+        case failed(applicationName: String, message: String)
     }
 
     @Published private(set) var state: State = .idle
 
     private let injectedRunner: MackupCommandRunning?
     private let detector: MackupExecutableResolving
-    private let parser: MackupApplicationListParser
+    private let parser: MackupApplicationDetailParser
     private let preferredCLIPath: URL?
     private let makeRunner: (URL) -> MackupCommandRunning
 
     init() {
         self.injectedRunner = nil
         self.detector = MackupDetector()
-        self.parser = MackupApplicationListParser()
+        self.parser = MackupApplicationDetailParser()
         self.preferredCLIPath = nil
         self.makeRunner = { MackupProcessRunner(executableURL: $0) }
     }
 
     init(
         runner: MackupCommandRunning,
-        parser: MackupApplicationListParser = MackupApplicationListParser()
+        parser: MackupApplicationDetailParser = MackupApplicationDetailParser()
     ) {
         self.injectedRunner = runner
         self.detector = MackupDetector()
@@ -37,8 +36,8 @@ final class ApplicationsListViewModel: ObservableObject {
         self.makeRunner = { MackupProcessRunner(executableURL: $0) }
     }
 
-    func refresh() async {
-        state = .loading
+    func load(applicationName: String) async {
+        state = .loading(applicationName)
 
         var stdout = ""
         var stderr = ""
@@ -46,8 +45,9 @@ final class ApplicationsListViewModel: ObservableObject {
 
         do {
             let runner = try await resolvedRunner()
+            let command = try MackupCommand.show(application: applicationName)
 
-            for try await event in runner.run(MackupCommand.list()) {
+            for try await event in runner.run(command) {
                 switch event {
                 case .output(let output, .stdout):
                     stdout += output
@@ -59,16 +59,17 @@ final class ApplicationsListViewModel: ObservableObject {
             }
 
             if let exitResult, exitResult.exitCode != 0 {
-                state = .failed(errorMessage(stdout: stdout, stderr: stderr, exitCode: exitResult.exitCode))
+                state = .failed(
+                    applicationName: applicationName,
+                    message: errorMessage(stdout: stdout, stderr: stderr, exitCode: exitResult.exitCode)
+                )
                 return
             }
 
-            let applications = try parser.parse(stdout)
-            state = applications.isEmpty ? .empty : .loaded(applications)
-        } catch MackupApplicationListParserError.noApplicationsFound {
-            state = .empty
+            let detail = try parser.parse(stdout, applicationName: applicationName)
+            state = .loaded(detail)
         } catch {
-            state = .failed(error.localizedDescription)
+            state = .failed(applicationName: applicationName, message: error.localizedDescription)
         }
     }
 
@@ -79,7 +80,7 @@ final class ApplicationsListViewModel: ObservableObject {
 
         let report = await detector.detect(preferredPath: preferredCLIPath)
         guard report.status == .found, let executableURL = report.executableURL else {
-            throw ApplicationsListError.mackupUnavailable(report.status.userFacingDescription)
+            throw ApplicationDetailError.mackupUnavailable(report.status.userFacingDescription)
         }
 
         return makeRunner(executableURL)
@@ -94,11 +95,11 @@ final class ApplicationsListViewModel: ObservableObject {
             return output
         }
 
-        return "mackup list exited with status \(exitCode)."
+        return "mackup show exited with status \(exitCode)."
     }
 }
 
-private enum ApplicationsListError: LocalizedError, Equatable {
+private enum ApplicationDetailError: LocalizedError, Equatable {
     case mackupUnavailable(String)
 
     var errorDescription: String? {
