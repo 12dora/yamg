@@ -8,8 +8,8 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Create low-token AI handoff docs.
 - [x] Create reusable coding AI start prompt.
 - [x] Set YAMG version to upstream local Mackup version `0.10.3`.
-- [ ] Create SwiftUI macOS Xcode project.
-- [ ] Add app shell: Sidebar, Dashboard, Applications, Storage, Logs, Preferences.
+- [x] Create SwiftUI macOS Xcode project.
+- [x] Add app shell: Sidebar, Dashboard, Applications, Storage, Logs, Preferences.
 - [ ] Implement `MackupCommand` and argv builder.
 - [ ] Implement `MackupProcessRunner` with streamed stdout/stderr.
 - [ ] Implement `MackupDetector` and version parser.
