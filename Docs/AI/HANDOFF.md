@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 19:18 CST | Codex
+Done: implemented `MackupDetector`, `MackupVersion`, and version parser; detector checks preferred path before default candidate paths and validates via `mackup --version` through the runner abstraction.
+Changed: `MackupCLI/MackupDetector.swift`, `YAMGTests/MackupDetectorTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests`.
+Next: implement `ProcessLogStore`.
+Blocked: none.
+
 2026-05-18 19:16 CST | Codex
 Done: implemented `MackupProcessRunner` with `Process.executableURL`, safe argument passing, streamed stdout/stderr events, exit result events, cancellation cleanup, and missing executable validation.
 Changed: `MackupCLI/MackupProcessRunner.swift`, `YAMGTests/MackupProcessRunnerTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.

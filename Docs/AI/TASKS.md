@@ -12,7 +12,7 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Add app shell: Sidebar, Dashboard, Applications, Storage, Logs, Preferences.
 - [x] Implement `MackupCommand` and argv builder.
 - [x] Implement `MackupProcessRunner` with streamed stdout/stderr.
-- [ ] Implement `MackupDetector` and version parser.
+- [x] Implement `MackupDetector` and version parser.
 - [ ] Implement `ProcessLogStore`.
 - [ ] Implement `.mackup.cfg` read/write.
 - [ ] Add `Localizable.xcstrings` zh-Hans/en baseline.
