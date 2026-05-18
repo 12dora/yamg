@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 19:24 CST | Codex
+Done: implemented `.mackup.cfg` read/write for Mackup-supported fields only: `[storage]`, `[applications_to_sync]`, and `[applications_to_ignore]`; preserves unknown sections and storage keys without writing YAMG metadata.
+Changed: `Config/MackupConfig.swift`, `YAMGTests/MackupConfigTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests`.
+Next: add `Localizable.xcstrings` zh-Hans/en baseline.
+Blocked: none.
+
 2026-05-18 19:21 CST | Codex
 Done: implemented actor-backed in-memory `ProcessLogStore` with run records, ordered process event entries, finish/fail status updates, and missing-run errors.
 Changed: `Logging/ProcessLogStore.swift`, `YAMGTests/ProcessLogStoreTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
