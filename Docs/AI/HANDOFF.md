@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 19:21 CST | Codex
+Done: implemented actor-backed in-memory `ProcessLogStore` with run records, ordered process event entries, finish/fail status updates, and missing-run errors.
+Changed: `Logging/ProcessLogStore.swift`, `YAMGTests/ProcessLogStoreTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests`.
+Next: implement `.mackup.cfg` read/write.
+Blocked: none.
+
 2026-05-18 19:18 CST | Codex
 Done: implemented `MackupDetector`, `MackupVersion`, and version parser; detector checks preferred path before default candidate paths and validates via `mackup --version` through the runner abstraction.
 Changed: `MackupCLI/MackupDetector.swift`, `YAMGTests/MackupDetectorTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.

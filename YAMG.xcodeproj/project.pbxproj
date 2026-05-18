@@ -21,6 +21,8 @@
 		5D1A0000000000000000007B /* MackupProcessRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000002D /* MackupProcessRunnerTests.swift */; };
 		5D1A0000000000000000007C /* MackupDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000002E /* MackupDetector.swift */; };
 		5D1A0000000000000000007D /* MackupDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A0000000000000000002F /* MackupDetectorTests.swift */; };
+		5D1A0000000000000000007E /* ProcessLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000080 /* ProcessLogStore.swift */; };
+		5D1A0000000000000000007F /* ProcessLogStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A00000000000000000081 /* ProcessLogStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +42,8 @@
 		5D1A0000000000000000002D /* MackupProcessRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupProcessRunnerTests.swift; sourceTree = "<group>"; };
 		5D1A0000000000000000002E /* MackupDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupDetector.swift; sourceTree = "<group>"; };
 		5D1A0000000000000000002F /* MackupDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupDetectorTests.swift; sourceTree = "<group>"; };
+		5D1A00000000000000000080 /* ProcessLogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessLogStore.swift; sourceTree = "<group>"; };
+		5D1A00000000000000000081 /* ProcessLogStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessLogStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +115,7 @@
 				5D1A0000000000000000002B /* MackupCommandTests.swift */,
 				5D1A0000000000000000002F /* MackupDetectorTests.swift */,
 				5D1A0000000000000000002D /* MackupProcessRunnerTests.swift */,
+				5D1A00000000000000000081 /* ProcessLogStoreTests.swift */,
 			);
 			path = YAMGTests;
 			sourceTree = "<group>";
@@ -157,6 +162,7 @@
 		5D1A0000000000000000001A /* Logging */ = {
 			isa = PBXGroup;
 			children = (
+				5D1A00000000000000000080 /* ProcessLogStore.swift */,
 			);
 			path = Logging;
 			sourceTree = "<group>";
@@ -286,6 +292,7 @@
 				5D1A00000000000000000078 /* MackupCommand.swift in Sources */,
 				5D1A0000000000000000007C /* MackupDetector.swift in Sources */,
 				5D1A0000000000000000007A /* MackupProcessRunner.swift in Sources */,
+				5D1A0000000000000000007E /* ProcessLogStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,6 +304,7 @@
 				5D1A00000000000000000079 /* MackupCommandTests.swift in Sources */,
 				5D1A0000000000000000007D /* MackupDetectorTests.swift in Sources */,
 				5D1A0000000000000000007B /* MackupProcessRunnerTests.swift in Sources */,
+				5D1A0000000000000000007F /* ProcessLogStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
