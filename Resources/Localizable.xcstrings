@@ -193,6 +193,22 @@
         }
       }
     },
+    "action.reset": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置"
+          }
+        }
+      }
+    },
     "action.cancel": {
       "localizations": {
         "en": {
@@ -285,6 +301,86 @@
           "stringUnit": {
             "state": "translated",
             "value": "安装 Mackup"
+          }
+        }
+      }
+    },
+    "preferences.cli_path": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mackup CLI path"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mackup CLI 路径"
+          }
+        }
+      }
+    },
+    "preferences.cli_path.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional absolute path to the mackup executable. Leave empty to auto-detect."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可选的 mackup 可执行文件绝对路径。留空则自动检测。"
+          }
+        }
+      }
+    },
+    "preferences.config_path": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mackup config path"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mackup 配置路径"
+          }
+        }
+      }
+    },
+    "preferences.config_path.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional path to .mackup.cfg. YAMG stores this preference in UserDefaults, not in the config file."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可选的 .mackup.cfg 路径。YAMG 将该偏好保存到 UserDefaults，不写入配置文件。"
+          }
+        }
+      }
+    },
+    "preferences.saved": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferences saved"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "偏好设置已保存"
           }
         }
       }

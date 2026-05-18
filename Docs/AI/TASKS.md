@@ -28,5 +28,5 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 ## P2
 
 - [x] Homebrew/pipx install entry.
-- [ ] Preferences for CLI/config path.
+- [x] Preferences for CLI/config path.
 - [ ] Link Mode advanced page.

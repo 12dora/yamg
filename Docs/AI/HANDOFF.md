@@ -111,3 +111,10 @@ Changed: Features/Dashboard/MackupInstallGuide.swift, Features/Dashboard/Dashboa
 Tests: plutil -lint YAMG.xcodeproj/project.pbxproj; jq empty Resources/Localizable.xcstrings; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/DashboardViewModelTests.
 Next: implement P2 Preferences for CLI/config path.
 Blocked: none.
+
+2026-05-18 22:29 CST | Codex
+Done: implemented Preferences for Mackup CLI/config paths using UserDefaults; wired preferred paths into Dashboard detection, Applications list/detail, Storage config editing, and backup/restore command config-file options without writing YAMG metadata to .mackup.cfg.
+Changed: App/YAMGApp.swift, Support/AppPreferences.swift, Support/LocalizationKey.swift, Features/Preferences/PreferencesView.swift, Features/Preferences/PreferencesViewModel.swift, Features/RootShellView.swift, Features/Dashboard/DashboardView.swift, Features/Dashboard/DashboardViewModel.swift, Features/Applications/ApplicationsListView.swift, Features/Applications/ApplicationsListViewModel.swift, Features/Applications/ApplicationDetailView.swift, Features/Applications/ApplicationDetailViewModel.swift, Features/Storage/StorageView.swift, Features/Operations/OperationFlowView.swift, Resources/Localizable.xcstrings, YAMGTests/AppPreferencesTests.swift, YAMGTests/PreferencesViewModelTests.swift, YAMGTests/StorageViewModelTests.swift, YAMGTests/OperationFlowViewModelTests.swift, YAMG.xcodeproj/project.pbxproj, Docs/AI/TASKS.md, Docs/AI/HANDOFF.md.
+Tests: plutil -lint YAMG.xcodeproj/project.pbxproj; jq empty Resources/Localizable.xcstrings; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/AppPreferencesTests -only-testing:YAMGTests/PreferencesViewModelTests -only-testing:YAMGTests/StorageViewModelTests -only-testing:YAMGTests/OperationFlowViewModelTests.
+Next: implement P2 Link Mode advanced page.
+Blocked: none.

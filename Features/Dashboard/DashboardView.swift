@@ -4,8 +4,14 @@ struct DashboardView: View {
     @StateObject private var viewModel: DashboardViewModel
 
     @MainActor
-    init() {
-        _viewModel = StateObject(wrappedValue: DashboardViewModel())
+    init(preferences: AppPreferencesStoring = AppPreferences()) {
+        _viewModel = StateObject(
+            wrappedValue: DashboardViewModel(
+                preferredCLIPath: preferences.preferredCLIPath,
+                configPath: preferences.configFilePath
+                    ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".mackup.cfg")
+            )
+        )
     }
 
     init(viewModel: DashboardViewModel) {
@@ -45,7 +51,12 @@ struct DashboardView: View {
                     .frame(maxWidth: 720)
             }
 
-            OperationFlowView()
+            OperationFlowView(
+                viewModel: OperationFlowViewModel(
+                    preferredCLIPath: viewModel.preferredCLIPath,
+                    configFilePath: viewModel.configPath
+                )
+            )
 
             Spacer()
         }

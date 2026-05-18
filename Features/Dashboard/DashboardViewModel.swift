@@ -24,8 +24,8 @@ final class DashboardViewModel: ObservableObject {
 
     private let detector: MackupExecutableResolving
     private let fileManager: FileManager
-    private let preferredCLIPath: URL?
-    private let configPath: URL
+    let preferredCLIPath: URL?
+    let configPath: URL
 
     init(
         detector: MackupExecutableResolving = MackupDetector(),

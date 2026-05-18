@@ -1,7 +1,12 @@
 import SwiftUI
 
 struct RootShellView: View {
+    @ObservedObject private var preferences: AppPreferences
     @State private var selection: AppSection? = .dashboard
+
+    init(preferences: AppPreferences = AppPreferences()) {
+        self.preferences = preferences
+    }
 
     var body: some View {
         NavigationView {
@@ -24,21 +29,28 @@ struct RootShellView: View {
         if section == .dashboard {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
-                DashboardView()
+                DashboardView(preferences: preferences)
             }
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else if section == .applications {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
-                ApplicationsListView()
+                ApplicationsListView(preferences: preferences)
             }
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else if section == .storage {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
-                StorageView()
+                StorageView(preferences: preferences)
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        } else if section == .preferences {
+            VStack(alignment: .leading, spacing: 16) {
+                sectionHeader(section)
+                PreferencesView(preferences: preferences)
             }
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

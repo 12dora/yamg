@@ -18,22 +18,23 @@ final class ApplicationsListViewModel: ObservableObject {
     private let preferredCLIPath: URL?
     private let makeRunner: (URL) -> MackupCommandRunning
 
-    init() {
+    init(preferredCLIPath: URL? = nil) {
         self.injectedRunner = nil
         self.detector = MackupDetector()
         self.parser = MackupApplicationListParser()
-        self.preferredCLIPath = nil
+        self.preferredCLIPath = preferredCLIPath
         self.makeRunner = { MackupProcessRunner(executableURL: $0) }
     }
 
     init(
         runner: MackupCommandRunning,
-        parser: MackupApplicationListParser = MackupApplicationListParser()
+        parser: MackupApplicationListParser = MackupApplicationListParser(),
+        preferredCLIPath: URL? = nil
     ) {
         self.injectedRunner = runner
         self.detector = MackupDetector()
         self.parser = parser
-        self.preferredCLIPath = nil
+        self.preferredCLIPath = preferredCLIPath
         self.makeRunner = { MackupProcessRunner(executableURL: $0) }
     }
 

@@ -4,8 +4,10 @@ struct StorageView: View {
     @StateObject private var viewModel: StorageViewModel
 
     @MainActor
-    init() {
-        _viewModel = StateObject(wrappedValue: StorageViewModel())
+    init(preferences: AppPreferencesStoring = AppPreferences()) {
+        _viewModel = StateObject(
+            wrappedValue: StorageViewModel(configFilePath: preferences.configFilePath)
+        )
     }
 
     init(viewModel: StorageViewModel) {

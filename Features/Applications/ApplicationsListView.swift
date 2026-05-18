@@ -3,13 +3,18 @@ import SwiftUI
 struct ApplicationsListView: View {
     @StateObject private var viewModel: ApplicationsListViewModel
     @State private var selectedApplicationName: String?
+    private let preferences: AppPreferencesStoring
 
     @MainActor
-    init() {
-        _viewModel = StateObject(wrappedValue: ApplicationsListViewModel())
+    init(preferences: AppPreferencesStoring = AppPreferences()) {
+        self.preferences = preferences
+        _viewModel = StateObject(
+            wrappedValue: ApplicationsListViewModel(preferredCLIPath: preferences.preferredCLIPath)
+        )
     }
 
     init(viewModel: ApplicationsListViewModel) {
+        self.preferences = AppPreferences()
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
@@ -37,7 +42,10 @@ struct ApplicationsListView: View {
 
                 Divider()
 
-                ApplicationDetailView(selectedApplicationName: selectedApplicationName)
+                ApplicationDetailView(
+                    selectedApplicationName: selectedApplicationName,
+                    preferredCLIPath: preferences.preferredCLIPath
+                )
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }

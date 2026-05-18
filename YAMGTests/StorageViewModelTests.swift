@@ -23,6 +23,25 @@ final class StorageViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.engine, .fileSystem)
         XCTAssertEqual(viewModel.path, "/Sync")
         XCTAssertEqual(viewModel.directory, "Mackup")
+        XCTAssertEqual(editor.loadedPath, nil)
+    }
+
+    func testLoadUsesPreferredConfigPath() {
+        let preferredConfigPath = URL(fileURLWithPath: "/tmp/custom/.mackup.cfg")
+        let editor = FakeMackupConfigEditor(
+            config: MackupConfig(
+                fileURL: preferredConfigPath,
+                storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                applicationsToSync: [],
+                applicationsToIgnore: [],
+                originalText: ""
+            )
+        )
+        let viewModel = StorageViewModel(editor: editor, configFilePath: preferredConfigPath)
+
+        viewModel.load()
+
+        XCTAssertEqual(editor.loadedPath, preferredConfigPath)
     }
 
     func testSaveWritesOnlyStorageFieldsOnLoadedConfig() throws {
@@ -68,6 +87,7 @@ private final class FakeMackupConfigEditor: MackupConfigEditing {
     private let config: MackupConfig?
     private let error: Error?
     private(set) var savedConfig: MackupConfig?
+    private(set) var loadedPath: URL?
 
     init(config: MackupConfig) {
         self.config = config
@@ -80,6 +100,7 @@ private final class FakeMackupConfigEditor: MackupConfigEditing {
     }
 
     func load(path: URL?) throws -> MackupConfig {
+        loadedPath = path
         if let error {
             throw error
         }

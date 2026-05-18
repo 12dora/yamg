@@ -47,6 +47,22 @@ final class OperationFlowViewModelTests: XCTestCase {
         XCTAssertEqual(runner.commands, [.restore()])
     }
 
+    func testOperationUsesPreferredConfigPathInCommand() async {
+        let runner = OperationFakeRunner(
+            events: [.finished(ProcessResult(exitCode: 0, terminationReason: .exit))]
+        )
+        let configPath = URL(fileURLWithPath: "/tmp/yamg/.mackup.cfg")
+        let viewModel = OperationFlowViewModel(runner: runner, configFilePath: configPath)
+
+        viewModel.request(.backup)
+        await viewModel.confirm()
+
+        XCTAssertEqual(
+            runner.commands,
+            [.backup(options: .init(dryRun: true, configFile: configPath))]
+        )
+    }
+
     func testCancelConfirmationDoesNotRunCommand() {
         let runner = OperationFakeRunner(events: [])
         let viewModel = OperationFlowViewModel(runner: runner)

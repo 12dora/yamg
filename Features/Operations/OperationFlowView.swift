@@ -4,8 +4,13 @@ struct OperationFlowView: View {
     @StateObject private var viewModel: OperationFlowViewModel
 
     @MainActor
-    init() {
-        _viewModel = StateObject(wrappedValue: OperationFlowViewModel())
+    init(preferences: AppPreferencesStoring = AppPreferences()) {
+        _viewModel = StateObject(
+            wrappedValue: OperationFlowViewModel(
+                preferredCLIPath: preferences.preferredCLIPath,
+                configFilePath: preferences.configFilePath
+            )
+        )
     }
 
     init(viewModel: OperationFlowViewModel) {

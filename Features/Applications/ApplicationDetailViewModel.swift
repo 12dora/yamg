@@ -17,22 +17,23 @@ final class ApplicationDetailViewModel: ObservableObject {
     private let preferredCLIPath: URL?
     private let makeRunner: (URL) -> MackupCommandRunning
 
-    init() {
+    init(preferredCLIPath: URL? = nil) {
         self.injectedRunner = nil
         self.detector = MackupDetector()
         self.parser = MackupApplicationDetailParser()
-        self.preferredCLIPath = nil
+        self.preferredCLIPath = preferredCLIPath
         self.makeRunner = { MackupProcessRunner(executableURL: $0) }
     }
 
     init(
         runner: MackupCommandRunning,
-        parser: MackupApplicationDetailParser = MackupApplicationDetailParser()
+        parser: MackupApplicationDetailParser = MackupApplicationDetailParser(),
+        preferredCLIPath: URL? = nil
     ) {
         self.injectedRunner = runner
         self.detector = MackupDetector()
         self.parser = parser
-        self.preferredCLIPath = nil
+        self.preferredCLIPath = preferredCLIPath
         self.makeRunner = { MackupProcessRunner(executableURL: $0) }
     }
 

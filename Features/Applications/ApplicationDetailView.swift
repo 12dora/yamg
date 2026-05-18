@@ -5,9 +5,11 @@ struct ApplicationDetailView: View {
     @StateObject private var viewModel: ApplicationDetailViewModel
 
     @MainActor
-    init(selectedApplicationName: String?) {
+    init(selectedApplicationName: String?, preferredCLIPath: URL? = nil) {
         self.selectedApplicationName = selectedApplicationName
-        _viewModel = StateObject(wrappedValue: ApplicationDetailViewModel())
+        _viewModel = StateObject(
+            wrappedValue: ApplicationDetailViewModel(preferredCLIPath: preferredCLIPath)
+        )
     }
 
     init(selectedApplicationName: String?, viewModel: ApplicationDetailViewModel) {
