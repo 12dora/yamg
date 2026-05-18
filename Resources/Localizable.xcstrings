@@ -225,6 +225,22 @@
         }
       }
     },
+    "action.copy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制"
+          }
+        }
+      }
+    },
     "action.save": {
       "localizations": {
         "en": {
@@ -237,6 +253,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存"
+          }
+        }
+      }
+    },
+    "install.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YAMG does not install dependencies automatically. Copy one command into your terminal, then refresh detection."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YAMG 不会自动安装依赖。请复制其中一条命令到终端执行，然后刷新检测。"
+          }
+        }
+      }
+    },
+    "install.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install Mackup"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装 Mackup"
           }
         }
       }

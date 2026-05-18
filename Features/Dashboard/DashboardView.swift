@@ -38,6 +38,13 @@ struct DashboardView: View {
             Divider()
                 .frame(maxWidth: 720)
 
+            if viewModel.shouldShowInstallGuide {
+                installGuide
+
+                Divider()
+                    .frame(maxWidth: 720)
+            }
+
             OperationFlowView()
 
             Spacer()
@@ -69,6 +76,37 @@ struct DashboardView: View {
             }
             .disabled(viewModel.cliState == .checking)
         }
+    }
+
+    private var installGuide: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(String(localized: "install.title"))
+                .font(.headline)
+            Text(String(localized: "install.detail"))
+                .font(.callout)
+                .foregroundStyle(.secondary)
+
+            ForEach(viewModel.installGuide.options) { option in
+                HStack(spacing: 10) {
+                    Text(option.title)
+                        .font(.callout.weight(.medium))
+                        .frame(width: 88, alignment: .leading)
+
+                    Text(option.command)
+                        .font(.system(.callout, design: .monospaced))
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Button {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(option.command, forType: .string)
+                    } label: {
+                        Label(String(localized: "action.copy"), systemImage: "doc.on.doc")
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: 720, alignment: .leading)
     }
 
     private func statusRow(

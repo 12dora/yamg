@@ -63,6 +63,7 @@ final class DashboardViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.cliState, .unavailable)
         XCTAssertEqual(viewModel.configState, .missing(configPath))
+        XCTAssertTrue(viewModel.shouldShowInstallGuide)
     }
 
     func testRefreshReportsInvalidVersionOutput() async {
@@ -82,6 +83,25 @@ final class DashboardViewModelTests: XCTestCase {
         await viewModel.refresh()
 
         XCTAssertEqual(viewModel.cliState, .invalidVersion(path: executableURL, output: "Mackup unknown\n"))
+        XCTAssertFalse(viewModel.shouldShowInstallGuide)
+    }
+
+    func testInstallGuideOffersCopyableHomebrewAndPipxCommands() {
+        XCTAssertEqual(
+            MackupInstallGuide.mvp.options,
+            [
+                MackupInstallOption(
+                    id: "homebrew",
+                    title: "Homebrew",
+                    command: "brew install mackup"
+                ),
+                MackupInstallOption(
+                    id: "pipx",
+                    title: "pipx",
+                    command: "pipx install mackup"
+                )
+            ]
+        )
     }
 }
 

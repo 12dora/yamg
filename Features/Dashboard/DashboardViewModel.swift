@@ -20,6 +20,8 @@ final class DashboardViewModel: ObservableObject {
     @Published private(set) var cliState: CLIState = .unknown
     @Published private(set) var configState: ConfigState = .unknown
 
+    let installGuide: MackupInstallGuide
+
     private let detector: MackupExecutableResolving
     private let fileManager: FileManager
     private let preferredCLIPath: URL?
@@ -29,12 +31,14 @@ final class DashboardViewModel: ObservableObject {
         detector: MackupExecutableResolving = MackupDetector(),
         fileManager: FileManager = .default,
         preferredCLIPath: URL? = nil,
-        configPath: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".mackup.cfg")
+        configPath: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".mackup.cfg"),
+        installGuide: MackupInstallGuide = .mvp
     ) {
         self.detector = detector
         self.fileManager = fileManager
         self.preferredCLIPath = preferredCLIPath
         self.configPath = configPath
+        self.installGuide = installGuide
     }
 
     func refresh() async {
@@ -43,6 +47,15 @@ final class DashboardViewModel: ObservableObject {
 
         let report = await detector.detect(preferredPath: preferredCLIPath)
         cliState = cliState(from: report)
+    }
+
+    var shouldShowInstallGuide: Bool {
+        switch cliState {
+        case .unavailable:
+            return true
+        case .unknown, .checking, .available, .invalidVersion, .failed:
+            return false
+        }
     }
 
     private func configState(for url: URL) -> ConfigState {

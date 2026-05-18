@@ -104,3 +104,10 @@ Changed: `Docs/AI/CODING_PROMPT.md`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
 Tests: not applicable; documentation only.
 Next: paste `Docs/AI/CODING_PROMPT.md` into a coding AI before implementation work.
 Blocked: none.
+
+2026-05-18 22:23 CST | Codex
+Done: added P2 Homebrew/pipx install entry for missing Mackup CLI detection; Dashboard now shows copyable install commands without running package managers.
+Changed: Features/Dashboard/MackupInstallGuide.swift, Features/Dashboard/DashboardView.swift, Features/Dashboard/DashboardViewModel.swift, Support/LocalizationKey.swift, Resources/Localizable.xcstrings, YAMGTests/DashboardViewModelTests.swift, YAMG.xcodeproj/project.pbxproj, Docs/AI/TASKS.md, Docs/AI/HANDOFF.md.
+Tests: plutil -lint YAMG.xcodeproj/project.pbxproj; jq empty Resources/Localizable.xcstrings; xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests/DashboardViewModelTests.
+Next: implement P2 Preferences for CLI/config path.
+Blocked: none.

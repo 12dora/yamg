@@ -49,6 +49,7 @@
 		5D1A000000000000000000B4 /* OperationFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B8 /* OperationFlowView.swift */; };
 		5D1A000000000000000000B5 /* OperationFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B9 /* OperationFlowViewModel.swift */; };
 		5D1A000000000000000000B6 /* OperationFlowViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000BA /* OperationFlowViewModelTests.swift */; };
+		5D1A000000000000000000BB /* MackupInstallGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000BC /* MackupInstallGuide.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -96,6 +97,7 @@
 		5D1A000000000000000000B8 /* OperationFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationFlowView.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000B9 /* OperationFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationFlowViewModel.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000BA /* OperationFlowViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationFlowViewModelTests.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000BC /* MackupInstallGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MackupInstallGuide.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -258,6 +260,7 @@
 			children = (
 				5D1A0000000000000000008D /* DashboardView.swift */,
 				5D1A0000000000000000008E /* DashboardViewModel.swift */,
+				5D1A000000000000000000BC /* MackupInstallGuide.swift */,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
@@ -414,6 +417,7 @@
 				5D1A0000000000000000008A /* DashboardView.swift in Sources */,
 				5D1A0000000000000000008B /* DashboardViewModel.swift in Sources */,
 				5D1A00000000000000000086 /* LocalizationKey.swift in Sources */,
+				5D1A000000000000000000BB /* MackupInstallGuide.swift in Sources */,
 				5D1A00000000000000000072 /* RootShellView.swift in Sources */,
 				5D1A000000000000000000AD /* StorageView.swift in Sources */,
 				5D1A000000000000000000AE /* StorageViewModel.swift in Sources */,
