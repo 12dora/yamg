@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 19:10 CST | Codex
+Done: implemented `MackupCommand` and argv builder for the allowed Mackup CLI surface; validated version/ignored upstream state before coding.
+Changed: `MackupCLI/MackupCommand.swift`, `YAMGTests/MackupCommandTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS'`.
+Next: implement `MackupProcessRunner` with streamed stdout/stderr.
+Blocked: none.
+
 2026-05-18 Asia/Shanghai | Codex
 Done: initialized YAMG work docs/scaffold directories; set VERSION to 0.10.3; prepared Git ignore to exclude upstream `mackup/`.
 Changed: `.gitignore`, `README.md`, `VERSION`, `Docs/AI/*`, `Docs/Engineering/SCAFFOLD.md`.

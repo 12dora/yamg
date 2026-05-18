@@ -10,7 +10,7 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Set YAMG version to upstream local Mackup version `0.10.3`.
 - [x] Create SwiftUI macOS Xcode project.
 - [x] Add app shell: Sidebar, Dashboard, Applications, Storage, Logs, Preferences.
-- [ ] Implement `MackupCommand` and argv builder.
+- [x] Implement `MackupCommand` and argv builder.
 - [ ] Implement `MackupProcessRunner` with streamed stdout/stderr.
 - [ ] Implement `MackupDetector` and version parser.
 - [ ] Implement `ProcessLogStore`.
