@@ -10,6 +10,13 @@ struct ProcessResult: Equatable {
     let terminationReason: Process.TerminationReason
 }
 
+struct ProcessLaunchEnvironment: Equatable {
+    var environment: [String: String]
+    var temporaryDirectory: URL?
+
+    static let current = ProcessLaunchEnvironment(environment: ProcessInfo.processInfo.environment)
+}
+
 enum ProcessEvent: Equatable {
     case output(String, stream: ProcessOutputStream)
     case finished(ProcessResult)
@@ -26,10 +33,16 @@ protocol MackupCommandRunning {
 final class MackupProcessRunner: MackupCommandRunning {
     private let executableURL: URL
     private let fileManager: FileManager
+    private let launchEnvironment: ProcessLaunchEnvironment
 
-    init(executableURL: URL, fileManager: FileManager = .default) {
+    init(
+        executableURL: URL,
+        fileManager: FileManager = .default,
+        launchEnvironment: ProcessLaunchEnvironment = .current
+    ) {
         self.executableURL = executableURL
         self.fileManager = fileManager
+        self.launchEnvironment = launchEnvironment
     }
 
     func run(_ command: MackupCommand) -> AsyncThrowingStream<ProcessEvent, Error> {
@@ -46,6 +59,7 @@ final class MackupProcessRunner: MackupCommandRunning {
 
             process.executableURL = executableURL
             process.arguments = command.arguments
+            process.environment = launchEnvironment.environment
             process.standardOutput = stdoutPipe
             process.standardError = stderrPipe
 
@@ -75,6 +89,10 @@ final class MackupProcessRunner: MackupCommandRunning {
                 yieldOutput(stderrPipe.fileHandleForReading, .stderr)
 
                 queue.async {
+                    if let temporaryDirectory = self.launchEnvironment.temporaryDirectory {
+                        try? self.fileManager.removeItem(at: temporaryDirectory)
+                    }
+
                     continuation.yield(
                         .finished(
                             ProcessResult(
@@ -93,6 +111,10 @@ final class MackupProcessRunner: MackupCommandRunning {
 
                 if process.isRunning {
                     process.terminate()
+                }
+
+                if let temporaryDirectory = self.launchEnvironment.temporaryDirectory {
+                    try? self.fileManager.removeItem(at: temporaryDirectory)
                 }
             }
 

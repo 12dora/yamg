@@ -55,6 +55,36 @@ final class MackupProcessRunnerTests: XCTestCase {
         XCTAssertEqual(events.last, .finished(ProcessResult(exitCode: 0, terminationReason: .exit)))
     }
 
+    func testRunnerPassesLaunchEnvironmentAndCleansTemporaryDirectory() async throws {
+        let script = try makeExecutableScript(
+            """
+            #!/bin/sh
+            printf 'HOME=%s\\n' "$HOME"
+            """
+        )
+        let runnerTemporaryDirectory = temporaryDirectory
+            .appendingPathComponent("runner-home", isDirectory: true)
+        try FileManager.default.createDirectory(at: runnerTemporaryDirectory, withIntermediateDirectories: true)
+        let runner = MackupProcessRunner(
+            executableURL: script,
+            launchEnvironment: ProcessLaunchEnvironment(
+                environment: ["HOME": runnerTemporaryDirectory.path],
+                temporaryDirectory: runnerTemporaryDirectory
+            )
+        )
+
+        let events = try await collectEvents(from: runner.run(.list()))
+
+        XCTAssertTrue(events.contains(.output("HOME=\(runnerTemporaryDirectory.path)\n", stream: .stdout)))
+        XCTAssertEqual(events.last, .finished(ProcessResult(exitCode: 0, terminationReason: .exit)))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: runnerTemporaryDirectory.path))
+    }
+
+    func testCurrentLaunchEnvironmentIncludesProcessEnvironment() {
+        XCTAssertEqual(ProcessLaunchEnvironment.current.environment, ProcessInfo.processInfo.environment)
+        XCTAssertNil(ProcessLaunchEnvironment.current.temporaryDirectory)
+    }
+
     func testRunnerFailsForMissingExecutable() async {
         let runner = MackupProcessRunner(
             executableURL: temporaryDirectory.appendingPathComponent("missing-mackup")

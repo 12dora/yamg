@@ -20,14 +20,32 @@ struct MackupApplicationListParser {
 
     private func applicationName(from line: String) -> String? {
         let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmedLine.hasPrefix("-") else {
+
+        guard !trimmedLine.isEmpty,
+              !trimmedLine.localizedCaseInsensitiveContains("Supported applications"),
+              !trimmedLine.localizedCaseInsensitiveContains("applications supported"),
+              !trimmedLine.localizedCaseInsensitiveContains("Error:") else {
             return nil
         }
 
-        let name = trimmedLine
-            .dropFirst()
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let name: String
 
-        return name.isEmpty ? nil : name
+        if let first = trimmedLine.first, first == "-" || first == "*" {
+            name = trimmedLine
+                .dropFirst()
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            name = trimmedLine
+        }
+
+        guard isApplicationIdentifier(name) else {
+            return nil
+        }
+
+        return name
+    }
+
+    private func isApplicationIdentifier(_ value: String) -> Bool {
+        value.range(of: #"^[A-Za-z0-9][A-Za-z0-9._+-]*$"#, options: .regularExpression) != nil
     }
 }
