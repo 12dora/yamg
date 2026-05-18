@@ -18,48 +18,82 @@ struct LinkModeView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Label(String(localized: "link_mode.warning"), systemImage: "exclamationmark.triangle")
-                    .font(.headline)
-                    .foregroundStyle(.orange)
-                Text(String(localized: "link_mode.detail"))
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: 760, alignment: .leading)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label(String(localized: "link_mode.warning"), systemImage: "exclamationmark.triangle")
+                        .font(.headline)
+                        .foregroundStyle(.orange)
+                    Text(String(localized: "link_mode.detail"))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: 760, alignment: .leading)
 
-            Picker(String(localized: "link_mode.operation"), selection: $viewModel.selectedOperation) {
-                ForEach(LinkModeViewModel.Operation.allCases) { operation in
-                    Text(title(for: operation)).tag(operation)
+                guide
+
+                Picker(String(localized: "link_mode.operation"), selection: $viewModel.selectedOperation) {
+                    ForEach(LinkModeViewModel.Operation.allCases) { operation in
+                        Text(title(for: operation)).tag(operation)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 520)
+
+                Toggle(String(localized: "operations.verbose"), isOn: $viewModel.verbose)
+                Toggle(String(localized: "link_mode.acknowledge"), isOn: $viewModel.acknowledgedRisk)
+                    .toggleStyle(.checkbox)
+
+                Button {
+                    viewModel.requestSelectedOperation()
+                } label: {
+                    Label(String(localized: "link_mode.request"), systemImage: "link")
+                }
+                .disabled(!viewModel.acknowledgedRisk || isRunning)
+
+                confirmationView
+
+                if !viewModel.output.isEmpty {
+                    ScrollView {
+                        Text(viewModel.output)
+                            .font(.system(.callout, design: .monospaced))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxWidth: 760, minHeight: 120, maxHeight: 260)
                 }
             }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 520)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+        .animation(.easeInOut(duration: 0.18), value: viewModel.selectedOperation)
+        .animation(.easeInOut(duration: 0.18), value: viewModel.state)
+    }
 
-            Toggle(String(localized: "operations.verbose"), isOn: $viewModel.verbose)
-            Toggle(String(localized: "link_mode.acknowledge"), isOn: $viewModel.acknowledgedRisk)
-                .toggleStyle(.checkbox)
+    private var guide: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            guideRow(
+                title: String(localized: "link_mode.guide.install.title"),
+                detail: String(localized: "link_mode.guide.install.detail")
+            )
+            guideRow(
+                title: String(localized: "link_mode.guide.link.title"),
+                detail: String(localized: "link_mode.guide.link.detail")
+            )
+            guideRow(
+                title: String(localized: "link_mode.guide.uninstall.title"),
+                detail: String(localized: "link_mode.guide.uninstall.detail")
+            )
+        }
+        .frame(maxWidth: 760, alignment: .leading)
+    }
 
-            Button {
-                viewModel.requestSelectedOperation()
-            } label: {
-                Label(String(localized: "link_mode.request"), systemImage: "link")
-            }
-            .disabled(!viewModel.acknowledgedRisk || isRunning)
-
-            confirmationView
-
-            if !viewModel.output.isEmpty {
-                ScrollView {
-                    Text(viewModel.output)
-                        .font(.system(.callout, design: .monospaced))
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(maxWidth: 760, minHeight: 120, maxHeight: 260)
-            }
-
-            Spacer()
+    private func guideRow(title: String, detail: String) -> some View {
+        HStack(alignment: .top, spacing: 18) {
+            Text(title)
+                .font(.callout.weight(.semibold))
+                .frame(width: 120, alignment: .leading)
+            Text(detail)
+                .font(.callout)
+                .foregroundStyle(.secondary)
         }
     }
 

@@ -12,14 +12,7 @@ struct RootShellView: View {
         NavigationView {
             List {
                 ForEach(AppSection.allCases) { section in
-                    Button {
-                        selection = section
-                    } label: {
-                        Label(section.titleKey.localizedStringKey, systemImage: section.systemImageName)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.vertical, 4)
+                    sidebarRow(for: section)
                     .listRowBackground((selection ?? .dashboard) == section ? Color.accentColor.opacity(0.16) : Color.clear)
                     .accessibilityIdentifier("sidebar-\(section.rawValue)")
                 }
@@ -32,6 +25,15 @@ struct RootShellView: View {
         .frame(minWidth: 960, minHeight: 640)
     }
 
+    private func sidebarRow(for section: AppSection) -> some View {
+        Label(section.titleKey.localizedStringKey, systemImage: section.systemImageName)
+            .frame(maxWidth: .infinity, minHeight: 28, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                selection = section
+            }
+    }
+
     @ViewBuilder
     private var detailView: some View {
         let section = selection ?? .dashboard
@@ -41,35 +43,40 @@ struct RootShellView: View {
                 sectionHeader(section)
                 DashboardView(preferences: preferences)
             }
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else if section == .applications {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
                 ApplicationsListView(preferences: preferences)
             }
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else if section == .storage {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
                 StorageView(preferences: preferences)
             }
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else if section == .linkMode {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
                 LinkModeView(preferences: preferences)
             }
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else if section == .preferences {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
                 PreferencesView(preferences: preferences)
             }
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else {
             VStack(alignment: .leading, spacing: 16) {
@@ -77,7 +84,8 @@ struct RootShellView: View {
 
                 Spacer()
             }
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }

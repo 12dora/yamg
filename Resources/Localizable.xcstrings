@@ -737,6 +737,102 @@
         }
       }
     },
+    "link_mode.guide.install.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装"
+          }
+        }
+      }
+    },
+    "link_mode.guide.install.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runs mackup link install. Mackup moves local files into storage and replaces them with links."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 mackup link install。Mackup 会把本地文件移入存储并替换为链接。"
+          }
+        }
+      }
+    },
+    "link_mode.guide.link.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "链接"
+          }
+        }
+      }
+    },
+    "link_mode.guide.link.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runs mackup link. Mackup links local paths to files already present in storage."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 mackup link。Mackup 会把本地路径链接到存储中已有的文件。"
+          }
+        }
+      }
+    },
+    "link_mode.guide.uninstall.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uninstall"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卸载"
+          }
+        }
+      }
+    },
+    "link_mode.guide.uninstall.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runs mackup link uninstall. Mackup removes links and copies files back locally."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 mackup link uninstall。Mackup 会移除链接并把文件复制回本机。"
+          }
+        }
+      }
+    },
     "link_mode.install": {
       "localizations": {
         "en": {
