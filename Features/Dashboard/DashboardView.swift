@@ -35,6 +35,11 @@ struct DashboardView: View {
             }
             .frame(maxWidth: 720, alignment: .leading)
 
+            Divider()
+                .frame(maxWidth: 720)
+
+            OperationFlowView()
+
             Spacer()
         }
         .task {

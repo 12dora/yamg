@@ -23,7 +23,7 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Applications list via `mackup list`.
 - [x] Application detail via `mackup show`.
 - [x] Storage editor.
-- [ ] Backup/restore/dry-run flow with confirmation.
+- [x] Backup/restore/dry-run flow with confirmation.
 
 ## P2
 

@@ -46,6 +46,9 @@
 		5D1A000000000000000000AD /* StorageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B1 /* StorageView.swift */; };
 		5D1A000000000000000000AE /* StorageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B2 /* StorageViewModel.swift */; };
 		5D1A000000000000000000AF /* StorageViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B3 /* StorageViewModelTests.swift */; };
+		5D1A000000000000000000B4 /* OperationFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B8 /* OperationFlowView.swift */; };
+		5D1A000000000000000000B5 /* OperationFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000B9 /* OperationFlowViewModel.swift */; };
+		5D1A000000000000000000B6 /* OperationFlowViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000BA /* OperationFlowViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -90,6 +93,9 @@
 		5D1A000000000000000000B1 /* StorageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageView.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000B2 /* StorageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageViewModel.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000B3 /* StorageViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageViewModelTests.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000B8 /* OperationFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationFlowView.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000B9 /* OperationFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationFlowViewModel.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000BA /* OperationFlowViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationFlowViewModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +157,7 @@
 			children = (
 				5D1A0000000000000000009E /* Applications */,
 				5D1A00000000000000000090 /* Dashboard */,
+				5D1A000000000000000000B7 /* Operations */,
 				5D1A000000000000000000B0 /* Storage */,
 				5D1A00000000000000000021 /* AppSection.swift */,
 				5D1A00000000000000000022 /* RootShellView.swift */,
@@ -171,6 +178,7 @@
 				5D1A00000000000000000085 /* MackupConfigTests.swift */,
 				5D1A0000000000000000002F /* MackupDetectorTests.swift */,
 				5D1A0000000000000000002D /* MackupProcessRunnerTests.swift */,
+				5D1A000000000000000000BA /* OperationFlowViewModelTests.swift */,
 				5D1A00000000000000000081 /* ProcessLogStoreTests.swift */,
 				5D1A000000000000000000B3 /* StorageViewModelTests.swift */,
 			);
@@ -283,6 +291,15 @@
 				5D1A000000000000000000B2 /* StorageViewModel.swift */,
 			);
 			path = Storage;
+			sourceTree = "<group>";
+		};
+		5D1A000000000000000000B7 /* Operations */ = {
+			isa = PBXGroup;
+			children = (
+				5D1A000000000000000000B8 /* OperationFlowView.swift */,
+				5D1A000000000000000000B9 /* OperationFlowViewModel.swift */,
+			);
+			path = Operations;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -409,6 +426,8 @@
 				5D1A0000000000000000007C /* MackupDetector.swift in Sources */,
 				5D1A000000000000000000A1 /* MackupDetectionStatusDescription.swift in Sources */,
 				5D1A0000000000000000007A /* MackupProcessRunner.swift in Sources */,
+				5D1A000000000000000000B4 /* OperationFlowView.swift in Sources */,
+				5D1A000000000000000000B5 /* OperationFlowViewModel.swift in Sources */,
 				5D1A0000000000000000007E /* ProcessLogStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -435,6 +454,7 @@
 				5D1A00000000000000000083 /* MackupConfigTests.swift in Sources */,
 				5D1A0000000000000000007D /* MackupDetectorTests.swift in Sources */,
 				5D1A0000000000000000007B /* MackupProcessRunnerTests.swift in Sources */,
+				5D1A000000000000000000B6 /* OperationFlowViewModelTests.swift in Sources */,
 				5D1A0000000000000000007F /* ProcessLogStoreTests.swift in Sources */,
 				5D1A000000000000000000AF /* StorageViewModelTests.swift in Sources */,
 			);

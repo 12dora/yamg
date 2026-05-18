@@ -1,5 +1,12 @@
 # Handoff
 
+2026-05-18 20:09 CST | Codex
+Done: implemented P1 backup/restore flow on Dashboard with dry-run enabled by default, explicit confirmation before running, streamed output display, and `ProcessLogStore` recording; commands are limited to Mackup CLI `backup`/`restore` via `MackupCommandRunning`.
+Changed: `Features/Operations/OperationFlowView.swift`, `Features/Operations/OperationFlowViewModel.swift`, `Features/Dashboard/DashboardView.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/OperationFlowViewModelTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
+Tests: `plutil -lint YAMG.xcodeproj/project.pbxproj`; `jq empty Resources/Localizable.xcstrings`; `xcodebuild test -project YAMG.xcodeproj -scheme YAMG -destination 'platform=macOS' -only-testing:YAMGTests`.
+Next: start P2 Homebrew/pipx install entry or preferences for CLI/config path.
+Blocked: none.
+
 2026-05-18 20:03 CST | Codex
 Done: implemented P1 Storage editor UI for Mackup-supported `[storage] engine/path/directory` fields only, backed by `MackupConfigEditor`; no migration, sync, copy, delete, or link behavior added.
 Changed: `Config/MackupConfig.swift`, `Features/Storage/StorageView.swift`, `Features/Storage/StorageViewModel.swift`, `Features/RootShellView.swift`, `Support/LocalizationKey.swift`, `Resources/Localizable.xcstrings`, `YAMGTests/StorageViewModelTests.swift`, `YAMG.xcodeproj/project.pbxproj`, `Docs/AI/TASKS.md`, `Docs/AI/HANDOFF.md`.
