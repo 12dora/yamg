@@ -15,7 +15,7 @@ struct StorageView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text(statusText)
                     .foregroundStyle(.secondary)
@@ -46,11 +46,31 @@ struct StorageView: View {
                 }
                 .pickerStyle(.segmented)
 
-                TextField(String(localized: "storage.path"), text: $viewModel.path)
-                    .textFieldStyle(.roundedBorder)
+                HStack(spacing: 8) {
+                    TextField(String(localized: "storage.path"), text: $viewModel.path)
+                        .textFieldStyle(.roundedBorder)
 
-                TextField(String(localized: "storage.directory"), text: $viewModel.directory)
-                    .textFieldStyle(.roundedBorder)
+                    Button {
+                        chooseFolder { url in
+                            viewModel.selectStoragePath(url)
+                        }
+                    } label: {
+                        Label(String(localized: "action.choose"), systemImage: "folder")
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    TextField(String(localized: "storage.directory"), text: $viewModel.directory)
+                        .textFieldStyle(.roundedBorder)
+
+                    Button {
+                        chooseFolder { url in
+                            viewModel.selectStorageDirectory(url)
+                        }
+                    } label: {
+                        Label(String(localized: "action.choose"), systemImage: "folder")
+                    }
+                }
 
                 if viewModel.engine == .fileSystem {
                     Text(String(localized: "storage.file_system.detail"))
@@ -73,6 +93,8 @@ struct StorageView: View {
                 viewModel.load()
             }
         }
+        .animation(.easeInOut(duration: 0.18), value: viewModel.engine)
+        .animation(.easeInOut(duration: 0.18), value: viewModel.state)
     }
 
     private var statusText: String {
@@ -98,19 +120,16 @@ struct StorageView: View {
         }
         return String(localized: "storage.config.pending")
     }
-}
 
-private extension MackupStorageEngine {
-    var displayName: String {
-        switch self {
-        case .dropbox:
-            return "Dropbox"
-        case .googleDrive:
-            return "Google Drive"
-        case .iCloud:
-            return "iCloud"
-        case .fileSystem:
-            return "File System"
+    private func chooseFolder(onSelection: (URL) -> Void) {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.canCreateDirectories = true
+
+        if panel.runModal() == .OK, let url = panel.url {
+            onSelection(url)
         }
     }
 }

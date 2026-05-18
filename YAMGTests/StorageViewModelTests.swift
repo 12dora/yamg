@@ -70,6 +70,31 @@ final class StorageViewModelTests: XCTestCase {
         XCTAssertEqual(saved.applicationsToIgnore, ["xcode"])
     }
 
+    func testFolderSelectionsUpdateStorageFields() {
+        let viewModel = StorageViewModel(editor: FakeMackupConfigEditor(
+            config: MackupConfig(
+                fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                applicationsToSync: [],
+                applicationsToIgnore: [],
+                originalText: ""
+            )
+        ))
+
+        viewModel.selectStoragePath(URL(fileURLWithPath: "/Users/test/Backup Root"))
+        viewModel.selectStorageDirectory(URL(fileURLWithPath: "/Users/test/Backup Root/Mackup"))
+
+        XCTAssertEqual(viewModel.path, "/Users/test/Backup Root")
+        XCTAssertEqual(viewModel.directory, "/Users/test/Backup Root/Mackup")
+    }
+
+    func testStorageEngineDisplayNamesAreUserFacing() {
+        XCTAssertEqual(MackupStorageEngine.dropbox.displayName, "Dropbox")
+        XCTAssertEqual(MackupStorageEngine.googleDrive.displayName, "Google Drive")
+        XCTAssertEqual(MackupStorageEngine.iCloud.displayName, "iCloud")
+        XCTAssertEqual(MackupStorageEngine.fileSystem.displayName, "File System")
+    }
+
     func testLoadFailurePublishesFailedState() {
         let viewModel = StorageViewModel(editor: FakeMackupConfigEditor(error: MackupConfigError.unsupportedStorageEngine("bad")))
 

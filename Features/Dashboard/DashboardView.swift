@@ -19,59 +19,63 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            header
-
+        ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                statusRow(
-                    title: LocalizationKey.onboardingCLIStatus.localizedStringKey,
-                    systemImage: cliIconName,
-                    stateText: cliStatusText,
-                    detailText: cliDetailText
-                )
+                header
 
-                Divider()
+                VStack(alignment: .leading, spacing: 16) {
+                    statusRow(
+                        title: LocalizationKey.onboardingCLIStatus.localizedStringKey,
+                        systemImage: cliIconName,
+                        stateText: cliStatusText,
+                        detailText: cliDetailText
+                    )
 
-                statusRow(
-                    title: LocalizationKey.onboardingConfigStatus.localizedStringKey,
-                    systemImage: configIconName,
-                    stateText: configStatusText,
-                    detailText: configDetailText
-                )
-            }
-            .frame(maxWidth: 720, alignment: .leading)
+                    Divider()
 
-            Divider()
-                .frame(maxWidth: 720)
-
-            if viewModel.shouldShowInstallGuide {
-                installGuide
+                    statusRow(
+                        title: LocalizationKey.onboardingConfigStatus.localizedStringKey,
+                        systemImage: configIconName,
+                        stateText: configStatusText,
+                        detailText: configDetailText
+                    )
+                }
+                .frame(maxWidth: 720, alignment: .leading)
 
                 Divider()
                     .frame(maxWidth: 720)
-            }
 
-            if viewModel.shouldShowConfigWizard {
-                configWizard
+                if viewModel.shouldShowInstallGuide {
+                    installGuide
 
-                Divider()
-                    .frame(maxWidth: 720)
-            }
+                    Divider()
+                        .frame(maxWidth: 720)
+                }
 
-            OperationFlowView(
-                viewModel: OperationFlowViewModel(
-                    preferredCLIPath: viewModel.preferredCLIPath,
-                    configFilePath: viewModel.configPath
+                if viewModel.shouldShowConfigWizard {
+                    configWizard
+
+                    Divider()
+                        .frame(maxWidth: 720)
+                }
+
+                OperationFlowView(
+                    viewModel: OperationFlowViewModel(
+                        preferredCLIPath: viewModel.preferredCLIPath,
+                        configFilePath: viewModel.configPath
+                    )
                 )
-            )
-
-            Spacer()
+            }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .task {
             if viewModel.cliState == .unknown {
                 await viewModel.refresh()
             }
         }
+        .animation(.easeInOut(duration: 0.18), value: viewModel.cliState)
+        .animation(.easeInOut(duration: 0.18), value: viewModel.configState)
+        .animation(.easeInOut(duration: 0.18), value: viewModel.setupState)
     }
 
     private var header: some View {
@@ -152,7 +156,7 @@ struct DashboardView: View {
 
             Picker(String(localized: "storage.engine"), selection: $viewModel.selectedStorageEngine) {
                 ForEach(MackupStorageEngine.allCases, id: \.self) { engine in
-                    Text(engine.rawValue).tag(engine)
+                    Text(engine.displayName).tag(engine)
                 }
             }
             .pickerStyle(.segmented)

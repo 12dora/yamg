@@ -64,6 +64,14 @@ final class StorageViewModel: ObservableObject {
         }
     }
 
+    func selectStoragePath(_ url: URL) {
+        path = url.path
+    }
+
+    func selectStorageDirectory(_ url: URL) {
+        directory = url.path
+    }
+
     private func currentConfig() throws -> MackupConfig {
         if let loadedConfig {
             return loadedConfig

@@ -5,6 +5,19 @@ enum MackupStorageEngine: String, CaseIterable, Equatable {
     case googleDrive = "google_drive"
     case iCloud = "icloud"
     case fileSystem = "file_system"
+
+    var displayName: String {
+        switch self {
+        case .dropbox:
+            return "Dropbox"
+        case .googleDrive:
+            return "Google Drive"
+        case .iCloud:
+            return "iCloud"
+        case .fileSystem:
+            return "File System"
+        }
+    }
 }
 
 struct MackupStorage: Equatable {
