@@ -21,10 +21,12 @@ struct MackupApplicationListParser {
     private func applicationName(from line: String) -> String? {
         let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
 
+        // mackup CLI output is ASCII-only; use a locale-independent compare so
+        // running under a non-English locale doesn't mis-match header lines.
+        let bannerKeywords = ["supported applications", "applications supported", "error:"]
+        let loweredLine = trimmedLine.lowercased()
         guard !trimmedLine.isEmpty,
-              !trimmedLine.localizedCaseInsensitiveContains("Supported applications"),
-              !trimmedLine.localizedCaseInsensitiveContains("applications supported"),
-              !trimmedLine.localizedCaseInsensitiveContains("Error:") else {
+              !bannerKeywords.contains(where: { loweredLine.contains($0) }) else {
             return nil
         }
 

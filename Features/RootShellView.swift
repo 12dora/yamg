@@ -3,9 +3,9 @@ import SwiftUI
 struct RootShellView: View {
     @ObservedObject private var preferences: AppPreferences
     @State private var selection: AppSection? = .dashboard
-    private let logStore: ProcessLogPersisting
+    private let logStore: ProcessLogStore
 
-    init(preferences: AppPreferences = AppPreferences(), logStore: ProcessLogPersisting = ProcessLogStore()) {
+    init(preferences: AppPreferences, logStore: ProcessLogStore) {
         self.preferences = preferences
         self.logStore = logStore
     }
@@ -139,6 +139,6 @@ struct RootShellView: View {
 
 struct RootShellView_Previews: PreviewProvider {
     static var previews: some View {
-        RootShellView()
+        RootShellView(preferences: AppPreferences(), logStore: ProcessLogStore())
     }
 }

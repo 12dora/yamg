@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PreferencesView: View {
     @StateObject private var viewModel: PreferencesViewModel
+    @State private var isResetConfirmationPresented = false
 
     @MainActor
     init(preferences: AppPreferencesStoring = AppPreferences()) {
@@ -80,7 +81,7 @@ struct PreferencesView: View {
 
             HStack(spacing: 10) {
                 Button(role: .destructive) {
-                    viewModel.reset()
+                    isResetConfirmationPresented = true
                 } label: {
                     Label("action.reset", systemImage: "arrow.counterclockwise")
                 }
@@ -97,6 +98,18 @@ struct PreferencesView: View {
         }
         .frame(maxWidth: 760, alignment: .leading)
         .animation(.easeInOut(duration: 0.18), value: viewModel.state)
+        .confirmationDialog(
+            "preferences.reset.confirm_title",
+            isPresented: $isResetConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            Button("preferences.reset.confirm_action", role: .destructive) {
+                viewModel.reset()
+            }
+            Button("action.cancel", role: .cancel) {}
+        } message: {
+            Text("preferences.reset.confirm_message")
+        }
     }
 
     @ViewBuilder

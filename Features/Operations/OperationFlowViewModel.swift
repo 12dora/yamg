@@ -25,6 +25,7 @@ final class OperationFlowViewModel: ObservableObject {
     private let preferredCLIPath: URL?
     private let configFilePath: URL?
     private let makeRunner: (URL) -> MackupCommandRunning
+    private var activeTask: Task<Void, Never>?
 
     init(
         runner: MackupCommandRunning? = nil,
@@ -47,15 +48,17 @@ final class OperationFlowViewModel: ObservableObject {
             return
         }
 
-        Task {
-            await run(operation)
+        // Flip state synchronously on the main actor so a rapid second call sees
+        // .running before its guard check, preventing the double-launch race.
+        state = .running(operation)
+        output = ""
+
+        activeTask = Task { [weak self] in
+            await self?.run(operation)
         }
     }
 
     private func run(_ operation: Operation) async {
-        state = .running(operation)
-        output = ""
-
         do {
             let command = command(for: operation)
             let run = try await logStore.createRun(command: command)

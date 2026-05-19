@@ -96,19 +96,30 @@ final class DashboardViewModel: ObservableObject {
     }
 
     var canSaveConfig: Bool {
+        saveConfigDisabledReasonKey == nil
+    }
+
+    /// The localization key explaining why save is currently disabled, or nil
+    /// when saving is possible. Surfaced as a hint next to the disabled button
+    /// so the user understands what to fix.
+    var saveConfigDisabledReasonKey: String? {
         guard let selectedStorageAvailability, selectedStorageAvailability.isAvailable else {
-            return false
+            return "setup.config.disabled.storage_unavailable"
         }
 
         guard !selectedStorageFolderPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return false
+            return "setup.config.disabled.folder_empty"
         }
 
         if selectedStorageEngine == .fileSystem {
-            return true
+            return nil
         }
 
-        return automaticStorageDirectory() != nil
+        if automaticStorageDirectory() == nil {
+            return "setup.config.disabled.folder_outside_provider"
+        }
+
+        return nil
     }
 
     var saveButtonTitleKey: String {

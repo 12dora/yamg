@@ -190,7 +190,9 @@ private enum MackupConfigRenderer {
 
             if let section = MackupConfigParser.sectionName(from: trimmed),
                supportedSections.contains(section) {
-                appendSection(section, config: config, originalLines: originalLines, startIndex: index, to: &output)
+                if shouldEmit(section: section, in: config) {
+                    appendSection(section, config: config, originalLines: originalLines, startIndex: index, to: &output)
+                }
                 renderedSections.insert(section)
                 index = nextSectionIndex(in: originalLines, after: index + 1)
             } else {
@@ -199,12 +201,26 @@ private enum MackupConfigRenderer {
             }
         }
 
-        for section in supportedSections.sorted() where !renderedSections.contains(section) {
+        for section in supportedSections.sorted()
+        where !renderedSections.contains(section) && shouldEmit(section: section, in: config) {
             appendSeparatorIfNeeded(to: &output)
             appendSection(section, config: config, originalLines: [], startIndex: 0, to: &output)
         }
 
         return output.joined(separator: "\n").trimmingCharacters(in: .newlines) + "\n"
+    }
+
+    private static func shouldEmit(section: String, in config: MackupConfig) -> Bool {
+        switch section {
+        case "storage":
+            return true
+        case "applications_to_sync":
+            return !config.applicationsToSync.isEmpty
+        case "applications_to_ignore":
+            return !config.applicationsToIgnore.isEmpty
+        default:
+            return false
+        }
     }
 
     private static func appendSection(

@@ -9,21 +9,6 @@ enum AppSection: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
-        switch self {
-        case .dashboard:
-            return "section.dashboard.title"
-        case .applications:
-            return "section.applications.title"
-        case .linkMode:
-            return "section.link_mode.title"
-        case .logs:
-            return "section.logs.title"
-        case .preferences:
-            return "section.preferences.title"
-        }
-    }
-
     var titleKey: LocalizationKey {
         switch self {
         case .dashboard:
@@ -51,21 +36,6 @@ enum AppSection: String, CaseIterable, Identifiable {
             return "doc.text.magnifyingglass"
         case .preferences:
             return "gearshape"
-        }
-    }
-
-    var subtitle: String {
-        switch self {
-        case .dashboard:
-            return "section.dashboard.subtitle"
-        case .applications:
-            return "section.applications.subtitle"
-        case .linkMode:
-            return "section.link_mode.subtitle"
-        case .logs:
-            return "section.logs.subtitle"
-        case .preferences:
-            return "section.preferences.subtitle"
         }
     }
 

@@ -864,8 +864,21 @@
         }
       }
     },
-    "logs.unavailable.detail" : {
-
+    "logs.select_run" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select a run to see its output"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择一次运行查看其输出"
+          }
+        }
+      }
     },
     "onboarding.cli.available %@" : {
       "extractionState" : "stale",
@@ -1443,6 +1456,56 @@
         }
       }
     },
+    "preferences.reset.confirm_action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重置"
+          }
+        }
+      }
+    },
+    "preferences.reset.confirm_message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This clears the CLI/config paths and deletes the matching .mackup.cfg files. This cannot be undone."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将清空 CLI/配置路径并删除对应的 .mackup.cfg 文件，操作不可撤销。"
+          }
+        }
+      }
+    },
+    "preferences.reset.confirm_title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset preferences?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确认重置偏好设置？"
+          }
+        }
+      }
+    },
     "preferences.saved" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1793,6 +1856,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "创建配置前请选择可用的存储提供商和 Mackup 文件夹。Dropbox、Google Drive 与 iCloud 路径会按 Mackup 兼容规则自动检测。"
+          }
+        }
+      }
+    },
+    "setup.config.disabled.folder_empty" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a Mackup folder to save"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请选择 Mackup 文件夹"
+          }
+        }
+      }
+    },
+    "setup.config.disabled.folder_outside_provider" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chosen folder is outside the provider's root"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所选文件夹不在该云盘根目录内"
+          }
+        }
+      }
+    },
+    "setup.config.disabled.storage_unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected storage provider is unavailable"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所选存储服务不可用"
           }
         }
       }

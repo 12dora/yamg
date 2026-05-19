@@ -32,20 +32,29 @@ enum ProcessLogStoreError: Error, Equatable {
     case runNotFound(UUID)
 }
 
+@MainActor
 final class ProcessLogStore: ProcessLogPersisting, ObservableObject {
+    nonisolated static let defaultMaxRuns = 100
+    nonisolated static let defaultMaxEntriesPerRun = 5_000
+
     @Published private(set) var runRecords: [UUID: RunRecord] = [:]
     private var runOrder: [UUID] = []
     private var logEntriesByRunID: [UUID: [ProcessLogEntry]] = [:]
     private let now: @Sendable () -> Date
     private let makeID: @Sendable () -> UUID
-    private let lock = NSLock()
+    private let maxRuns: Int
+    private let maxEntriesPerRun: Int
 
-    init(
+    nonisolated init(
         now: @escaping @Sendable () -> Date = { Date() },
-        makeID: @escaping @Sendable () -> UUID = { UUID() }
+        makeID: @escaping @Sendable () -> UUID = { UUID() },
+        maxRuns: Int = ProcessLogStore.defaultMaxRuns,
+        maxEntriesPerRun: Int = ProcessLogStore.defaultMaxEntriesPerRun
     ) {
         self.now = now
         self.makeID = makeID
+        self.maxRuns = max(1, maxRuns)
+        self.maxEntriesPerRun = max(1, maxEntriesPerRun)
     }
 
     func createRun(command: MackupCommand) async throws -> RunRecord {
@@ -58,21 +67,16 @@ final class ProcessLogStore: ProcessLogPersisting, ObservableObject {
             status: .running
         )
 
-        lock.withLock {
-            runRecords[id] = record
-            runOrder.append(id)
-            logEntriesByRunID[id] = []
-        }
+        runRecords[id] = record
+        runOrder.append(id)
+        logEntriesByRunID[id] = []
+        evictOldRunsIfNeeded()
 
         return record
     }
 
     func append(_ event: ProcessEvent, to runID: UUID) async throws {
-        lock.lock()
-        let exists = runRecords[runID] != nil
-        lock.unlock()
-
-        guard exists else {
+        guard runRecords[runID] != nil else {
             throw ProcessLogStoreError.runNotFound(runID)
         }
 
@@ -83,58 +87,51 @@ final class ProcessLogStore: ProcessLogPersisting, ObservableObject {
             event: event
         )
 
-        lock.withLock {
-            logEntriesByRunID[runID, default: []].append(entry)
+        var entries = logEntriesByRunID[runID, default: []]
+        entries.append(entry)
+        if entries.count > maxEntriesPerRun {
+            entries.removeFirst(entries.count - maxEntriesPerRun)
         }
+        logEntriesByRunID[runID] = entries
     }
 
     func finish(runID: UUID, result: ProcessResult) async throws {
-        lock.lock()
         guard var record = runRecords[runID] else {
-            lock.unlock()
             throw ProcessLogStoreError.runNotFound(runID)
         }
-        lock.unlock()
 
         record.finishedAt = now()
         record.status = .finished(result)
-
-        lock.withLock {
-            runRecords[runID] = record
-        }
+        runRecords[runID] = record
     }
 
     func fail(runID: UUID, message: String) async throws {
-        lock.lock()
         guard var record = runRecords[runID] else {
-            lock.unlock()
             throw ProcessLogStoreError.runNotFound(runID)
         }
-        lock.unlock()
 
         record.finishedAt = now()
         record.status = .failed(message)
-
-        lock.withLock {
-            runRecords[runID] = record
-        }
+        runRecords[runID] = record
     }
 
     func runs() -> [RunRecord] {
-        lock.withLock {
-            runOrder.compactMap { runRecords[$0] }
-        }
+        runOrder.compactMap { runRecords[$0] }
     }
 
     func run(id: UUID) -> RunRecord? {
-        lock.withLock {
-            runRecords[id]
-        }
+        runRecords[id]
     }
 
     func entries(for runID: UUID) -> [ProcessLogEntry] {
-        lock.withLock {
-            logEntriesByRunID[runID, default: []]
+        logEntriesByRunID[runID, default: []]
+    }
+
+    private func evictOldRunsIfNeeded() {
+        while runOrder.count > maxRuns {
+            let evicted = runOrder.removeFirst()
+            runRecords.removeValue(forKey: evicted)
+            logEntriesByRunID.removeValue(forKey: evicted)
         }
     }
 }

@@ -1,31 +1,14 @@
 import SwiftUI
 
 struct LogsView: View {
-    private let store: ProcessLogPersisting
+    private let store: ProcessLogStore
 
-    init(logStore: ProcessLogPersisting) {
+    init(logStore: ProcessLogStore) {
         self.store = logStore
     }
 
     var body: some View {
-        Group {
-            if let store = store as? ProcessLogStore {
-                LogsContentView(store: store)
-            } else {
-                unavailableView
-            }
-        }
-    }
-
-    private var unavailableView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("logs.unavailable", systemImage: "doc.text.magnifyingglass")
-                .font(.headline)
-            Text("logs.unavailable.detail")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        LogsContentView(store: store)
     }
 }
 
@@ -34,27 +17,33 @@ private struct LogsContentView: View {
     @State private var selectedRunID: UUID?
 
     var body: some View {
-        let runs = store.runs().reversed()
+        let runs = Array(store.runs().reversed())
 
         Group {
             if runs.isEmpty {
                 emptyRunsView
             } else {
-                List(selection: $selectedRunID) {
-                    ForEach(Array(runs)) { run in
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(run.command.description)
-                                .font(.callout.weight(.medium))
-                                .lineLimit(1)
-                            Text(run.startedAt, style: .time)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                HSplitView {
+                    List(selection: $selectedRunID) {
+                        ForEach(runs) { run in
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(run.command.description)
+                                    .font(.callout.weight(.medium))
+                                    .lineLimit(1)
+                                Text(run.startedAt, style: .time)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .tag(run.id)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .tag(run.id)
                     }
+                    .listStyle(.inset)
+                    .frame(minWidth: 220, idealWidth: 260, maxWidth: 360, maxHeight: .infinity)
+
+                    logDetail
+                        .frame(minWidth: 280, maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .listStyle(.inset)
                 .frame(maxWidth: .infinity, minHeight: 220, alignment: .topLeading)
             }
         }
@@ -103,7 +92,11 @@ private struct LogsContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
         } else {
-            EmptyView()
+            VStack {
+                Text("logs.select_run")
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 

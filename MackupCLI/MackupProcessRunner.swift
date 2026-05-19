@@ -85,10 +85,25 @@ final class MackupProcessRunner: MackupCommandRunning {
                 stdoutPipe.fileHandleForReading.readabilityHandler = nil
                 stderrPipe.fileHandleForReading.readabilityHandler = nil
 
-                yieldOutput(stdoutPipe.fileHandleForReading, .stdout)
-                yieldOutput(stderrPipe.fileHandleForReading, .stderr)
-
+                // Drain + finish must run on the same serial queue all output
+                // is yielded through. Hopping onto the queue guarantees any
+                // output blocks enqueued by earlier readability fires execute
+                // before the .finished event. Late readability fires whose
+                // queue.async slips in afterwards see a finished continuation
+                // and their yields are silently dropped.
                 queue.async {
+                    let drain: (FileHandle, ProcessOutputStream) -> Void = { handle, stream in
+                        let data = handle.availableData
+                        guard
+                            !data.isEmpty,
+                            let output = String(data: data, encoding: .utf8),
+                            !output.isEmpty
+                        else { return }
+                        continuation.yield(.output(output, stream: stream))
+                    }
+                    drain(stdoutPipe.fileHandleForReading, .stdout)
+                    drain(stderrPipe.fileHandleForReading, .stderr)
+
                     if let temporaryDirectory = self.launchEnvironment.temporaryDirectory {
                         try? self.fileManager.removeItem(at: temporaryDirectory)
                     }

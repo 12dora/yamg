@@ -145,7 +145,7 @@ struct DashboardView: View {
             Text("scheduled_backup.enabled")
                 .font(.headline)
 
-            ScheduledBackupView()
+            ScheduledBackupView(preferences: preferences)
 
             Spacer(minLength: 0)
         }
@@ -277,6 +277,12 @@ struct DashboardView: View {
                     Label(LocalizedStringKey(viewModel.saveButtonTitleKey), systemImage: "square.and.arrow.down")
                 }
                 .disabled(isSavingConfig || !viewModel.canSaveConfig)
+
+                if let reasonKey = viewModel.saveConfigDisabledReasonKey {
+                    Label(LocalizedStringKey(reasonKey), systemImage: "info.circle")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
 
                 configSaveStatusView
             }
@@ -559,11 +565,33 @@ final class ScheduledBackupManager: ScheduledBackupManaging {
     private let fileManager: FileManager
     private let launchAgentName = "com.yamg.backup"
     private let launchAgentPath: URL
+    private let mackupPathProvider: () -> URL?
+    private let candidateMackupPaths: [URL]
 
-    init(fileManager: FileManager = .default) {
+    init(
+        fileManager: FileManager = .default,
+        mackupPathProvider: @escaping () -> URL? = { nil },
+        candidateMackupPaths: [URL] = MackupDetector.defaultCandidateURLs
+    ) {
         self.fileManager = fileManager
         let home = fileManager.homeDirectoryForCurrentUser
         self.launchAgentPath = home.appendingPathComponent("Library/LaunchAgents/\(launchAgentName).plist")
+        self.mackupPathProvider = mackupPathProvider
+        self.candidateMackupPaths = candidateMackupPaths
+    }
+
+    private func resolveMackupPath() -> URL {
+        if let preferred = mackupPathProvider(),
+           fileManager.isExecutableFile(atPath: preferred.path) {
+            return preferred
+        }
+        for candidate in candidateMackupPaths
+        where fileManager.isExecutableFile(atPath: candidate.path) {
+            return candidate
+        }
+        // Last-resort fallback so the plist is still well-formed; the agent will
+        // fail loudly via StandardErrorPath instead of being silently broken.
+        return candidateMackupPaths.first ?? URL(fileURLWithPath: "/usr/local/bin/mackup")
     }
 
     func getConfig() -> ScheduledBackupConfig {
@@ -596,6 +624,11 @@ final class ScheduledBackupManager: ScheduledBackupManaging {
     private func installLaunchAgent(intervalMinutes: Int) throws {
         let plistContent = createLaunchAgentPlist(intervalMinutes: intervalMinutes)
 
+        // Unload any previous agent first; launchctl ignores parameter changes
+        // for an already-loaded label, so a fresh load() against the same path
+        // would silently keep the old interval/path.
+        runLaunchctl(arguments: ["unload", launchAgentPath.path])
+
         do {
             let parentDir = launchAgentPath.deletingLastPathComponent()
             try fileManager.createDirectory(at: parentDir, withIntermediateDirectories: true)
@@ -613,6 +646,23 @@ final class ScheduledBackupManager: ScheduledBackupManaging {
             process.waitUntilExit()
         } catch {
             throw ScheduledBackupError.launchAgentCreationFailed("Failed to load launch agent: \(error.localizedDescription)")
+        }
+    }
+
+    @discardableResult
+    private func runLaunchctl(arguments: [String]) -> Int32 {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
+        process.arguments = arguments
+        process.standardOutput = Pipe()
+        process.standardError = Pipe()
+
+        do {
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus
+        } catch {
+            return -1
         }
     }
 
@@ -637,7 +687,7 @@ final class ScheduledBackupManager: ScheduledBackupManaging {
 
     private func createLaunchAgentPlist(intervalMinutes: Int) -> String {
         let intervalSeconds = intervalMinutes * 60
-        let mackupPath = "/opt/homebrew/bin/mackup"
+        let mackupPath = resolveMackupPath().path
 
         return """
         <?xml version="1.0" encoding="UTF-8"?>
@@ -679,6 +729,8 @@ final class ScheduledBackupViewModel: ObservableObject {
     }
 
     private let manager: ScheduledBackupManaging
+    private var pendingIntervalSave: Task<Void, Never>?
+    private let intervalSaveDebounceNanoseconds: UInt64 = 450_000_000
 
     init(manager: ScheduledBackupManaging = ScheduledBackupManager()) {
         self.manager = manager
@@ -707,12 +759,21 @@ final class ScheduledBackupViewModel: ObservableObject {
 
     func setEnabled(_ isEnabled: Bool) {
         self.isEnabled = isEnabled
+        pendingIntervalSave?.cancel()
+        pendingIntervalSave = nil
         save()
     }
 
     func setIntervalMinutes(_ intervalMinutes: Int) {
         self.intervalMinutes = intervalMinutes
-        save()
+        // Stepper clicks fire rapidly; coalesce them so we hit launchctl once
+        // when the user finishes clicking, not on every step.
+        pendingIntervalSave?.cancel()
+        pendingIntervalSave = Task { [weak self, debounce = intervalSaveDebounceNanoseconds] in
+            try? await Task.sleep(nanoseconds: debounce)
+            guard !Task.isCancelled, let self else { return }
+            self.save()
+        }
     }
 }
 
@@ -720,6 +781,14 @@ struct ScheduledBackupView: View {
     @StateObject private var viewModel: ScheduledBackupViewModel
 
     init(manager: ScheduledBackupManaging = ScheduledBackupManager()) {
+        _viewModel = StateObject(wrappedValue: ScheduledBackupViewModel(manager: manager))
+    }
+
+    @MainActor
+    init(preferences: AppPreferencesStoring) {
+        let manager = ScheduledBackupManager(
+            mackupPathProvider: { preferences.preferredCLIPath }
+        )
         _viewModel = StateObject(wrappedValue: ScheduledBackupViewModel(manager: manager))
     }
 

@@ -16,8 +16,10 @@ struct MackupApplication: Identifiable, Equatable {
             .folding(options: [.diacriticInsensitive, .widthInsensitive], locale: .current)
             .lowercased()
 
+        // Use a Unicode-aware separator class so non-ASCII names (e.g. pure CJK)
+        // still produce a non-empty identifier instead of collapsing to "".
         let slug = lowered.replacingOccurrences(
-            of: #"[^a-z0-9]+"#,
+            of: #"[^\p{L}\p{N}]+"#,
             with: "-",
             options: .regularExpression
         )

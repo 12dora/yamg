@@ -235,6 +235,7 @@ final class ApplicationsListViewModelTests: XCTestCase {
 
         let saved = try XCTUnwrap(editor.savedConfig)
         XCTAssertEqual(saved.applicationsToSync, [])
+        XCTAssertEqual(saved.applicationsToIgnore, ["git", "raycast"])
         XCTAssertFalse(viewModel.isSyncAllMode)
         if case .loaded(let apps) = viewModel.state {
             XCTAssertTrue(apps.allSatisfy { !$0.isSynced })

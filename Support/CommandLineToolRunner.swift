@@ -85,8 +85,30 @@ final class CommandLineToolRunner: CommandLineToolRunning {
                 stdoutPipe.fileHandleForReading.readabilityHandler = nil
                 stderrPipe.fileHandleForReading.readabilityHandler = nil
 
-                appendOutput(stdoutPipe.fileHandleForReading.readDataToEndOfFile())
-                appendOutput(stderrPipe.fileHandleForReading.readDataToEndOfFile())
+                // Drain remaining buffered data via non-blocking reads.
+                // readDataToEndOfFile() blocks forever if a grandchild keeps
+                // the write end open after the parent process exits; setting
+                // O_NONBLOCK ensures the loop exits on EAGAIN instead.
+                let drain: (FileHandle) -> Void = { handle in
+                    let fd = handle.fileDescriptor
+                    let flags = fcntl(fd, F_GETFL)
+                    if flags >= 0 {
+                        _ = fcntl(fd, F_SETFL, flags | O_NONBLOCK)
+                    }
+                    var buffer = [UInt8](repeating: 0, count: 4096)
+                    while true {
+                        let count = buffer.withUnsafeMutableBufferPointer { ptr -> Int in
+                            read(fd, ptr.baseAddress, ptr.count)
+                        }
+                        if count > 0 {
+                            appendOutput(Data(buffer.prefix(count)))
+                        } else {
+                            break
+                        }
+                    }
+                }
+                drain(stdoutPipe.fileHandleForReading)
+                drain(stderrPipe.fileHandleForReading)
 
                 queue.async {
                     let outputText = String(data: output, encoding: .utf8) ?? ""

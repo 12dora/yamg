@@ -18,6 +18,7 @@ final class ApplicationsListViewModel: ObservableObject {
     private let configEditor: MackupConfigEditing
     private let configFilePath: URL?
     private var loadedConfig: MackupConfig?
+    private var lastSupportedIdentifiers: [String] = []
 
     init(
         installedScanner: InstalledApplicationScanning = InstalledApplicationScanner(),
@@ -59,6 +60,7 @@ final class ApplicationsListViewModel: ObservableObject {
             return
         }
         loadedConfig = config
+        lastSupportedIdentifiers = supportedIdentifiers
 
         let matches = SyncableApplicationMatcher.intersect(
             supportedIdentifiers: supportedIdentifiers,
@@ -150,11 +152,16 @@ final class ApplicationsListViewModel: ObservableObject {
             baseConfig = loaded
         }
 
+        // mackup's empty applications_to_sync means "sync all". To make the UI's
+        // "deselect all" actually result in zero apps being synced, place every
+        // supported app in applications_to_ignore.
+        let mergedIgnore = Array(Set(baseConfig.applicationsToIgnore).union(lastSupportedIdentifiers)).sorted()
+
         let updatedConfig = MackupConfig(
             fileURL: baseConfig.fileURL,
             storage: baseConfig.storage,
             applicationsToSync: [],
-            applicationsToIgnore: baseConfig.applicationsToIgnore,
+            applicationsToIgnore: mergedIgnore,
             originalText: baseConfig.originalText
         )
 
@@ -177,11 +184,16 @@ final class ApplicationsListViewModel: ObservableObject {
             baseConfig = loaded
         }
 
+        // Reverse the deselectAll() bulk-ignore: remove every supported identifier
+        // from the ignore list so mackup actually syncs everything.
+        let supportedSet = Set(lastSupportedIdentifiers)
+        let prunedIgnore = baseConfig.applicationsToIgnore.filter { !supportedSet.contains($0) }
+
         let updatedConfig = MackupConfig(
             fileURL: baseConfig.fileURL,
             storage: baseConfig.storage,
             applicationsToSync: [],
-            applicationsToIgnore: baseConfig.applicationsToIgnore,
+            applicationsToIgnore: prunedIgnore,
             originalText: baseConfig.originalText
         )
 

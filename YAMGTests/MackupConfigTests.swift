@@ -117,6 +117,6 @@ final class MackupConfigTests: XCTestCase {
         let saved = try String(contentsOf: fileURL, encoding: .utf8)
         XCTAssertTrue(saved.contains("[storage]\nengine = icloud\ndirectory = .config/mackup"))
         XCTAssertTrue(saved.contains("[applications_to_sync]\nfish"))
-        XCTAssertTrue(saved.contains("[applications_to_ignore]"))
+        XCTAssertFalse(saved.contains("[applications_to_ignore]"))
     }
 }

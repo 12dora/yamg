@@ -96,16 +96,23 @@ final class MackupDetector: MackupExecutableResolving {
 
     func detect(preferredPath: URL?) async -> MackupDetectionReport {
         let checkedURLs = candidateList(preferredPath: preferredPath)
+        var lastReport: MackupDetectionReport?
 
         for candidate in checkedURLs {
             guard fileManager.isExecutableFile(atPath: candidate.path) else {
                 continue
             }
 
-            return await detectExecutable(at: candidate, checkedURLs: checkedURLs)
+            let report = await detectExecutable(at: candidate, checkedURLs: checkedURLs)
+            if report.isUsable {
+                return report
+            }
+            // Remember the most informative failure; keep trying remaining
+            // candidates rather than surfacing a stale binary's error.
+            lastReport = report
         }
 
-        return MackupDetectionReport(
+        return lastReport ?? MackupDetectionReport(
             status: .notFound,
             executableURL: nil,
             version: nil,
