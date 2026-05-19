@@ -81,6 +81,38 @@
         }
       }
     },
+    "logs.empty": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No run history"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无运行记录"
+          }
+        }
+      }
+    },
+    "logs.empty.detail": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run a backup or restore from the Dashboard to see output here."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在仪表盘执行备份或还原后，输出记录将显示在这里。"
+          }
+        }
+      }
+    },
     "section.logs.subtitle": {
       "localizations": {
         "en": {
@@ -1261,6 +1293,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法载入应用"
+          }
+        }
+      }
+    },
+    "applications.sync_all": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全选同步"
           }
         }
       }

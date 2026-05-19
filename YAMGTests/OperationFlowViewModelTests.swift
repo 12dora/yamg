@@ -24,14 +24,14 @@ final class OperationFlowViewModelTests: XCTestCase {
 
         await viewModel.confirm()
 
-        XCTAssertEqual(runner.commands, [.backup(options: .init(dryRun: true))])
+        XCTAssertEqual(runner.commands, [.backup(options: .init(dryRun: true, forceAnswer: .yes))])
         XCTAssertEqual(viewModel.output, "preview\n")
         XCTAssertEqual(
             viewModel.state,
             .finished(.backup, ProcessResult(exitCode: 0, terminationReason: .exit))
         )
         let runs = await logStore.runs()
-        XCTAssertEqual(runs.first?.command, .backup(options: .init(dryRun: true)))
+        XCTAssertEqual(runs.first?.command, .backup(options: .init(dryRun: true, forceAnswer: .yes)))
     }
 
     func testRestoreCanRunWithoutDryRunAfterConfirmation() async {
@@ -44,7 +44,7 @@ final class OperationFlowViewModelTests: XCTestCase {
         viewModel.request(.restore)
         await viewModel.confirm()
 
-        XCTAssertEqual(runner.commands, [.restore()])
+        XCTAssertEqual(runner.commands, [.restore(options: .init(forceAnswer: .yes))])
     }
 
     func testOperationUsesPreferredConfigPathInCommand() async {
@@ -59,7 +59,7 @@ final class OperationFlowViewModelTests: XCTestCase {
 
         XCTAssertEqual(
             runner.commands,
-            [.backup(options: .init(dryRun: true, configFile: configPath))]
+            [.backup(options: .init(dryRun: true, forceAnswer: .yes, configFile: configPath))]
         )
     }
 

@@ -29,6 +29,13 @@ struct ApplicationsListView: View {
 
                 Spacer()
 
+                if case .loaded = viewModel.state {
+                    Button(String(localized: "applications.sync_all")) {
+                        viewModel.selectAll()
+                    }
+                    .disabled(viewModel.isSyncAllMode)
+                }
+
                 Button {
                     Task {
                         await viewModel.refresh()

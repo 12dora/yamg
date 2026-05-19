@@ -89,10 +89,17 @@ struct RootShellView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        } else if section == .logs {
+            VStack(alignment: .leading, spacing: 10) {
+                sectionHeader(section)
+                LogsView()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader(section)
-
                 Spacer()
             }
             .padding(.horizontal, 20)

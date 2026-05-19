@@ -49,3 +49,7 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Replace Applications list with installed/Mackup-supported intersection plus per-row sync toggle that writes `[applications_to_sync]`.
 - [x] Fold Storage editor into Dashboard as a create-or-modify flow and remove the standalone Storage section.
 - [x] Remove development reset (`resetForFirstRunSimulation`) from Preferences and tighten Preferences layout.
+- [x] Fix `[applications_to_sync]` empty-means-sync-all semantics: all apps shown ON when list empty; Sync All button clears list; turning off one app in sync-all mode expands to explicit list.
+- [x] Fix `forceAnswer: nil` in OperationFlowViewModel — pass `--force` so Mackup does not prompt interactively (app provides its own confirmation dialog).
+- [x] Remove duplicate setupStateView that appeared under both install guide and config editor.
+- [x] Add minimal LogsView so the Logs sidebar section shows content instead of a blank page.

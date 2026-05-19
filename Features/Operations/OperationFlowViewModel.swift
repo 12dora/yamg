@@ -93,7 +93,7 @@ final class OperationFlowViewModel: ObservableObject {
         let options = MackupCommand.Options(
             dryRun: dryRun,
             verbose: verbose,
-            forceAnswer: nil,
+            forceAnswer: .yes,
             configFile: configFilePath
         )
 

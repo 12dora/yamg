@@ -141,8 +141,6 @@ struct DashboardView: View {
                     .disabled(isInstalling)
                 }
             }
-
-            setupStateView
         }
         .frame(maxWidth: 720, alignment: .leading)
     }

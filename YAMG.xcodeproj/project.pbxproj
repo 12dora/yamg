@@ -63,6 +63,7 @@
 		5D1A000000000000000000C9 /* LinkModeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000CB /* LinkModeViewModel.swift */; };
 		5D1A000000000000000000CC /* LinkModeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000CD /* LinkModeViewModelTests.swift */; };
 		5D1A000000000000000000CF /* CommandLineToolRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000D0 /* CommandLineToolRunner.swift */; };
+		5D1A000000000000000000DA /* LogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A000000000000000000DB /* LogsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -124,6 +125,7 @@
 		5D1A000000000000000000CB /* LinkModeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkModeViewModel.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000CD /* LinkModeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkModeViewModelTests.swift; sourceTree = "<group>"; };
 		5D1A000000000000000000D0 /* CommandLineToolRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLineToolRunner.swift; sourceTree = "<group>"; };
+		5D1A000000000000000000DB /* LogsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -186,12 +188,21 @@
 				5D1A0000000000000000009E /* Applications */,
 				5D1A00000000000000000090 /* Dashboard */,
 				5D1A000000000000000000CE /* LinkMode */,
+				5D1A000000000000000000DC /* Logs */,
 				5D1A000000000000000000B7 /* Operations */,
 				5D1A000000000000000000C7 /* Preferences */,
 				5D1A00000000000000000021 /* AppSection.swift */,
 				5D1A00000000000000000022 /* RootShellView.swift */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		5D1A000000000000000000DC /* Logs */ = {
+			isa = PBXGroup;
+			children = (
+				5D1A000000000000000000DB /* LogsView.swift */,
+			);
+			path = Logs;
 			sourceTree = "<group>";
 		};
 		5D1A00000000000000000013 /* YAMGTests */ = {
@@ -468,6 +479,7 @@
 				5D1A000000000000000000D1 /* InstalledApplicationScanner.swift in Sources */,
 				5D1A000000000000000000C8 /* LinkModeView.swift in Sources */,
 				5D1A000000000000000000C9 /* LinkModeViewModel.swift in Sources */,
+				5D1A000000000000000000DA /* LogsView.swift in Sources */,
 				5D1A00000000000000000086 /* LocalizationKey.swift in Sources */,
 				5D1A000000000000000000BB /* MackupInstallGuide.swift in Sources */,
 				5D1A00000000000000000072 /* RootShellView.swift in Sources */,

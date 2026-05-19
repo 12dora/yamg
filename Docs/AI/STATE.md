@@ -26,7 +26,7 @@ Keep this file short. Read first when resuming.
 
 ## Next Best Step
 
-Sidebar is Dashboard / Applications / Logs / Preferences (plus Link Mode when enabled). Dashboard owns CLI status, the create-or-modify Mackup storage editor, and backup/restore flows. Applications now lists installed apps that Mackup supports with per-row sync toggles writing `[applications_to_sync]`. Preferences no longer has a development reset.
+All known bugs fixed. Architecture note: `ProcessLogStore` is created per `OperationFlowViewModel` (not shared), so the Logs section currently shows a placeholder. Full log history would require a shared store at the app level.
 
-Pick the next item from `Docs/AI/TASKS.md` (currently bug fixes or polish on the new flows).
+Pick the next item from `Docs/AI/TASKS.md` or address remaining optimizations.
 

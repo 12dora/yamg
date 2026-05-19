@@ -79,33 +79,132 @@ final class ApplicationsListViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.state, .failed("missing"))
     }
 
+    func testEmptyApplicationsToSyncShowsAllAsSynced() async {
+        let viewModel = ApplicationsListViewModel(
+            installedScanner: FakeInstalledApplicationScanner(applications: [
+                MackupApplication(name: "git", displayName: "Git"),
+                MackupApplication(name: "raycast", displayName: "Raycast")
+            ]),
+            catalog: FakeCatalog(identifiers: ["git", "raycast"]),
+            configEditor: FakeMackupConfigEditor(
+                config: MackupConfig(
+                    fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                    storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                    applicationsToSync: [],
+                    applicationsToIgnore: [],
+                    originalText: ""
+                )
+            )
+        )
+
+        await viewModel.refresh()
+
+        XCTAssertTrue(viewModel.isSyncAllMode)
+        XCTAssertEqual(
+            viewModel.state,
+            .loaded([
+                SyncableApplication(identifier: "git", displayName: "Git", isSynced: true),
+                SyncableApplication(identifier: "raycast", displayName: "Raycast", isSynced: true)
+            ])
+        )
+    }
+
     func testTogglingSyncOnWritesApplicationToSyncList() async throws {
         let editor = FakeMackupConfigEditor(
             config: MackupConfig(
                 fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
                 storage: MackupStorage(engine: .fileSystem, path: "/Sync", directory: "Mackup"),
-                applicationsToSync: [],
+                applicationsToSync: ["raycast"],
                 applicationsToIgnore: ["xcode"],
                 originalText: "[storage]\nengine = file_system\n"
             )
         )
         let viewModel = ApplicationsListViewModel(
             installedScanner: FakeInstalledApplicationScanner(applications: [
-                MackupApplication(name: "git", displayName: "Git")
+                MackupApplication(name: "git", displayName: "Git"),
+                MackupApplication(name: "raycast", displayName: "Raycast")
             ]),
-            catalog: FakeCatalog(identifiers: ["git"]),
+            catalog: FakeCatalog(identifiers: ["git", "raycast"]),
             configEditor: editor
         )
         await viewModel.refresh()
 
+        XCTAssertFalse(viewModel.isSyncAllMode)
         XCTAssertTrue(viewModel.setSync(identifier: "git", isOn: true))
 
         let saved = try XCTUnwrap(editor.savedConfig)
-        XCTAssertEqual(saved.applicationsToSync, ["git"])
+        XCTAssertEqual(saved.applicationsToSync, ["git", "raycast"])
         XCTAssertEqual(saved.applicationsToIgnore, ["xcode"])
         XCTAssertEqual(saved.storage, MackupStorage(engine: .fileSystem, path: "/Sync", directory: "Mackup"))
         if case .loaded(let apps) = viewModel.state {
-            XCTAssertEqual(apps.first?.isSynced, true)
+            XCTAssertEqual(apps.first(where: { $0.identifier == "git" })?.isSynced, true)
+        } else {
+            XCTFail("Expected loaded state")
+        }
+    }
+
+    func testTogglingSyncOffInSyncAllModeExpandsToExplicitList() async throws {
+        let editor = FakeMackupConfigEditor(
+            config: MackupConfig(
+                fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                applicationsToSync: [],
+                applicationsToIgnore: [],
+                originalText: ""
+            )
+        )
+        let viewModel = ApplicationsListViewModel(
+            installedScanner: FakeInstalledApplicationScanner(applications: [
+                MackupApplication(name: "git", displayName: "Git"),
+                MackupApplication(name: "raycast", displayName: "Raycast")
+            ]),
+            catalog: FakeCatalog(identifiers: ["git", "raycast"]),
+            configEditor: editor
+        )
+        await viewModel.refresh()
+
+        XCTAssertTrue(viewModel.isSyncAllMode)
+        XCTAssertTrue(viewModel.setSync(identifier: "git", isOn: false))
+
+        let saved = try XCTUnwrap(editor.savedConfig)
+        XCTAssertEqual(saved.applicationsToSync, ["raycast"])
+        XCTAssertFalse(viewModel.isSyncAllMode)
+        if case .loaded(let apps) = viewModel.state {
+            XCTAssertEqual(apps.first(where: { $0.identifier == "git" })?.isSynced, false)
+            XCTAssertEqual(apps.first(where: { $0.identifier == "raycast" })?.isSynced, true)
+        } else {
+            XCTFail("Expected loaded state")
+        }
+    }
+
+    func testSelectAllClearsApplicationsToSyncList() async throws {
+        let editor = FakeMackupConfigEditor(
+            config: MackupConfig(
+                fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                applicationsToSync: ["git"],
+                applicationsToIgnore: [],
+                originalText: ""
+            )
+        )
+        let viewModel = ApplicationsListViewModel(
+            installedScanner: FakeInstalledApplicationScanner(applications: [
+                MackupApplication(name: "git", displayName: "Git"),
+                MackupApplication(name: "raycast", displayName: "Raycast")
+            ]),
+            catalog: FakeCatalog(identifiers: ["git", "raycast"]),
+            configEditor: editor
+        )
+        await viewModel.refresh()
+
+        XCTAssertFalse(viewModel.isSyncAllMode)
+        viewModel.selectAll()
+
+        let saved = try XCTUnwrap(editor.savedConfig)
+        XCTAssertEqual(saved.applicationsToSync, [])
+        XCTAssertTrue(viewModel.isSyncAllMode)
+        if case .loaded(let apps) = viewModel.state {
+            XCTAssertTrue(apps.allSatisfy(\.isSynced))
         } else {
             XCTFail("Expected loaded state")
         }

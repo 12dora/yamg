@@ -11,6 +11,7 @@ final class ApplicationsListViewModel: ObservableObject {
     }
 
     @Published private(set) var state: State = .idle
+    @Published private(set) var isSyncAllMode: Bool = true
 
     private let installedScanner: InstalledApplicationScanning
     private let catalog: MackupSupportedApplicationCataloging
@@ -69,15 +70,17 @@ final class ApplicationsListViewModel: ObservableObject {
             return
         }
 
+        let isSyncAll = config.applicationsToSync.isEmpty
         let syncedSet = Set(config.applicationsToSync)
         let syncables = matches.map { match in
             SyncableApplication(
                 identifier: match.identifier,
                 displayName: match.displayName,
-                isSynced: syncedSet.contains(match.identifier)
+                isSynced: isSyncAll || syncedSet.contains(match.identifier)
             )
         }
 
+        isSyncAllMode = isSyncAll
         state = .loaded(syncables)
     }
 
@@ -87,8 +90,6 @@ final class ApplicationsListViewModel: ObservableObject {
               let index = apps.firstIndex(where: { $0.identifier == identifier }) else {
             return false
         }
-
-        apps[index].isSynced = isOn
 
         let baseConfig: MackupConfig
         if let loadedConfig {
@@ -102,11 +103,15 @@ final class ApplicationsListViewModel: ObservableObject {
             }
         }
 
-        var updatedSync = baseConfig.applicationsToSync.filter { $0 != identifier }
-        if isOn {
-            updatedSync.append(identifier)
+        let updatedSync: [String]
+        if !isOn && isSyncAllMode {
+            // Expand sync-all into an explicit list excluding the app being turned off.
+            updatedSync = apps.compactMap { $0.identifier == identifier ? nil : $0.identifier }.sorted()
+        } else {
+            var list = baseConfig.applicationsToSync.filter { $0 != identifier }
+            if isOn { list.append(identifier) }
+            updatedSync = list.sorted()
         }
-        updatedSync.sort()
 
         let updatedConfig = MackupConfig(
             fileURL: baseConfig.fileURL,
@@ -119,11 +124,45 @@ final class ApplicationsListViewModel: ObservableObject {
         do {
             try configEditor.save(updatedConfig)
             loadedConfig = updatedConfig
+
+            apps[index].isSynced = isOn
+            let newSyncAll = updatedSync.isEmpty
+            if newSyncAll {
+                for i in apps.indices { apps[i].isSynced = true }
+            }
+            isSyncAllMode = newSyncAll
             state = .loaded(apps)
             return true
         } catch {
             state = .failed(error.localizedDescription)
             return false
         }
+    }
+
+    func selectAll() {
+        guard case .loaded(var apps) = state else { return }
+
+        let baseConfig: MackupConfig
+        if let loadedConfig {
+            baseConfig = loadedConfig
+        } else {
+            guard let loaded = try? configEditor.load(path: configFilePath) else { return }
+            baseConfig = loaded
+        }
+
+        let updatedConfig = MackupConfig(
+            fileURL: baseConfig.fileURL,
+            storage: baseConfig.storage,
+            applicationsToSync: [],
+            applicationsToIgnore: baseConfig.applicationsToIgnore,
+            originalText: baseConfig.originalText
+        )
+
+        guard (try? configEditor.save(updatedConfig)) != nil else { return }
+        loadedConfig = updatedConfig
+
+        for i in apps.indices { apps[i].isSynced = true }
+        isSyncAllMode = true
+        state = .loaded(apps)
     }
 }
