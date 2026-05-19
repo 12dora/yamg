@@ -63,6 +63,18 @@ struct PreferencesView: View {
                 }
             }
 
+            settingField(
+                label: String(localized: "preferences.language"),
+                detail: ""
+            ) {
+                Picker(String(localized: "preferences.language"), selection: $viewModel.preferredLanguage) {
+                    ForEach(AppLanguage.allCases, id: \.self) { language in
+                        Text(language.displayName).tag(language)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+
             HStack(spacing: 10) {
                 Button(role: .destructive) {
                     viewModel.reset()

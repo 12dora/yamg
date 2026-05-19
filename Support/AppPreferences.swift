@@ -1,9 +1,27 @@
 import Foundation
 
+enum AppLanguage: String, CaseIterable {
+    case system = "system"
+    case english = "en"
+    case simplifiedChinese = "zh-Hans"
+
+    var displayName: String {
+        switch self {
+        case .system:
+            return String(localized: "language.system")
+        case .english:
+            return String(localized: "language.english")
+        case .simplifiedChinese:
+            return String(localized: "language.simplified_chinese")
+        }
+    }
+}
+
 protocol AppPreferencesStoring: AnyObject {
     var preferredCLIPath: URL? { get set }
     var configFilePath: URL? { get set }
     var showsLinkMode: Bool { get set }
+    var preferredLanguage: AppLanguage { get set }
 }
 
 final class AppPreferences: ObservableObject, AppPreferencesStoring {
@@ -11,6 +29,7 @@ final class AppPreferences: ObservableObject, AppPreferencesStoring {
         static let preferredCLIPath = "preferredCLIPath"
         static let configFilePath = "configFilePath"
         static let showsLinkMode = "showsLinkMode"
+        static let preferredLanguage = "preferredLanguage"
     }
 
     private let defaults: UserDefaults
@@ -44,6 +63,17 @@ final class AppPreferences: ObservableObject, AppPreferencesStoring {
         set {
             objectWillChange.send()
             defaults.set(newValue, forKey: Key.showsLinkMode)
+        }
+    }
+
+    var preferredLanguage: AppLanguage {
+        get {
+            let rawValue = defaults.string(forKey: Key.preferredLanguage) ?? AppLanguage.system.rawValue
+            return AppLanguage(rawValue: rawValue) ?? .system
+        }
+        set {
+            objectWillChange.send()
+            defaults.set(newValue.rawValue, forKey: Key.preferredLanguage)
         }
     }
 

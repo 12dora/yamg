@@ -12,6 +12,7 @@ final class PreferencesViewModel: ObservableObject {
     @Published var cliPath: String
     @Published var configPath: String
     @Published var showsLinkMode: Bool
+    @Published var preferredLanguage: AppLanguage
     @Published private(set) var state: State = .editing
 
     private let preferences: AppPreferencesStoring
@@ -29,6 +30,7 @@ final class PreferencesViewModel: ObservableObject {
         self.cliPath = preferences.preferredCLIPath?.path ?? ""
         self.configPath = preferences.configFilePath?.path ?? ""
         self.showsLinkMode = preferences.showsLinkMode
+        self.preferredLanguage = preferences.preferredLanguage
     }
 
     func save() {
@@ -42,6 +44,7 @@ final class PreferencesViewModel: ObservableObject {
         preferences.preferredCLIPath = cliURL
         preferences.configFilePath = normalizedURL(from: configPath)
         preferences.showsLinkMode = showsLinkMode
+        preferences.preferredLanguage = preferredLanguage
         state = .saved
     }
 

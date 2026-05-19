@@ -142,10 +142,12 @@ private final class InMemoryPreferences: AppPreferencesStoring {
     var preferredCLIPath: URL?
     var configFilePath: URL?
     var showsLinkMode: Bool
+    var preferredLanguage: AppLanguage
 
-    init(preferredCLIPath: URL? = nil, configFilePath: URL? = nil, showsLinkMode: Bool = false) {
+    init(preferredCLIPath: URL? = nil, configFilePath: URL? = nil, showsLinkMode: Bool = false, preferredLanguage: AppLanguage = .system) {
         self.preferredCLIPath = preferredCLIPath
         self.configFilePath = configFilePath
         self.showsLinkMode = showsLinkMode
+        self.preferredLanguage = preferredLanguage
     }
 }
