@@ -21,10 +21,10 @@ struct LinkModeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Label(String(localized: "link_mode.warning"), systemImage: "exclamationmark.triangle")
+                    Label("link_mode.warning", systemImage: "exclamationmark.triangle")
                         .font(.headline)
                         .foregroundStyle(.orange)
-                    Text(String(localized: "link_mode.detail"))
+                    Text("link_mode.detail")
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: 820, alignment: .leading)
@@ -32,7 +32,7 @@ struct LinkModeView: View {
                 guide
                 commandGuide
 
-                Picker(String(localized: "link_mode.operation"), selection: $viewModel.selectedOperation) {
+                Picker("link_mode.operation", selection: $viewModel.selectedOperation) {
                     ForEach(LinkModeViewModel.Operation.allCases) { operation in
                         Text(title(for: operation)).tag(operation)
                     }
@@ -40,14 +40,14 @@ struct LinkModeView: View {
                 .pickerStyle(.segmented)
                 .frame(maxWidth: 480)
 
-                Toggle(String(localized: "operations.verbose"), isOn: $viewModel.verbose)
-                Toggle(String(localized: "link_mode.acknowledge"), isOn: $viewModel.acknowledgedRisk)
+                Toggle("operations.verbose", isOn: $viewModel.verbose)
+                Toggle("link_mode.acknowledge", isOn: $viewModel.acknowledgedRisk)
                     .toggleStyle(.checkbox)
 
                 Button {
                     viewModel.requestSelectedOperation()
                 } label: {
-                    Label(String(localized: "link_mode.request"), systemImage: "link")
+                    Label("link_mode.request", systemImage: "link")
                 }
                 .disabled(!viewModel.acknowledgedRisk || isRunning)
 
@@ -70,20 +70,20 @@ struct LinkModeView: View {
     }
 
     private var guide: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            guideRow(
-                title: String(localized: "link_mode.guide.install.title"),
-                detail: String(localized: "link_mode.guide.install.detail")
-            )
-            guideRow(
-                title: String(localized: "link_mode.guide.link.title"),
-                detail: String(localized: "link_mode.guide.link.detail")
-            )
-            guideRow(
-                title: String(localized: "link_mode.guide.uninstall.title"),
-                detail: String(localized: "link_mode.guide.uninstall.detail")
-            )
-        }
+            VStack(alignment: .leading, spacing: 6) {
+                guideRow(
+                    title: "link_mode.guide.install.title",
+                    detail: "link_mode.guide.install.detail"
+                )
+                guideRow(
+                    title: "link_mode.guide.link.title",
+                    detail: "link_mode.guide.link.detail"
+                )
+                guideRow(
+                    title: "link_mode.guide.uninstall.title",
+                    detail: "link_mode.guide.uninstall.detail"
+                )
+            }
         .frame(maxWidth: 820, alignment: .leading)
     }
 
@@ -91,22 +91,22 @@ struct LinkModeView: View {
         VStack(alignment: .leading, spacing: 6) {
             commandGuideRow(
                 command: "mackup link install",
-                detail: String(localized: "link_mode.command.install.detail")
+                detail: "link_mode.command.install.detail"
             )
             commandGuideRow(
                 command: "mackup link",
-                detail: String(localized: "link_mode.command.link.detail")
+                detail: "link_mode.command.link.detail"
             )
             commandGuideRow(
                 command: "mackup link uninstall",
-                detail: String(localized: "link_mode.command.uninstall.detail")
+                detail: "link_mode.command.uninstall.detail"
             )
         }
         .font(.callout)
         .frame(maxWidth: 820, alignment: .leading)
     }
 
-    private func guideRow(title: String, detail: String) -> some View {
+    private func guideRow(title: LocalizedStringKey, detail: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Text(title)
                 .font(.callout.weight(.semibold))
@@ -117,7 +117,7 @@ struct LinkModeView: View {
         }
     }
 
-    private func commandGuideRow(command: String, detail: String) -> some View {
+    private func commandGuideRow(command: String, detail: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Text(command)
                 .font(.system(.callout, design: .monospaced))
@@ -132,7 +132,7 @@ struct LinkModeView: View {
     private var confirmationView: some View {
         switch viewModel.state {
         case .idle:
-            Text(String(localized: "link_mode.idle"))
+            Text("link_mode.idle")
                 .font(.callout)
                 .foregroundStyle(.secondary)
         case .confirming(let operation):
@@ -144,7 +144,7 @@ struct LinkModeView: View {
                     Button(role: .cancel) {
                         viewModel.cancelConfirmation()
                     } label: {
-                        Text(String(localized: "action.cancel"))
+                        Text("action.cancel")
                     }
 
                     Button {
@@ -152,7 +152,7 @@ struct LinkModeView: View {
                             await viewModel.confirm()
                         }
                     } label: {
-                        Text(String(localized: "action.confirm"))
+                        Text("action.confirm")
                     }
                     .keyboardShortcut(.defaultAction)
                 }
@@ -177,36 +177,47 @@ struct LinkModeView: View {
         return false
     }
 
-    private func title(for operation: LinkModeViewModel.Operation) -> String {
+    private func title(for operation: LinkModeViewModel.Operation) -> LocalizedStringKey {
         switch operation {
         case .install:
-            return String(localized: "link_mode.install")
+            return "link_mode.install"
         case .link:
-            return String(localized: "link_mode.link")
+            return "link_mode.link"
         case .uninstall:
-            return String(localized: "link_mode.uninstall")
+            return "link_mode.uninstall"
         }
     }
 
-    private func confirmText(for operation: LinkModeViewModel.Operation) -> String {
+    private func confirmText(for operation: LinkModeViewModel.Operation) -> LocalizedStringKey {
         switch operation {
         case .install:
-            return String(localized: "link_mode.confirm.install")
+            return "link_mode.confirm.install"
         case .link:
-            return String(localized: "link_mode.confirm.link")
+            return "link_mode.confirm.link"
         case .uninstall:
-            return String(localized: "link_mode.confirm.uninstall")
+            return "link_mode.confirm.uninstall"
+        }
+    }
+
+    private func titleValue(for operation: LinkModeViewModel.Operation) -> String.LocalizationValue {
+        switch operation {
+        case .install:
+            return "link_mode.install"
+        case .link:
+            return "link_mode.link"
+        case .uninstall:
+            return "link_mode.uninstall"
         }
     }
 
     private func runningText(for operation: LinkModeViewModel.Operation) -> String {
-        "\(title(for: operation))..."
+        "\(String(localized: titleValue(for: operation)))..."
     }
 
     private func finishedText(for operation: LinkModeViewModel.Operation, result: ProcessResult) -> String {
         if result.exitCode == 0 {
-            return "\(title(for: operation)) completed successfully."
+            return "\(String(localized: titleValue(for: operation))) completed successfully."
         }
-        return "\(title(for: operation)) exited with status \(result.exitCode)."
+        return "\(String(localized: titleValue(for: operation))) exited with status \(result.exitCode)."
     }
 }

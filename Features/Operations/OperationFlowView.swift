@@ -20,22 +20,22 @@ struct OperationFlowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Toggle(String(localized: "operations.dry_run"), isOn: $viewModel.dryRun)
-                Toggle(String(localized: "operations.verbose"), isOn: $viewModel.verbose)
+                Toggle("operations.dry_run", isOn: $viewModel.dryRun)
+                Toggle("operations.verbose", isOn: $viewModel.verbose)
             }
 
             HStack {
                 Button {
                     viewModel.request(.backup)
                 } label: {
-                    Label(String(localized: "operations.backup"), systemImage: "arrow.up.doc")
+                    Label("operations.backup", systemImage: "arrow.up.doc")
                 }
                 .disabled(isRunning)
 
                 Button {
                     viewModel.request(.restore)
                 } label: {
-                    Label(String(localized: "operations.restore"), systemImage: "arrow.down.doc")
+                    Label("operations.restore", systemImage: "arrow.down.doc")
                 }
                 .disabled(isRunning)
             }
@@ -59,7 +59,7 @@ struct OperationFlowView: View {
     private var confirmationView: some View {
         switch viewModel.state {
         case .idle:
-            Text(String(localized: "operations.idle"))
+            Text("operations.idle")
                 .font(.callout)
                 .foregroundStyle(.secondary)
         case .confirming(let operation):
@@ -71,7 +71,7 @@ struct OperationFlowView: View {
                     Button(role: .cancel) {
                         viewModel.cancelConfirmation()
                     } label: {
-                        Text(String(localized: "action.cancel"))
+                        Text("action.cancel")
                     }
 
                     Button {
@@ -79,7 +79,7 @@ struct OperationFlowView: View {
                             await viewModel.confirm()
                         }
                     } label: {
-                        Text(String(localized: "action.confirm"))
+                        Text("action.confirm")
                     }
                     .keyboardShortcut(.defaultAction)
                 }
@@ -104,40 +104,40 @@ struct OperationFlowView: View {
         return false
     }
 
-    private func confirmationText(for operation: OperationFlowViewModel.Operation) -> String {
+    private func confirmationText(for operation: OperationFlowViewModel.Operation) -> LocalizedStringKey {
         switch operation {
         case .backup:
             return viewModel.dryRun
-                ? String(localized: "operations.confirm.backup_dry_run")
-                : String(localized: "operations.confirm.backup")
+                ? "operations.confirm.backup_dry_run"
+                : "operations.confirm.backup"
         case .restore:
             return viewModel.dryRun
-                ? String(localized: "operations.confirm.restore_dry_run")
-                : String(localized: "operations.confirm.restore")
+                ? "operations.confirm.restore_dry_run"
+                : "operations.confirm.restore"
         }
     }
 
-    private func runningText(for operation: OperationFlowViewModel.Operation) -> String {
+    private func runningText(for operation: OperationFlowViewModel.Operation) -> LocalizedStringKey {
         switch operation {
         case .backup:
-            return String(localized: "operations.running.backup")
+            return "operations.running.backup"
         case .restore:
-            return String(localized: "operations.running.restore")
+            return "operations.running.restore"
         }
     }
 
     private func finishedText(for operation: OperationFlowViewModel.Operation, result: ProcessResult) -> String {
-        let operationName: String
+        let operationName: String.LocalizationValue
         switch operation {
         case .backup:
-            operationName = String(localized: "operations.backup")
+            operationName = "operations.backup"
         case .restore:
-            operationName = String(localized: "operations.restore")
+            operationName = "operations.restore"
         }
 
         if result.exitCode == 0 {
-            return "\(operationName) completed successfully."
+            return "\(String(localized: operationName)) completed successfully."
         }
-        return "\(operationName) exited with status \(result.exitCode)."
+        return "\(String(localized: operationName)) exited with status \(result.exitCode)."
     }
 }

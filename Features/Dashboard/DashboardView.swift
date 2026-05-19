@@ -64,9 +64,9 @@ struct DashboardView: View {
                     .frame(maxWidth: 780)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(String(localized: "scheduled_backup.enabled"))
+                    Text("scheduled_backup.enabled")
                         .font(.headline)
-                    Text(String(localized: "scheduled_backup.interval"))
+                    Text("scheduled_backup.interval")
                         .font(.callout)
                         .foregroundStyle(.secondary)
 
@@ -121,13 +121,13 @@ struct DashboardView: View {
 
     private var installGuide: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(String(localized: "install.title"))
+            Text("install.title")
                 .font(.headline)
-            Text(String(localized: "install.detail"))
+            Text("install.detail")
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
-            Picker(String(localized: "install.method"), selection: $viewModel.selectedInstallOptionID) {
+            Picker("install.method", selection: $viewModel.selectedInstallOptionID) {
                 ForEach(viewModel.installGuide.options) { option in
                     Text(option.title).tag(option.id)
                 }
@@ -146,7 +146,7 @@ struct DashboardView: View {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(option.command, forType: .string)
                     } label: {
-                        Label(String(localized: "action.copy"), systemImage: "doc.on.doc")
+                        Label("action.copy", systemImage: "doc.on.doc")
                     }
 
                     Button {
@@ -154,7 +154,7 @@ struct DashboardView: View {
                             await viewModel.installSelectedMackup()
                         }
                     } label: {
-                        Label(String(localized: "install.run"), systemImage: "arrow.down.circle")
+                        Label("install.run", systemImage: "arrow.down.circle")
                     }
                     .disabled(isInstalling)
                 }
@@ -165,9 +165,9 @@ struct DashboardView: View {
 
     private var configEditor: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(String(localized: "setup.config.title"))
+            Text("setup.config.title")
                 .font(.headline)
-            Text(String(localized: "setup.config.detail"))
+            Text("setup.config.detail")
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
@@ -175,7 +175,7 @@ struct DashboardView: View {
 
             selectedPathRow(
                 text: viewModel.selectedStorageFolderPath,
-                placeholder: String(localized: "storage.folder.placeholder"),
+                placeholder: "storage.folder.placeholder",
                 systemImage: "folder"
             ) {
                 chooseFolder { url in
@@ -197,7 +197,7 @@ struct DashboardView: View {
             Button {
                 viewModel.saveStorageConfig()
             } label: {
-                Label(String(localized: String.LocalizationValue(viewModel.saveButtonTitleKey)), systemImage: "square.and.arrow.down")
+                Label(LocalizedStringKey(viewModel.saveButtonTitleKey), systemImage: "square.and.arrow.down")
             }
             .disabled(isSavingConfig || !viewModel.canSaveConfig)
 
@@ -228,17 +228,24 @@ struct DashboardView: View {
 
     private func selectedPathRow(
         text: String,
-        placeholder: String,
+        placeholder: LocalizedStringKey,
         systemImage: String,
         onChoose: @escaping () -> Void
     ) -> some View {
         HStack(spacing: 8) {
             Label {
-                Text(text.isEmpty ? placeholder : text)
-                    .foregroundStyle(text.isEmpty ? .secondary : .primary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .textSelection(.enabled)
+                if text.isEmpty {
+                    Text(placeholder)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                } else {
+                    Text(text)
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .textSelection(.enabled)
+                }
             } icon: {
                 Image(systemName: systemImage)
                     .foregroundStyle(.secondary)
@@ -251,7 +258,7 @@ struct DashboardView: View {
             Button {
                 onChoose()
             } label: {
-                Label(String(localized: "action.choose"), systemImage: "folder")
+                Label("action.choose", systemImage: "folder")
             }
         }
     }
@@ -262,10 +269,10 @@ struct DashboardView: View {
         case .idle:
             EmptyView()
         case .installing(let method):
-            Label(String(localized: "install.running \(method)"), systemImage: "clock")
+            Label("install.running \(method)", systemImage: "clock")
                 .foregroundStyle(.secondary)
         case .installFinished(let output):
-            Label(output.isEmpty ? String(localized: "install.finished") : output, systemImage: "checkmark.circle")
+            Label(output.isEmpty ? LocalizedStringKey("install.finished") : LocalizedStringKey(output), systemImage: "checkmark.circle")
                 .foregroundStyle(.green)
                 .textSelection(.enabled)
         case .installFailed(let message):
@@ -273,10 +280,10 @@ struct DashboardView: View {
                 .foregroundStyle(.red)
                 .textSelection(.enabled)
         case .savingConfig:
-            Label(String(localized: "setup.config.saving"), systemImage: "clock")
+            Label("setup.config.saving", systemImage: "clock")
                 .foregroundStyle(.secondary)
         case .configSaved(let url):
-            Label(String(localized: "setup.config.saved \(url.path)"), systemImage: "checkmark.circle")
+            Label("setup.config.saved \(url.path)", systemImage: "checkmark.circle")
                 .foregroundStyle(.green)
                 .textSelection(.enabled)
         case .configSaveFailed(let message):
@@ -303,8 +310,8 @@ struct DashboardView: View {
     private func statusRow(
         title: LocalizedStringKey,
         systemImage: String,
-        stateText: String,
-        detailText: String
+        stateText: LocalizedStringKey,
+        detailText: LocalizedStringKey
     ) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: systemImage)
@@ -350,38 +357,38 @@ struct DashboardView: View {
         }
     }
 
-    private var cliStatusText: String {
+    private var cliStatusText: LocalizedStringKey {
         switch viewModel.cliState {
         case .unknown:
-            return String(localized: "status.not_checked")
+            return "status.not_checked"
         case .checking:
-            return String(localized: "status.checking")
+            return "status.checking"
         case .available(_, let version):
-            return String(localized: "onboarding.cli.available \(version.description)")
+            return "onboarding.cli.available \(version.description)"
         case .unavailable:
-            return String(localized: "onboarding.cli.unavailable")
+            return "onboarding.cli.unavailable"
         case .invalidVersion:
-            return String(localized: "onboarding.cli.invalid_version")
+            return "onboarding.cli.invalid_version"
         case .failed:
-            return String(localized: "onboarding.cli.failed")
+            return "onboarding.cli.failed"
         }
     }
 
-    private var cliDetailText: String {
+    private var cliDetailText: LocalizedStringKey {
         switch viewModel.cliState {
         case .available(let path, _):
-            return path.path
+            return LocalizedStringKey(path.path)
         case .invalidVersion(let path, let output):
-            return "\(path.path): \(output.trimmingCharacters(in: .whitespacesAndNewlines))"
+            return LocalizedStringKey("\(path.path): \(output.trimmingCharacters(in: .whitespacesAndNewlines))")
         case .failed(let path, let message):
             if let path {
-                return "\(path.path): \(message)"
+                return LocalizedStringKey("\(path.path): \(message)")
             }
-            return message
+            return LocalizedStringKey(message)
         case .unavailable:
-            return String(localized: "onboarding.cli.unavailable.detail")
+            return "onboarding.cli.unavailable.detail"
         case .checking, .unknown:
-            return String(localized: "onboarding.cli.pending.detail")
+            return "onboarding.cli.pending.detail"
         }
     }
 
@@ -396,23 +403,23 @@ struct DashboardView: View {
         }
     }
 
-    private var configStatusText: String {
+    private var configStatusText: LocalizedStringKey {
         switch viewModel.configState {
         case .unknown:
-            return String(localized: "status.not_checked")
+            return "status.not_checked"
         case .present:
-            return String(localized: "onboarding.config.present")
+            return "onboarding.config.present"
         case .missing:
-            return String(localized: "onboarding.config.missing")
+            return "onboarding.config.missing"
         }
     }
 
-    private var configDetailText: String {
+    private var configDetailText: LocalizedStringKey {
         switch viewModel.configState {
         case .present(let path), .missing(let path):
-            return path.path
+            return LocalizedStringKey(path.path)
         case .unknown:
-            return String(localized: "onboarding.config.pending.detail")
+            return "onboarding.config.pending.detail"
         }
     }
 }
@@ -601,12 +608,12 @@ struct ScheduledBackupView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
-                Toggle(String(localized: "scheduled_backup.enabled"), isOn: $viewModel.isEnabled)
+                Toggle("scheduled_backup.enabled", isOn: $viewModel.isEnabled)
                     .toggleStyle(.checkbox)
 
                 if viewModel.isEnabled {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(String(localized: "scheduled_backup.interval"))
+                        Text("scheduled_backup.interval")
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
@@ -633,7 +640,7 @@ struct ScheduledBackupView: View {
             }
 
             if viewModel.isInstalled {
-                Label(String(localized: "scheduled_backup.installed"), systemImage: "checkmark.circle")
+                Label("scheduled_backup.installed", systemImage: "checkmark.circle")
                     .font(.caption)
                     .foregroundStyle(.green)
             }
@@ -642,7 +649,7 @@ struct ScheduledBackupView: View {
                 Button {
                     viewModel.save()
                 } label: {
-                    Label(String(localized: "action.save"), systemImage: "square.and.arrow.down")
+                    Label("action.save", systemImage: "square.and.arrow.down")
                 }
                 .disabled(viewModel.state == .saving)
 
@@ -654,7 +661,7 @@ struct ScheduledBackupView: View {
             }
 
             if case .saved = viewModel.state {
-                Label(String(localized: "scheduled_backup.saved"), systemImage: "checkmark.circle")
+                Label("scheduled_backup.saved", systemImage: "checkmark.circle")
                     .font(.caption)
                     .foregroundStyle(.green)
             }

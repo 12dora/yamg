@@ -15,12 +15,12 @@ struct PreferencesView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             settingField(
-                label: String(localized: "preferences.cli_path"),
-                detail: String(localized: "preferences.cli_path.detail")
+                label: "preferences.cli_path",
+                detail: "preferences.cli_path.detail"
             ) {
                 selectedPathRow(
                     text: viewModel.cliPath,
-                    placeholder: String(localized: "preferences.cli_path.placeholder"),
+                    placeholder: "preferences.cli_path.placeholder",
                     systemImage: "terminal"
                 ) {
                     chooseFile { url in
@@ -30,12 +30,12 @@ struct PreferencesView: View {
             }
 
             settingField(
-                label: String(localized: "preferences.config_path"),
-                detail: String(localized: "preferences.config_path.detail")
+                label: "preferences.config_path",
+                detail: "preferences.config_path.detail"
             ) {
                 selectedPathRow(
                     text: viewModel.configPath,
-                    placeholder: String(localized: "preferences.config_path.placeholder"),
+                    placeholder: "preferences.config_path.placeholder",
                     systemImage: "doc.text"
                 ) {
                     chooseConfigFile { url in
@@ -46,46 +46,49 @@ struct PreferencesView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 8) {
-                    Toggle(String(localized: "preferences.show_link_mode"), isOn: $viewModel.showsLinkMode)
+                    Toggle("preferences.show_link_mode", isOn: $viewModel.showsLinkMode)
                         .toggleStyle(.checkbox)
 
                     if viewModel.showsLinkMode {
-                        Label(String(localized: "link_mode.high_risk"), systemImage: "exclamationmark.circle.fill")
+                        Label("link_mode.high_risk", systemImage: "exclamationmark.circle.fill")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.red)
                     }
                 }
 
                 if viewModel.showsLinkMode {
-                    Text(String(localized: "link_mode.warning"))
+                    Text("link_mode.warning")
                         .font(.caption)
                         .foregroundStyle(.red)
                 }
             }
 
             settingField(
-                label: String(localized: "preferences.language"),
+                label: "preferences.language",
                 detail: ""
             ) {
-                Picker(String(localized: "preferences.language"), selection: $viewModel.preferredLanguage) {
+                Picker("preferences.language", selection: $viewModel.preferredLanguage) {
                     ForEach(AppLanguage.allCases, id: \.self) { language in
-                        Text(language.displayName).tag(language)
+                        Text(language.displayNameKey).tag(language)
                     }
                 }
                 .pickerStyle(.menu)
+                .onChange(of: viewModel.preferredLanguage) { _ in
+                    viewModel.applyPreferredLanguage()
+                }
             }
 
             HStack(spacing: 10) {
                 Button(role: .destructive) {
                     viewModel.reset()
                 } label: {
-                    Label(String(localized: "action.reset"), systemImage: "arrow.counterclockwise")
+                    Label("action.reset", systemImage: "arrow.counterclockwise")
                 }
 
                 Button {
                     viewModel.save()
                 } label: {
-                    Label(String(localized: "action.save"), systemImage: "square.and.arrow.down")
+                    Label("action.save", systemImage: "square.and.arrow.down")
                 }
                 .keyboardShortcut(.defaultAction)
 
@@ -100,10 +103,10 @@ struct PreferencesView: View {
     private var stateLabel: some View {
         switch viewModel.state {
         case .saved:
-            Label(String(localized: "preferences.saved"), systemImage: "checkmark.circle")
+            Label("preferences.saved", systemImage: "checkmark.circle")
                 .foregroundStyle(.green)
         case .reset:
-            Label(String(localized: "preferences.reset_done"), systemImage: "checkmark.circle")
+            Label("preferences.reset_done", systemImage: "checkmark.circle")
                 .foregroundStyle(.green)
                 .textSelection(.enabled)
         case .failed(let message):
@@ -116,8 +119,8 @@ struct PreferencesView: View {
     }
 
     private func settingField<Content: View>(
-        label: String,
-        detail: String,
+        label: LocalizedStringKey,
+        detail: LocalizedStringKey,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -132,17 +135,24 @@ struct PreferencesView: View {
 
     private func selectedPathRow(
         text: String,
-        placeholder: String,
+        placeholder: LocalizedStringKey,
         systemImage: String,
         onChoose: @escaping () -> Void
     ) -> some View {
         HStack(spacing: 8) {
             Label {
-                Text(text.isEmpty ? placeholder : text)
-                    .foregroundStyle(text.isEmpty ? .secondary : .primary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .textSelection(.enabled)
+                if text.isEmpty {
+                    Text(placeholder)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                } else {
+                    Text(text)
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .textSelection(.enabled)
+                }
             } icon: {
                 Image(systemName: systemImage)
                     .foregroundStyle(.secondary)
@@ -155,7 +165,7 @@ struct PreferencesView: View {
             Button {
                 onChoose()
             } label: {
-                Label(String(localized: "action.choose"), systemImage: "folder")
+                Label("action.choose", systemImage: "folder")
             }
         }
     }

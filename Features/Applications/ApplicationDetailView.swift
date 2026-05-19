@@ -26,9 +26,9 @@ struct ApplicationDetailView: View {
                     }
             } else {
                 unavailableView(
-                    title: String(localized: "application.detail.placeholder"),
+                    title: "application.detail.placeholder",
                     systemImage: "sidebar.right",
-                    detail: String(localized: "application.detail.placeholder.detail")
+                    detail: "application.detail.placeholder.detail"
                 )
             }
         }
@@ -59,11 +59,11 @@ struct ApplicationDetailView: View {
 
                 Divider()
 
-                Text(String(localized: "application.detail.configuration_files"))
+                Text("application.detail.configuration_files")
                     .font(.headline)
 
                 if detail.configurationFiles.isEmpty {
-                    Text(String(localized: "application.detail.no_files"))
+                    Text("application.detail.no_files")
                         .foregroundStyle(.secondary)
                 } else {
                     List(detail.configurationFiles, id: \.self) { file in
@@ -76,14 +76,14 @@ struct ApplicationDetailView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         case .failed(let applicationName, let message):
             unavailableView(
-                title: applicationName,
+                title: LocalizedStringKey(applicationName),
                 systemImage: "exclamationmark.triangle",
-                detail: message
+                detail: LocalizedStringKey(message)
             )
         }
     }
 
-    private func unavailableView(title: String, systemImage: String, detail: String) -> some View {
+    private func unavailableView(title: LocalizedStringKey, systemImage: String, detail: LocalizedStringKey) -> some View {
         VStack(spacing: 8) {
             Image(systemName: systemImage)
                 .font(.largeTitle)

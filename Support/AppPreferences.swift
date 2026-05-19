@@ -1,18 +1,30 @@
 import Foundation
+import SwiftUI
 
 enum AppLanguage: String, CaseIterable {
     case system = "system"
     case english = "en"
     case simplifiedChinese = "zh-Hans"
 
-    var displayName: String {
+    var locale: Locale {
         switch self {
         case .system:
-            return String(localized: "language.system")
+            return .autoupdatingCurrent
         case .english:
-            return String(localized: "language.english")
+            return Locale(identifier: rawValue)
         case .simplifiedChinese:
-            return String(localized: "language.simplified_chinese")
+            return Locale(identifier: rawValue)
+        }
+    }
+
+    var displayNameKey: LocalizedStringKey {
+        switch self {
+        case .system:
+            return "language.system"
+        case .english:
+            return "language.english"
+        case .simplifiedChinese:
+            return "language.simplified_chinese"
         }
     }
 }

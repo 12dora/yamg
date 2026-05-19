@@ -48,6 +48,10 @@ final class PreferencesViewModel: ObservableObject {
         state = .saved
     }
 
+    func applyPreferredLanguage() {
+        preferences.preferredLanguage = preferredLanguage
+    }
+
     func reset() {
         do {
             let configPathsToDelete = uniqueURLs([

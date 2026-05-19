@@ -30,12 +30,12 @@ struct ApplicationsListView: View {
                 Spacer()
 
                 if case .loaded = viewModel.state {
-                    Button(String(localized: "applications.sync_all")) {
+                    Button("applications.sync_all") {
                         viewModel.selectAll()
                     }
                     .disabled(viewModel.isSyncAllMode)
 
-                    Button(String(localized: "applications.sync_none")) {
+                    Button("applications.sync_none") {
                         viewModel.deselectAll()
                     }
                     .disabled(!viewModel.isSyncAllMode && viewModel.state == .idle)
@@ -76,7 +76,7 @@ struct ApplicationsListView: View {
     private var content: some View {
         switch viewModel.state {
         case .idle:
-            Text(String(localized: "status.not_checked"))
+            Text("status.not_checked")
                 .foregroundStyle(.secondary)
         case .loading:
             ProgressView()
@@ -131,20 +131,20 @@ struct ApplicationsListView: View {
             }
         case .empty:
             unavailableView(
-                title: String(localized: "applications.empty"),
+                title: "applications.empty",
                 systemImage: "tray",
-                detail: String(localized: "applications.empty.detail")
+                detail: "applications.empty.detail"
             )
         case .failed(let message):
             unavailableView(
-                title: String(localized: "applications.failed"),
+                title: "applications.failed",
                 systemImage: "exclamationmark.triangle",
-                detail: message
+                detail: LocalizedStringKey(message)
             )
         }
     }
 
-    private func unavailableView(title: String, systemImage: String, detail: String) -> some View {
+    private func unavailableView(title: LocalizedStringKey, systemImage: String, detail: LocalizedStringKey) -> some View {
         VStack(spacing: 8) {
             Image(systemName: systemImage)
                 .font(.largeTitle)
@@ -158,18 +158,18 @@ struct ApplicationsListView: View {
         .frame(maxWidth: .infinity, minHeight: 240)
     }
 
-    private var statusText: String {
+    private var statusText: LocalizedStringKey {
         switch viewModel.state {
         case .idle:
-            return String(localized: "status.not_checked")
+            return "status.not_checked"
         case .loading:
-            return String(localized: "status.checking")
+            return "status.checking"
         case .loaded(let applications):
-            return String(localized: "applications.count \(applications.count)")
+            return "applications.count \(applications.count)"
         case .empty:
-            return String(localized: "applications.empty")
+            return "applications.empty"
         case .failed:
-            return String(localized: "applications.failed")
+            return "applications.failed"
         }
     }
 }

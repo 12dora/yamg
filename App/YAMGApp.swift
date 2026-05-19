@@ -8,6 +8,7 @@ struct YAMGApp: App {
     var body: some Scene {
         WindowGroup {
             RootShellView(preferences: preferences, logStore: logStore)
+                .environment(\.locale, preferences.preferredLanguage.locale)
         }
     }
 }
