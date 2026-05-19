@@ -66,11 +66,28 @@ YAMG does **not** reimplement sync logic. It detects your environment, helps you
 
 ## Installation
 
-> Distributable builds are not yet available. Clone the repository and build with Xcode.
+### Homebrew (recommended)
 
 ```bash
-git clone https://github.com/12dora/YAMG.git
-cd YAMG
+brew install --cask 12dora/tap/yamg
+```
+
+Homebrew strips the macOS quarantine attribute automatically — no Gatekeeper prompt.
+
+### Manual DMG
+
+1. Download the latest `.dmg` from [Releases](https://github.com/12dora/yamg/releases).
+2. Open the DMG, drag **YAMG** into `/Applications`.
+3. The app is ad-hoc signed but not notarized (no Apple Developer Program membership). Clear the quarantine flag once:
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/YAMG.app
+   ```
+
+### Build from source
+
+```bash
+git clone https://github.com/12dora/yamg.git
+cd yamg
 open YAMG.xcodeproj
 ```
 
@@ -193,11 +210,28 @@ YAMG **不**重新实现同步逻辑。它负责检测你的环境、帮助你�
 
 ## 安装
 
-> 目前尚无预构建安装包。请克隆仓库后使用 Xcode 构建。
+### Homebrew（推荐）
 
 ```bash
-git clone https://github.com/12dora/YAMG.git
-cd YAMG
+brew install --cask 12dora/tap/yamg
+```
+
+Homebrew 会自动移除 macOS 隔离属性，无需处理 Gatekeeper 弹窗。
+
+### 手动安装 DMG
+
+1. 从 [Releases](https://github.com/12dora/yamg/releases) 下载最新 `.dmg`。
+2. 打开 DMG，将 **YAMG** 拖入 `/Applications`。
+3. 本应用使用 ad-hoc 签名，未经 Apple 公证（无 Apple Developer Program 会员资格）。首次运行前需执行一次：
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/YAMG.app
+   ```
+
+### 从源码构建
+
+```bash
+git clone https://github.com/12dora/yamg.git
+cd yamg
 open YAMG.xcodeproj
 ```
 
