@@ -22,6 +22,11 @@ jobs:
   build:
     name: Build & publish DMG
     runs-on: macos-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      bundle_version: ${{ steps.ver.outputs.bundle_version }}
+      sha256: ${{ steps.hash.outputs.sha256 }}
+      is_prerelease: ${{ steps.ver.outputs.is_prerelease }}
 
     steps:
       - name: Checkout
@@ -38,8 +43,16 @@ jobs:
           else
             VERSION="${{ github.event.inputs.version }}"
           fi
+          BUNDLE_VERSION="${VERSION%%-*}"
+          if [[ "$VERSION" == *-* ]]; then
+            IS_PRERELEASE="true"
+          else
+            IS_PRERELEASE="false"
+          fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Building YAMG ${VERSION}"
+          echo "bundle_version=${BUNDLE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=${IS_PRERELEASE}" >> "$GITHUB_OUTPUT"
+          echo "Building YAMG ${VERSION} (bundle: ${BUNDLE_VERSION}, prerelease: ${IS_PRERELEASE})"
 
       - name: Build Release (ad-hoc signed)
         run: |
@@ -49,14 +62,13 @@ jobs:
             -configuration Release \
             -derivedDataPath build \
             -destination 'generic/platform=macOS' \
-            MARKETING_VERSION=${{ steps.ver.outputs.version }} \
+            MARKETING_VERSION=${{ steps.ver.outputs.bundle_version }} \
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=YES \
             build | xcpretty || true
-          # xcpretty may swallow non-zero; re-check the artifact exists
           test -d "build/Build/Products/Release/YAMG.app"
 
       - name: Re-sign ad-hoc (deep)
@@ -88,7 +100,7 @@ jobs:
           SHA=$(shasum -a 256 "$DMG" | awk '{print $1}')
           echo "sha256=${SHA}" >> "$GITHUB_OUTPUT"
 
-      - name: Upload artifact (always, for inspection)
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: YAMG-${{ steps.ver.outputs.version }}-dmg
@@ -101,6 +113,7 @@ jobs:
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          prerelease: ${{ steps.ver.outputs.is_prerelease == 'true' }}
           files: |
             YAMG-${{ steps.ver.outputs.version }}.dmg
             YAMG-${{ steps.ver.outputs.version }}.dmg.sha256
@@ -132,3 +145,57 @@ jobs:
             ```
             ${{ steps.hash.outputs.sha256 }}
             ```
+
+            ---
+            *Based on [Mackup](https://github.com/lra/mackup) 0.10.3*
+
+  update-tap:
+    name: Update Homebrew tap
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout homebrew-tap
+        uses: actions/checkout@v4
+        with:
+          repository: 12dora/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+      - name: Update cask
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          SHA256="${{ needs.build.outputs.sha256 }}"
+          cat > Casks/yamg.rb << 'CASK'
+          cask "yamg" do
+            version "VERSION_PLACEHOLDER"
+            sha256 "SHA256_PLACEHOLDER"
+
+            url "https://github.com/12dora/yamg/releases/download/v#{version}/YAMG-#{version}.dmg"
+            name "YAMG"
+            desc "Yet Another Mackup GUI for macOS"
+            homepage "https://github.com/12dora/yamg"
+
+            app "YAMG.app"
+
+            zap trash: [
+              "~/Library/Preferences/com.yamg.app.plist",
+              "~/Library/Application Support/YAMG",
+              "~/Library/Caches/com.yamg.app",
+              "~/Library/Saved Application State/com.yamg.app.savedState",
+            ]
+          end
+          CASK
+          sed -i "s/VERSION_PLACEHOLDER/${VERSION}/" Casks/yamg.rb
+          sed -i "s/SHA256_PLACEHOLDER/${SHA256}/" Casks/yamg.rb
+          # Remove leading whitespace from heredoc
+          sed -i 's/^          //' Casks/yamg.rb
+
+      - name: Commit and push
+        run: |
+          git config user.name "12dora"
+          git config user.email "12dora@users.noreply.github.com"
+          git add Casks/yamg.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "yamg ${{ needs.build.outputs.version }}"
+          git push
