@@ -1,10 +1,22 @@
 import SwiftUI
 
 struct OperationFlowView: View {
+    struct Layout {
+        var panelHeight: CGFloat?
+        var controlsWidth: CGFloat = 150
+        var actionButtonWidth: CGFloat = 108
+        var logMinWidth: CGFloat = 150
+        var logMaxWidth: CGFloat = .infinity
+        var logHeight: CGFloat?
+        var logMaxHeight: CGFloat = .infinity
+    }
+
     @StateObject private var viewModel: OperationFlowViewModel
+    private let layout: Layout
 
     @MainActor
-    init(preferences: AppPreferencesStoring = AppPreferences()) {
+    init(preferences: AppPreferencesStoring = AppPreferences(), layout: Layout = Layout()) {
+        self.layout = layout
         _viewModel = StateObject(
             wrappedValue: OperationFlowViewModel(
                 preferredCLIPath: preferences.preferredCLIPath,
@@ -13,87 +25,94 @@ struct OperationFlowView: View {
         )
     }
 
-    init(viewModel: OperationFlowViewModel) {
+    init(viewModel: OperationFlowViewModel, layout: Layout = Layout()) {
+        self.layout = layout
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Toggle("operations.dry_run", isOn: $viewModel.dryRun)
-                Toggle("operations.verbose", isOn: $viewModel.verbose)
-            }
+        HStack(alignment: .top, spacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    HStack(spacing: 4) {
+                        Text("operations.backup")
+                        Text("/")
+                        Text("operations.restore")
+                    }
+                    .font(.headline)
 
-            HStack {
-                Button {
-                    viewModel.request(.backup)
-                } label: {
-                    Label("operations.backup", systemImage: "arrow.up.doc")
+                    Spacer(minLength: 8)
+
+                    operationStatusBadge
                 }
-                .disabled(isRunning)
 
-                Button {
-                    viewModel.request(.restore)
-                } label: {
-                    Label("operations.restore", systemImage: "arrow.down.doc")
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("operations.dry_run", isOn: $viewModel.dryRun)
+                        .toggleStyle(.checkbox)
+                    Toggle("operations.verbose", isOn: $viewModel.verbose)
+                        .toggleStyle(.checkbox)
                 }
-                .disabled(isRunning)
-            }
 
-            confirmationView
+                VStack(alignment: .leading, spacing: 6) {
+                    Button {
+                        viewModel.request(.backup)
+                    } label: {
+                        Label("operations.backup", systemImage: "arrow.up.doc")
+                            .frame(width: layout.actionButtonWidth)
+                    }
+                    .disabled(isRunning)
 
-            if !viewModel.output.isEmpty {
-                ScrollView {
-                    Text(viewModel.output)
-                        .font(.system(.callout, design: .monospaced))
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Button {
+                        viewModel.request(.restore)
+                    } label: {
+                        Label("operations.restore", systemImage: "arrow.down.doc")
+                            .frame(width: layout.actionButtonWidth)
+                    }
+                    .disabled(isRunning)
                 }
-                .frame(maxWidth: 720, minHeight: 120, maxHeight: 220)
+
+                Spacer(minLength: 0)
             }
+            .frame(width: layout.controlsWidth, alignment: .topLeading)
+
+            ScrollView {
+                Text(viewModel.output.isEmpty ? " " : viewModel.output)
+                    .font(.system(.caption, design: .monospaced))
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(minWidth: layout.logMinWidth, maxWidth: layout.logMaxWidth, alignment: .topLeading)
+            .frame(height: layout.logHeight, alignment: .topLeading)
+            .frame(maxHeight: layout.logMaxHeight, alignment: .topLeading)
+            .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 6))
         }
-        .frame(maxWidth: 760, alignment: .leading)
+        .padding(10)
+        .frame(height: layout.panelHeight, alignment: .topLeading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     @ViewBuilder
-    private var confirmationView: some View {
+    private var operationStatusBadge: some View {
         switch viewModel.state {
         case .idle:
-            Text("operations.idle")
-                .font(.callout)
+            EmptyView()
+        case .running:
+            Image(systemName: "clock")
                 .foregroundStyle(.secondary)
-        case .confirming(let operation):
-            VStack(alignment: .leading, spacing: 10) {
-                Label(confirmationText(for: operation), systemImage: "exclamationmark.triangle")
-                    .foregroundStyle(.orange)
-
-                HStack {
-                    Button(role: .cancel) {
-                        viewModel.cancelConfirmation()
-                    } label: {
-                        Text("action.cancel")
-                    }
-
-                    Button {
-                        Task {
-                            await viewModel.confirm()
-                        }
-                    } label: {
-                        Text("action.confirm")
-                    }
-                    .keyboardShortcut(.defaultAction)
-                }
-            }
-        case .running(let operation):
-            Label(runningText(for: operation), systemImage: "clock")
-                .foregroundStyle(.secondary)
-        case .finished(let operation, let result):
-            Label(finishedText(for: operation, result: result), systemImage: result.exitCode == 0 ? "checkmark.circle" : "exclamationmark.triangle")
+        case .finished(_, let result):
+            Label(
+                result.exitCode == 0 ? "operations.status.success" : "operations.status.failure",
+                systemImage: result.exitCode == 0 ? "checkmark.circle" : "exclamationmark.triangle"
+            )
+            .font(.caption)
+            .lineLimit(1)
                 .foregroundStyle(result.exitCode == 0 ? .green : .orange)
-        case .failed(_, let message):
-            Label(message, systemImage: "exclamationmark.triangle")
+        case .failed:
+            Label("operations.status.failure", systemImage: "exclamationmark.triangle")
+                .font(.caption)
+                .lineLimit(1)
                 .foregroundStyle(.red)
-                .textSelection(.enabled)
         }
     }
 
@@ -104,40 +123,4 @@ struct OperationFlowView: View {
         return false
     }
 
-    private func confirmationText(for operation: OperationFlowViewModel.Operation) -> LocalizedStringKey {
-        switch operation {
-        case .backup:
-            return viewModel.dryRun
-                ? "operations.confirm.backup_dry_run"
-                : "operations.confirm.backup"
-        case .restore:
-            return viewModel.dryRun
-                ? "operations.confirm.restore_dry_run"
-                : "operations.confirm.restore"
-        }
-    }
-
-    private func runningText(for operation: OperationFlowViewModel.Operation) -> LocalizedStringKey {
-        switch operation {
-        case .backup:
-            return "operations.running.backup"
-        case .restore:
-            return "operations.running.restore"
-        }
-    }
-
-    private func finishedText(for operation: OperationFlowViewModel.Operation, result: ProcessResult) -> String {
-        let operationName: String.LocalizationValue
-        switch operation {
-        case .backup:
-            operationName = "operations.backup"
-        case .restore:
-            operationName = "operations.restore"
-        }
-
-        if result.exitCode == 0 {
-            return "\(String(localized: operationName)) completed successfully."
-        }
-        return "\(String(localized: operationName)) exited with status \(result.exitCode)."
-    }
 }

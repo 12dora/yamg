@@ -23,11 +23,9 @@ struct ApplicationsListView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
+            HStack(spacing: 8) {
                 Text(statusText)
                     .foregroundStyle(.secondary)
-
-                Spacer()
 
                 if case .loaded = viewModel.state {
                     Button("applications.sync_all") {
@@ -50,20 +48,12 @@ struct ApplicationsListView: View {
                 }
                 .disabled(viewModel.state == .loading)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            HStack(alignment: .top, spacing: 12) {
-                content
-                    .frame(minWidth: 320, idealWidth: 360, maxWidth: 420)
-
-                Divider()
-
-                ApplicationDetailView(
-                    selectedApplicationName: selectedApplicationIdentifier,
-                    preferredCLIPath: preferences.preferredCLIPath
-                )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            }
+            content
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .task {
             if viewModel.state == .idle {
                 await viewModel.refresh()
@@ -113,6 +103,7 @@ struct ApplicationsListView: View {
                     .tag(application.identifier)
                 }
             }
+            .listStyle(.inset)
             .frame(minHeight: 320)
             .onAppear {
                 if selectedApplicationIdentifier == nil {

@@ -1,149 +1,151 @@
 import SwiftUI
-import Foundation
-
-@MainActor
-final class LogsViewModel: ObservableObject {
-    @Published private(set) var runs: [RunRecord] = []
-
-    private let logStore: ProcessLogPersisting
-    private var updateTask: Task<Void, Never>?
-
-    init(logStore: ProcessLogPersisting = ProcessLogStore()) {
-        self.logStore = logStore
-        startPolling()
-    }
-
-    deinit {
-        updateTask?.cancel()
-    }
-
-    private func startPolling() {
-        updateTask = Task {
-            while !Task.isCancelled {
-                await updateRuns()
-                try? await Task.sleep(nanoseconds: 500_000_000)
-            }
-        }
-    }
-
-    private func updateRuns() async {
-        if let store = logStore as? ProcessLogStore {
-            runs = store.runs()
-        }
-    }
-}
 
 struct LogsView: View {
-    @StateObject private var viewModel: LogsViewModel
+    private let store: ProcessLogPersisting
 
-    init(logStore: ProcessLogPersisting = ProcessLogStore()) {
-        _viewModel = StateObject(wrappedValue: LogsViewModel(logStore: logStore))
+    init(logStore: ProcessLogPersisting) {
+        self.store = logStore
     }
 
     var body: some View {
-        if viewModel.runs.isEmpty {
-            VStack(spacing: 12) {
-                Image(systemName: "doc.text.magnifyingglass")
-                    .font(.largeTitle)
-                    .foregroundStyle(.secondary)
-                Text(String(localized: "logs.empty"))
-                    .font(.headline)
-                Text(String(localized: "logs.empty.detail"))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+        Group {
+            if let store = store as? ProcessLogStore {
+                LogsContentView(store: store)
+            } else {
+                unavailableView
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(viewModel.runs.reversed()) { run in
-                        runCard(run)
+        }
+    }
+
+    private var unavailableView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("logs.unavailable", systemImage: "doc.text.magnifyingglass")
+                .font(.headline)
+            Text("logs.unavailable.detail")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+private struct LogsContentView: View {
+    @ObservedObject var store: ProcessLogStore
+    @State private var selectedRunID: UUID?
+
+    var body: some View {
+        let runs = store.runs().reversed()
+
+        Group {
+            if runs.isEmpty {
+                emptyRunsView
+            } else {
+                List(selection: $selectedRunID) {
+                    ForEach(Array(runs)) { run in
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(run.command.description)
+                                .font(.callout.weight(.medium))
+                                .lineLimit(1)
+                            Text(run.startedAt, style: .time)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .tag(run.id)
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .listStyle(.inset)
+                .frame(maxWidth: .infinity, minHeight: 220, alignment: .topLeading)
             }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .onAppear {
+            if selectedRunID == nil {
+                selectedRunID = runs.first?.id
+            }
+        }
+    }
+
+    private var emptyRunsView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("logs.empty", systemImage: "tray")
+                .font(.headline)
+            Text("logs.empty.detail")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    @ViewBuilder
+    private var logDetail: some View {
+        if let selectedRunID, let run = store.run(id: selectedRunID) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(run.command.description)
+                        .font(.headline)
+                        .lineLimit(1)
+                    Spacer()
+                    statusLabel(for: run)
+                }
+
+                ScrollView {
+                    Text(logText(for: selectedRunID))
+                        .font(.system(.caption, design: .monospaced))
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 6))
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        } else {
+            EmptyView()
         }
     }
 
     @ViewBuilder
-    private func runCard(_ run: RunRecord) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Image(systemName: statusIcon(run.status))
-                    .foregroundStyle(statusColor(run.status))
+    private func statusLabel(for run: RunRecord) -> some View {
+        switch run.status {
+        case .running:
+            Label("status.running", systemImage: "clock")
+                .foregroundStyle(.secondary)
+        case .finished(let result):
+            Label("status.finished \(result.exitCode)", systemImage: result.exitCode == 0 ? "checkmark.circle" : "exclamationmark.triangle")
+                .foregroundStyle(result.exitCode == 0 ? .green : .orange)
+        case .failed:
+            Label("status.failed", systemImage: "exclamationmark.triangle")
+                .foregroundStyle(.red)
+        }
+    }
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(run.command.description)
-                        .font(.headline)
-                    Text(run.startedAt.formatted(date: .abbreviated, time: .standard))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+    private func logText(for runID: UUID) -> String {
+        let entries = store.entries(for: runID)
 
-                Spacer()
+        guard !entries.isEmpty else {
+            return String(localized: "logs.no_output")
+        }
 
-                Text(statusText(run.status))
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(statusColor(run.status))
+        return entries.map { entry in
+            switch entry.event {
+            case .output(let text, let stream):
+                return "[\(label(for: stream))] \(text)"
+            case .finished(let result):
+                return "[exit] \(result.exitCode)"
             }
-
-            if let finishedAt = run.finishedAt {
-                Text("Duration: \(formatDuration(from: run.startedAt, to: finishedAt))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
         }
-        .padding(10)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 6))
+        .joined(separator: "\n")
     }
 
-    private func statusIcon(_ status: RunRecord.Status) -> String {
-        switch status {
-        case .running:
-            return "clock"
-        case .finished(let result):
-            return result.exitCode == 0 ? "checkmark.circle" : "exclamationmark.triangle"
-        case .failed:
-            return "exclamationmark.triangle"
-        }
-    }
-
-    private func statusColor(_ status: RunRecord.Status) -> Color {
-        switch status {
-        case .running:
-            return .secondary
-        case .finished(let result):
-            return result.exitCode == 0 ? .green : .orange
-        case .failed:
-            return .red
-        }
-    }
-
-    private func statusText(_ status: RunRecord.Status) -> String {
-        switch status {
-        case .running:
-            return String(localized: "status.running")
-        case .finished(let result):
-            return result.exitCode == 0 ? String(localized: "status.success") : String(localized: "status.failed")
-        case .failed:
-            return String(localized: "status.failed")
-        }
-    }
-
-    private func formatDuration(from start: Date, to end: Date) -> String {
-        let interval = end.timeIntervalSince(start)
-        let seconds = Int(interval) % 60
-        let minutes = (Int(interval) / 60) % 60
-        let hours = Int(interval) / 3600
-
-        if hours > 0 {
-            return String(format: "%dh %dm %ds", hours, minutes, seconds)
-        } else if minutes > 0 {
-            return String(format: "%dm %ds", minutes, seconds)
-        } else {
-            return String(format: "%ds", seconds)
+    private func label(for stream: ProcessOutputStream) -> String {
+        switch stream {
+        case .stdout:
+            return "stdout"
+        case .stderr:
+            return "stderr"
         }
     }
 }
-
-

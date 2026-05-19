@@ -9,7 +9,6 @@ final class OperationFlowViewModel: ObservableObject {
 
     enum State: Equatable {
         case idle
-        case confirming(Operation)
         case running(Operation)
         case finished(Operation, ProcessResult)
         case failed(Operation?, String)
@@ -17,7 +16,7 @@ final class OperationFlowViewModel: ObservableObject {
 
     @Published private(set) var state: State = .idle
     @Published private(set) var output: String = ""
-    @Published var dryRun: Bool = true
+    @Published var dryRun: Bool = false
     @Published var verbose: Bool = false
 
     private let injectedRunner: MackupCommandRunning?
@@ -47,21 +46,10 @@ final class OperationFlowViewModel: ObservableObject {
         guard !isRunning else {
             return
         }
-        state = .confirming(operation)
-    }
 
-    func cancelConfirmation() {
-        if case .confirming = state {
-            state = .idle
+        Task {
+            await run(operation)
         }
-    }
-
-    func confirm() async {
-        guard case .confirming(let operation) = state else {
-            return
-        }
-
-        await run(operation)
     }
 
     private func run(_ operation: Operation) async {

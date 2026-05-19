@@ -70,10 +70,10 @@ struct ApplicationDetailView: View {
                         Text(file)
                             .textSelection(.enabled)
                     }
-                    .frame(minHeight: 240)
+                    .frame(minHeight: 220)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(maxWidth: 320, maxHeight: .infinity, alignment: .topLeading)
         case .failed(let applicationName, let message):
             unavailableView(
                 title: LocalizedStringKey(applicationName),
@@ -94,6 +94,6 @@ struct ApplicationDetailView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity, minHeight: 240)
+        .frame(maxWidth: 320, minHeight: 180, alignment: .top)
     }
 }

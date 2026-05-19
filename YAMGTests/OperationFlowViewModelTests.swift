@@ -3,7 +3,7 @@ import XCTest
 
 @MainActor
 final class OperationFlowViewModelTests: XCTestCase {
-    func testBackupDryRunRequiresConfirmationAndRunsCommand() async throws {
+    func testBackupDryRunRunsCommandImmediately() async throws {
         let runner = OperationFakeRunner(
             events: [
                 .output("preview\n", stream: .stdout),
@@ -18,11 +18,15 @@ final class OperationFlowViewModelTests: XCTestCase {
             ]).next
         )
         let viewModel = OperationFlowViewModel(runner: runner, logStore: logStore)
+        viewModel.dryRun = true
 
         viewModel.request(.backup)
-        XCTAssertEqual(viewModel.state, .confirming(.backup))
-
-        await viewModel.confirm()
+        await waitUntil {
+            if case .finished(.backup, _) = viewModel.state {
+                return true
+            }
+            return false
+        }
 
         XCTAssertEqual(runner.commands, [.backup(options: .init(dryRun: true, forceAnswer: .yes))])
         XCTAssertEqual(viewModel.output, "preview\n")
@@ -34,7 +38,7 @@ final class OperationFlowViewModelTests: XCTestCase {
         XCTAssertEqual(runs.first?.command, .backup(options: .init(dryRun: true, forceAnswer: .yes)))
     }
 
-    func testRestoreCanRunWithoutDryRunAfterConfirmation() async {
+    func testRestoreCanRunWithoutDryRunImmediately() async {
         let runner = OperationFakeRunner(
             events: [.finished(ProcessResult(exitCode: 0, terminationReason: .exit))]
         )
@@ -42,7 +46,9 @@ final class OperationFlowViewModelTests: XCTestCase {
         viewModel.dryRun = false
 
         viewModel.request(.restore)
-        await viewModel.confirm()
+        await waitUntil {
+            !runner.commands.isEmpty
+        }
 
         XCTAssertEqual(runner.commands, [.restore(options: .init(forceAnswer: .yes))])
     }
@@ -55,23 +61,27 @@ final class OperationFlowViewModelTests: XCTestCase {
         let viewModel = OperationFlowViewModel(runner: runner, configFilePath: configPath)
 
         viewModel.request(.backup)
-        await viewModel.confirm()
+        await waitUntil {
+            !runner.commands.isEmpty
+        }
 
         XCTAssertEqual(
             runner.commands,
-            [.backup(options: .init(dryRun: true, forceAnswer: .yes, configFile: configPath))]
+            [.backup(options: .init(forceAnswer: .yes, configFile: configPath))]
         )
     }
 
-    func testCancelConfirmationDoesNotRunCommand() {
-        let runner = OperationFakeRunner(events: [])
+    func testRequestWhileRunningDoesNotStartAnotherCommand() async {
+        let runner = OperationSuspendingRunner()
         let viewModel = OperationFlowViewModel(runner: runner)
 
         viewModel.request(.restore)
-        viewModel.cancelConfirmation()
+        await waitUntil {
+            !runner.commands.isEmpty
+        }
+        viewModel.request(.backup)
 
-        XCTAssertEqual(viewModel.state, .idle)
-        XCTAssertEqual(runner.commands, [])
+        XCTAssertEqual(runner.commands, [.restore(options: .init(forceAnswer: .yes))])
     }
 
     func testRunnerFailurePublishesFailedState() async {
@@ -80,13 +90,29 @@ final class OperationFlowViewModelTests: XCTestCase {
         )
 
         viewModel.request(.backup)
-        await viewModel.confirm()
+        await waitUntil {
+            if case .failed(.backup, _) = viewModel.state {
+                return true
+            }
+            return false
+        }
 
         if case .failed(.backup, _) = viewModel.state {
             XCTAssertTrue(true)
         } else {
             XCTFail("Expected failed backup state")
         }
+    }
+}
+
+private func waitUntil(
+    timeoutNanoseconds: UInt64 = 1_000_000_000,
+    condition: @MainActor @escaping () -> Bool
+) async {
+    let start = DispatchTime.now().uptimeNanoseconds
+
+    while await !condition(), DispatchTime.now().uptimeNanoseconds - start < timeoutNanoseconds {
+        try? await Task.sleep(nanoseconds: 10_000_000)
     }
 }
 
@@ -117,6 +143,16 @@ private struct OperationFailingRunner: MackupCommandRunning {
         AsyncThrowingStream { continuation in
             continuation.finish(throwing: error)
         }
+    }
+}
+
+private final class OperationSuspendingRunner: MackupCommandRunning {
+    private(set) var commands: [MackupCommand] = []
+
+    func run(_ command: MackupCommand) -> AsyncThrowingStream<ProcessEvent, Error> {
+        commands.append(command)
+
+        return AsyncThrowingStream { _ in }
     }
 }
 

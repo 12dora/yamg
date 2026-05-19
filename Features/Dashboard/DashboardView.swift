@@ -1,6 +1,45 @@
 import SwiftUI
 
 struct DashboardView: View {
+    private enum Layout {
+        static let sectionSpacing: CGFloat = 10
+        static let panelSpacing: CGFloat = 10
+
+        static let headerWidth: CGFloat? = nil
+        static let headerMaxWidth: CGFloat = .infinity
+        static let headerHeight: CGFloat? = nil
+
+        static let statusPanelWidth: CGFloat? = nil
+        static let statusPanelMaxWidth: CGFloat = .infinity
+        static let statusPanelHeight: CGFloat? = nil
+
+        static let installGuideWidth: CGFloat? = nil
+        static let installGuideMaxWidth: CGFloat = .infinity
+        static let installGuideHeight: CGFloat? = nil
+        static let installMethodPickerMaxWidth: CGFloat = 360
+
+        static let configEditorWidth: CGFloat? = nil
+        static let configEditorMaxWidth: CGFloat = .infinity
+        static let configEditorHeight: CGFloat? = nil
+        static let storageEngineButtonMinWidth: CGFloat = 112
+        static let selectedPathMinWidth: CGFloat = 180
+
+        static let scheduledBackupPanelWidth: CGFloat = 150
+        static let scheduledBackupPanelHeight: CGFloat = 150
+
+        static let operationPanelWidth: CGFloat? = nil
+        static let operationPanelMaxWidth: CGFloat = .infinity
+        static let operationPanelHeight: CGFloat = 150
+        static let operationControlsWidth: CGFloat = 150
+        static let operationActionButtonWidth: CGFloat = 108
+        static let operationLogMinWidth: CGFloat = 150
+        static let operationLogMaxWidth: CGFloat = .infinity
+        static let operationLogHeight: CGFloat? = nil
+        static let operationLogMaxHeight: CGFloat = .infinity
+
+        static let statusIconWidth: CGFloat = 20
+    }
+
     @StateObject private var viewModel: DashboardViewModel
     private let preferences: AppPreferencesStoring
     private let logStore: ProcessLogPersisting
@@ -26,64 +65,18 @@ struct DashboardView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: Layout.sectionSpacing) {
                 header
 
-                VStack(alignment: .leading, spacing: 10) {
-                    statusRow(
-                        title: LocalizationKey.onboardingCLIStatus.localizedStringKey,
-                        systemImage: cliIconName,
-                        stateText: cliStatusText,
-                        detailText: cliDetailText
-                    )
-
-                    Divider()
-
-                    statusRow(
-                        title: LocalizationKey.onboardingConfigStatus.localizedStringKey,
-                        systemImage: configIconName,
-                        stateText: configStatusText,
-                        detailText: configDetailText
-                    )
+                VStack(alignment: .leading, spacing: Layout.sectionSpacing) {
+                    statusPanel
+                    if viewModel.shouldShowInstallGuide {
+                        installGuide
+                    }
+                    configEditor
+                    backupAndRestorePanels
                 }
-                .frame(maxWidth: 780, alignment: .leading)
-
-                Divider()
-                    .frame(maxWidth: 720)
-
-                if viewModel.shouldShowInstallGuide {
-                    installGuide
-
-                    Divider()
-                        .frame(maxWidth: 780)
-                }
-
-                configEditor
-
-                Divider()
-                    .frame(maxWidth: 780)
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("scheduled_backup.enabled")
-                        .font(.headline)
-                    Text("scheduled_backup.interval")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-
-                    ScheduledBackupView()
-                }
-                .frame(maxWidth: 780, alignment: .leading)
-
-                Divider()
-                    .frame(maxWidth: 780)
-
-                OperationFlowView(
-                    viewModel: OperationFlowViewModel(
-                        logStore: logStore,
-                        preferredCLIPath: viewModel.preferredCLIPath,
-                        configFilePath: viewModel.configPath
-                    )
-                )
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
@@ -101,9 +94,11 @@ struct DashboardView: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(LocalizationKey.onboardingTitle.localizedStringKey)
-                    .font(.title2.weight(.semibold))
+                    .font(.headline)
                 Text(LocalizationKey.onboardingSubtitle.localizedStringKey)
+                    .font(.callout)
                     .foregroundStyle(.secondary)
+                    .lineLimit(2)
             }
 
             Spacer()
@@ -117,10 +112,78 @@ struct DashboardView: View {
             }
             .disabled(viewModel.cliState == .checking)
         }
+        .frame(width: Layout.headerWidth, height: Layout.headerHeight)
+        .frame(maxWidth: Layout.headerMaxWidth)
+    }
+
+    private var statusPanel: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            statusRow(
+                title: LocalizationKey.onboardingCLIStatus.localizedStringKey,
+                systemImage: cliIconName,
+                stateText: cliStatusText,
+                detailText: cliDetailText
+            )
+
+            Divider()
+
+            statusRow(
+                title: LocalizationKey.onboardingConfigStatus.localizedStringKey,
+                systemImage: configIconName,
+                stateText: configStatusText,
+                detailText: configDetailText
+            )
+        }
+        .frame(width: Layout.statusPanelWidth, height: Layout.statusPanelHeight, alignment: .topLeading)
+        .frame(maxWidth: Layout.statusPanelMaxWidth, alignment: .topLeading)
+        .padding(10)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var backupPanel: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("scheduled_backup.enabled")
+                .font(.headline)
+
+            ScheduledBackupView()
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .padding(10)
+        .frame(height: Layout.scheduledBackupPanelHeight, alignment: .topLeading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var backupAndRestorePanels: some View {
+        HStack(alignment: .top, spacing: Layout.panelSpacing) {
+            backupPanel
+                .frame(width: Layout.scheduledBackupPanelWidth, alignment: .topLeading)
+
+            OperationFlowView(
+                viewModel: OperationFlowViewModel(
+                    logStore: logStore,
+                    preferredCLIPath: viewModel.preferredCLIPath,
+                    configFilePath: viewModel.configPath
+                ),
+                layout: OperationFlowView.Layout(
+                    panelHeight: Layout.operationPanelHeight,
+                    controlsWidth: Layout.operationControlsWidth,
+                    actionButtonWidth: Layout.operationActionButtonWidth,
+                    logMinWidth: Layout.operationLogMinWidth,
+                    logMaxWidth: Layout.operationLogMaxWidth,
+                    logHeight: Layout.operationLogHeight,
+                    logMaxHeight: Layout.operationLogMaxHeight
+                )
+            )
+            .frame(width: Layout.operationPanelWidth, alignment: .topLeading)
+            .frame(maxWidth: Layout.operationPanelMaxWidth, alignment: .topLeading)
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     private var installGuide: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("install.title")
                 .font(.headline)
             Text("install.detail")
@@ -133,38 +196,52 @@ struct DashboardView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .frame(maxWidth: 360)
+            .frame(maxWidth: Layout.installMethodPickerMaxWidth)
 
             if let option = viewModel.selectedInstallOption {
-                HStack(spacing: 10) {
-                    Text(option.command)
-                        .font(.system(.callout, design: .monospaced))
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    Button {
-                        NSPasteboard.general.clearContents()
-                        NSPasteboard.general.setString(option.command, forType: .string)
-                    } label: {
-                        Label("action.copy", systemImage: "doc.on.doc")
-                    }
-
-                    Button {
-                        Task {
-                            await viewModel.installSelectedMackup()
-                        }
-                    } label: {
-                        Label("install.run", systemImage: "arrow.down.circle")
-                    }
-                    .disabled(isInstalling)
+                VStack(alignment: .leading, spacing: 8) {
+                    installCommand(option)
+                    installActions
                 }
             }
         }
-        .frame(maxWidth: 720, alignment: .leading)
+        .frame(width: Layout.installGuideWidth, height: Layout.installGuideHeight, alignment: .topLeading)
+        .frame(maxWidth: Layout.installGuideMaxWidth, alignment: .topLeading)
+        .padding(10)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    private func installCommand(_ option: MackupInstallOption) -> some View {
+        Text(option.command)
+            .font(.system(.callout, design: .monospaced))
+            .textSelection(.enabled)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var installActions: some View {
+        HStack(spacing: 8) {
+            Button {
+                NSPasteboard.general.clearContents()
+                if let option = viewModel.selectedInstallOption {
+                    NSPasteboard.general.setString(option.command, forType: .string)
+                }
+            } label: {
+                Label("action.copy", systemImage: "doc.on.doc")
+            }
+
+            Button {
+                Task {
+                    await viewModel.installSelectedMackup()
+                }
+            } label: {
+                Label("install.run", systemImage: "arrow.down.circle")
+            }
+            .disabled(isInstalling)
+        }
     }
 
     private var configEditor: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("setup.config.title")
                 .font(.headline)
             Text("setup.config.detail")
@@ -182,7 +259,6 @@ struct DashboardView: View {
                     viewModel.selectStorageFolder(url)
                 }
             }
-            .frame(maxWidth: 700)
 
             if let selectedAvailability = viewModel.selectedStorageAvailability {
                 Label(
@@ -194,36 +270,54 @@ struct DashboardView: View {
                 .textSelection(.enabled)
             }
 
-            Button {
-                viewModel.saveStorageConfig()
-            } label: {
-                Label(LocalizedStringKey(viewModel.saveButtonTitleKey), systemImage: "square.and.arrow.down")
-            }
-            .disabled(isSavingConfig || !viewModel.canSaveConfig)
+            HStack(spacing: 10) {
+                Button {
+                    viewModel.saveStorageConfig()
+                } label: {
+                    Label(LocalizedStringKey(viewModel.saveButtonTitleKey), systemImage: "square.and.arrow.down")
+                }
+                .disabled(isSavingConfig || !viewModel.canSaveConfig)
 
-            setupStateView
+                configSaveStatusView
+            }
+
+            setupErrorStateView
         }
-        .frame(maxWidth: 780, alignment: .leading)
+        .frame(width: Layout.configEditorWidth, height: Layout.configEditorHeight, alignment: .topLeading)
+        .frame(maxWidth: Layout.configEditorMaxWidth, alignment: .topLeading)
+        .padding(10)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
     }
 
     private var storageEngineChooser: some View {
         HStack(spacing: 8) {
             ForEach(viewModel.storageAvailability) { item in
+                let isSelected = item.engine == viewModel.selectedStorageEngine
+
                 Button {
                     viewModel.selectStorageEngine(item.engine)
                 } label: {
                     HStack(spacing: 6) {
-                        Image(systemName: item.isAvailable ? "checkmark.circle" : "slash.circle")
+                        Image(systemName: storageEngineIcon(for: item, isSelected: isSelected))
                         Text(item.engine.displayName)
                             .lineLimit(1)
                     }
-                    .frame(minWidth: 112)
+                    .frame(minWidth: Layout.storageEngineButtonMinWidth)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.borderedProminent)
+                .tint(isSelected ? .accentColor : .gray)
                 .disabled(!item.isAvailable)
                 .help(item.detail)
             }
         }
+    }
+
+    private func storageEngineIcon(for item: MackupStorageAvailability, isSelected: Bool) -> String {
+        if isSelected {
+            return "checkmark.circle.fill"
+        }
+
+        return item.isAvailable ? "circle" : "slash.circle"
     }
 
     private func selectedPathRow(
@@ -250,7 +344,7 @@ struct DashboardView: View {
                 Image(systemName: systemImage)
                     .foregroundStyle(.secondary)
             }
-            .frame(minWidth: 420, maxWidth: .infinity, alignment: .leading)
+            .frame(minWidth: Layout.selectedPathMinWidth, maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
             .background(.quaternary.opacity(0.55), in: RoundedRectangle(cornerRadius: 6))
@@ -264,10 +358,27 @@ struct DashboardView: View {
     }
 
     @ViewBuilder
-    private var setupStateView: some View {
+    private var configSaveStatusView: some View {
         switch viewModel.setupState {
-        case .idle:
+        case .savingConfig:
+            Label("setup.config.saving", systemImage: "clock")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        case .configSaved(let url):
+            Label("setup.config.saved \(url.path)", systemImage: "checkmark.circle")
+                .font(.caption)
+                .foregroundStyle(.green)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .textSelection(.enabled)
+        case .idle, .installing, .installFinished, .installFailed, .configSaveFailed:
             EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private var setupErrorStateView: some View {
+        switch viewModel.setupState {
         case .installing(let method):
             Label("install.running \(method)", systemImage: "clock")
                 .foregroundStyle(.secondary)
@@ -279,17 +390,12 @@ struct DashboardView: View {
             Label(message, systemImage: "exclamationmark.triangle")
                 .foregroundStyle(.red)
                 .textSelection(.enabled)
-        case .savingConfig:
-            Label("setup.config.saving", systemImage: "clock")
-                .foregroundStyle(.secondary)
-        case .configSaved(let url):
-            Label("setup.config.saved \(url.path)", systemImage: "checkmark.circle")
-                .foregroundStyle(.green)
-                .textSelection(.enabled)
         case .configSaveFailed(let message):
             Label(message, systemImage: "exclamationmark.triangle")
                 .foregroundStyle(.red)
                 .textSelection(.enabled)
+        case .idle, .savingConfig, .configSaved:
+            EmptyView()
         }
     }
 
@@ -315,18 +421,20 @@ struct DashboardView: View {
     ) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: systemImage)
-                .font(.title3)
-                .frame(width: 24)
+                .font(.body)
+                .frame(width: Layout.statusIconWidth)
                 .foregroundStyle(.secondary)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .font(.callout.weight(.semibold))
                 Text(stateText)
-                    .font(.body.weight(.medium))
+                    .font(.callout.weight(.medium))
                 Text(detailText)
-                    .font(.callout)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .truncationMode(.middle)
                     .textSelection(.enabled)
             }
         }
@@ -596,6 +704,16 @@ final class ScheduledBackupViewModel: ObservableObject {
             state = .failed(error.localizedDescription)
         }
     }
+
+    func setEnabled(_ isEnabled: Bool) {
+        self.isEnabled = isEnabled
+        save()
+    }
+
+    func setIntervalMinutes(_ intervalMinutes: Int) {
+        self.intervalMinutes = intervalMinutes
+        save()
+    }
 }
 
 struct ScheduledBackupView: View {
@@ -608,75 +726,46 @@ struct ScheduledBackupView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
-                Toggle("scheduled_backup.enabled", isOn: $viewModel.isEnabled)
+                Toggle(
+                    "scheduled_backup.enabled",
+                    isOn: Binding(
+                        get: { viewModel.isEnabled },
+                        set: { viewModel.setEnabled($0) }
+                    )
+                )
                     .toggleStyle(.checkbox)
 
-                if viewModel.isEnabled {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("scheduled_backup.interval")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("scheduled_backup.interval")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
-                        HStack(spacing: 12) {
-                            Stepper(
-                                value: $viewModel.intervalMinutes,
-                                in: 5...1440,
-                                step: 5
-                            ) {
-                                Text("\(viewModel.intervalMinutes) min")
-                                    .font(.body.monospaced())
-                            }
-
-                            Spacer()
-
-                            Text(formatInterval(viewModel.intervalMinutes))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        Stepper(
+                            value: Binding(
+                                get: { viewModel.intervalMinutes },
+                                set: { viewModel.setIntervalMinutes($0) }
+                            ),
+                            in: 5...1440,
+                            step: 5
+                        ) {
+                            Text("\(viewModel.intervalMinutes) min")
+                                .font(.body.monospaced())
                         }
                     }
-                    .padding(10)
-                    .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 6))
                 }
+                .padding(10)
+                .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 6))
+                .opacity(viewModel.isEnabled ? 1 : 0.45)
+                .disabled(!viewModel.isEnabled)
             }
 
-            if viewModel.isInstalled {
-                Label("scheduled_backup.installed", systemImage: "checkmark.circle")
+            if case .failed(let message) = viewModel.state {
+                Text(message)
                     .font(.caption)
-                    .foregroundStyle(.green)
-            }
-
-            HStack(spacing: 10) {
-                Button {
-                    viewModel.save()
-                } label: {
-                    Label("action.save", systemImage: "square.and.arrow.down")
-                }
-                .disabled(viewModel.state == .saving)
-
-                if case .failed(let message) = viewModel.state {
-                    Text(message)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                }
-            }
-
-            if case .saved = viewModel.state {
-                Label("scheduled_backup.saved", systemImage: "checkmark.circle")
-                    .font(.caption)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(.red)
             }
         }
     }
 
-    private func formatInterval(_ minutes: Int) -> String {
-        if minutes < 60 {
-            return String(localized: "scheduled_backup.interval_minutes \(minutes)")
-        } else if minutes < 1440 {
-            let hours = minutes / 60
-            return String(localized: "scheduled_backup.interval_hours \(hours)")
-        } else {
-            let days = minutes / 1440
-            return String(localized: "scheduled_backup.interval_days \(days)")
-        }
-    }
 }
