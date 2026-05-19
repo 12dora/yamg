@@ -15,3 +15,5 @@ struct LogsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
+
+
