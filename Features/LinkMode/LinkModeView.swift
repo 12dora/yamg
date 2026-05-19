@@ -204,6 +204,9 @@ struct LinkModeView: View {
     }
 
     private func finishedText(for operation: LinkModeViewModel.Operation, result: ProcessResult) -> String {
-        "\(title(for: operation)) exited with status \(result.exitCode)."
+        if result.exitCode == 0 {
+            return "\(title(for: operation)) completed successfully."
+        }
+        return "\(title(for: operation)) exited with status \(result.exitCode)."
     }
 }

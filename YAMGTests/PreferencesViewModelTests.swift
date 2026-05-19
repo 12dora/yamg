@@ -31,22 +31,37 @@ final class PreferencesViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.showsLinkMode)
     }
 
-    func testSaveNormalizesWhitespaceAndTildePaths() {
+    func testSaveNormalizesWhitespaceAndTildePaths() throws {
+        let executableFile = temporaryDirectory.appendingPathComponent("mackup")
+        try "#!/bin/bash\necho test".write(to: executableFile, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: executableFile.path)
+
         let preferences = InMemoryPreferences()
         let viewModel = PreferencesViewModel(preferences: preferences)
-        viewModel.cliPath = "  ~/bin/mackup  "
+        viewModel.cliPath = "  \(executableFile.path)  "
         viewModel.configPath = "  "
         viewModel.showsLinkMode = true
 
         viewModel.save()
 
-        XCTAssertEqual(
-            preferences.preferredCLIPath,
-            URL(fileURLWithPath: NSString(string: "~/bin/mackup").expandingTildeInPath)
-        )
+        XCTAssertEqual(preferences.preferredCLIPath, executableFile)
         XCTAssertNil(preferences.configFilePath)
         XCTAssertTrue(preferences.showsLinkMode)
         XCTAssertEqual(viewModel.state, .saved)
+    }
+
+    func testSaveFailsWhenCLIPathIsNotExecutable() {
+        let preferences = InMemoryPreferences()
+        let viewModel = PreferencesViewModel(preferences: preferences)
+        viewModel.cliPath = "/nonexistent/path/mackup"
+
+        viewModel.save()
+
+        if case .failed(let message) = viewModel.state {
+            XCTAssertTrue(message.contains("not executable"))
+        } else {
+            XCTFail("Expected failed state with non-executable path")
+        }
     }
 
     func testResetClearsStoredPathsAndDeletesSelectedConfigFile() throws {

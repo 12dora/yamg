@@ -135,6 +135,9 @@ struct OperationFlowView: View {
             operationName = String(localized: "operations.restore")
         }
 
+        if result.exitCode == 0 {
+            return "\(operationName) completed successfully."
+        }
         return "\(operationName) exited with status \(result.exitCode)."
     }
 }

@@ -32,7 +32,14 @@ final class PreferencesViewModel: ObservableObject {
     }
 
     func save() {
-        preferences.preferredCLIPath = normalizedURL(from: cliPath)
+        let cliURL = normalizedURL(from: cliPath)
+
+        if let cliURL, !isExecutable(cliURL) {
+            state = .failed("The selected CLI path is not executable. Please choose a valid Mackup executable.")
+            return
+        }
+
+        preferences.preferredCLIPath = cliURL
         preferences.configFilePath = normalizedURL(from: configPath)
         preferences.showsLinkMode = showsLinkMode
         state = .saved
@@ -94,5 +101,9 @@ final class PreferencesViewModel: ObservableObject {
         }
 
         return result
+    }
+
+    private func isExecutable(_ url: URL) -> Bool {
+        fileManager.isExecutableFile(atPath: url.path)
     }
 }
