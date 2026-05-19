@@ -44,8 +44,24 @@ struct PreferencesView: View {
                 }
             }
 
-            Toggle(String(localized: "preferences.show_link_mode"), isOn: $viewModel.showsLinkMode)
-                .toggleStyle(.checkbox)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Toggle(String(localized: "preferences.show_link_mode"), isOn: $viewModel.showsLinkMode)
+                        .toggleStyle(.checkbox)
+
+                    if viewModel.showsLinkMode {
+                        Label(String(localized: "link_mode.high_risk"), systemImage: "exclamationmark.circle.fill")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                if viewModel.showsLinkMode {
+                    Text(String(localized: "link_mode.warning"))
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
 
             HStack(spacing: 10) {
                 Button(role: .destructive) {

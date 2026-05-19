@@ -993,6 +993,22 @@
         }
       }
     },
+    "link_mode.high_risk": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(High Risk)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "（高风险）"
+          }
+        }
+      }
+    },
     "status.not_checked": {
       "localizations": {
         "en": {
