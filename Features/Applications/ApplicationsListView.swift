@@ -2,19 +2,22 @@ import SwiftUI
 
 struct ApplicationsListView: View {
     @StateObject private var viewModel: ApplicationsListViewModel
-    @State private var selectedApplicationName: String?
+    @State private var selectedApplicationIdentifier: String?
     private let preferences: AppPreferencesStoring
 
     @MainActor
     init(preferences: AppPreferencesStoring = AppPreferences()) {
         self.preferences = preferences
         _viewModel = StateObject(
-            wrappedValue: ApplicationsListViewModel(preferredCLIPath: preferences.preferredCLIPath)
+            wrappedValue: ApplicationsListViewModel(
+                configFilePath: preferences.configFilePath,
+                preferredCLIPath: preferences.preferredCLIPath
+            )
         )
     }
 
-    init(viewModel: ApplicationsListViewModel) {
-        self.preferences = AppPreferences()
+    init(viewModel: ApplicationsListViewModel, preferences: AppPreferencesStoring = AppPreferences()) {
+        self.preferences = preferences
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
@@ -38,12 +41,12 @@ struct ApplicationsListView: View {
 
             HStack(alignment: .top, spacing: 12) {
                 content
-                    .frame(minWidth: 300, idealWidth: 340, maxWidth: 400)
+                    .frame(minWidth: 320, idealWidth: 360, maxWidth: 420)
 
                 Divider()
 
                 ApplicationDetailView(
-                    selectedApplicationName: selectedApplicationName,
+                    selectedApplicationName: selectedApplicationIdentifier,
                     preferredCLIPath: preferences.preferredCLIPath
                 )
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -67,36 +70,51 @@ struct ApplicationsListView: View {
             ProgressView()
                 .controlSize(.small)
         case .loaded(let applications):
-            List(applications, selection: $selectedApplicationName) { application in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(application.displayName)
-                        .lineLimit(1)
+            List(selection: $selectedApplicationIdentifier) {
+                ForEach(applications) { application in
+                    HStack(spacing: 10) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(application.displayName)
+                                .lineLimit(1)
+                            Text(application.identifier)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
 
-                    if application.displayName != application.name {
-                        Text(application.name)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                        Spacer(minLength: 8)
+
+                        Toggle(
+                            "",
+                            isOn: Binding(
+                                get: { application.isSynced },
+                                set: { newValue in
+                                    viewModel.setSync(identifier: application.identifier, isOn: newValue)
+                                }
+                            )
+                        )
+                        .labelsHidden()
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
                     }
+                    .contentShape(Rectangle())
+                    .tag(application.identifier)
                 }
-                .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
-                .contentShape(Rectangle())
-                .tag(application.name)
             }
             .frame(minHeight: 320)
             .onAppear {
-                if selectedApplicationName == nil {
-                    selectedApplicationName = applications.first?.name
+                if selectedApplicationIdentifier == nil {
+                    selectedApplicationIdentifier = applications.first?.identifier
                 }
             }
             .onChange(of: applications) { newApplications in
-                guard let selectedApplicationName else {
-                    self.selectedApplicationName = newApplications.first?.name
+                guard let selectedApplicationIdentifier else {
+                    self.selectedApplicationIdentifier = newApplications.first?.identifier
                     return
                 }
 
-                if !newApplications.contains(where: { $0.name == selectedApplicationName }) {
-                    self.selectedApplicationName = newApplications.first?.name
+                if !newApplications.contains(where: { $0.identifier == selectedApplicationIdentifier }) {
+                    self.selectedApplicationIdentifier = newApplications.first?.identifier
                 }
             }
         case .empty:

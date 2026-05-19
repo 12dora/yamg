@@ -8,7 +8,6 @@ final class AppSectionTests: XCTestCase {
             [
                 "section.dashboard.title",
                 "section.applications.title",
-                "section.storage.title",
                 "section.link_mode.title",
                 "section.logs.title",
                 "section.preferences.title"
@@ -31,5 +30,9 @@ final class AppSectionTests: XCTestCase {
     func testVisibleSectionsHideLinkModeByDefault() {
         XCTAssertFalse(AppSection.visibleSections(showsLinkMode: false).contains(.linkMode))
         XCTAssertTrue(AppSection.visibleSections(showsLinkMode: true).contains(.linkMode))
+    }
+
+    func testStorageSectionIsRemoved() {
+        XCTAssertFalse(AppSection.allCases.contains(where: { $0.rawValue == "storage" }))
     }
 }

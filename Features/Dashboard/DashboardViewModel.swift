@@ -22,9 +22,9 @@ final class DashboardViewModel: ObservableObject {
         case installing(String)
         case installFinished(String)
         case installFailed(String)
-        case creatingConfig
-        case configCreated(URL)
-        case configCreateFailed(String)
+        case savingConfig
+        case configSaved(URL)
+        case configSaveFailed(String)
     }
 
     @Published private(set) var cliState: CLIState = .unknown
@@ -65,12 +65,14 @@ final class DashboardViewModel: ObservableObject {
         self.installGuide = installGuide
         self.selectedInstallOptionID = installGuide.options.first?.id ?? ""
         refreshStorageAvailability()
+        loadExistingConfigIntoSelection()
     }
 
     func refresh() async {
         cliState = .checking
         configState = configState(for: configPath)
         refreshStorageAvailability()
+        loadExistingConfigIntoSelection()
 
         let report = await detector.detect(preferredPath: preferredCLIPath)
         cliState = cliState(from: report)
@@ -85,15 +87,6 @@ final class DashboardViewModel: ObservableObject {
         }
     }
 
-    var shouldShowConfigWizard: Bool {
-        switch configState {
-        case .missing:
-            return true
-        case .unknown, .present:
-            return false
-        }
-    }
-
     var selectedInstallOption: MackupInstallOption? {
         installGuide.options.first { $0.id == selectedInstallOptionID }
     }
@@ -102,7 +95,7 @@ final class DashboardViewModel: ObservableObject {
         storageAvailability.first { $0.engine == selectedStorageEngine }
     }
 
-    var canCreateConfig: Bool {
+    var canSaveConfig: Bool {
         guard let selectedStorageAvailability, selectedStorageAvailability.isAvailable else {
             return false
         }
@@ -116,6 +109,15 @@ final class DashboardViewModel: ObservableObject {
         }
 
         return automaticStorageDirectory() != nil
+    }
+
+    var saveButtonTitleKey: String {
+        switch configState {
+        case .present:
+            return "setup.config.update"
+        case .missing, .unknown:
+            return "setup.config.create"
+        }
     }
 
     func installSelectedMackup() async {
@@ -142,27 +144,28 @@ final class DashboardViewModel: ObservableObject {
         }
     }
 
-    func createDefaultConfig() {
-        guard canCreateConfig else {
-            setupState = .configCreateFailed("Choose an available storage provider and Mackup folder before creating the config.")
+    func saveStorageConfig() {
+        guard canSaveConfig else {
+            setupState = .configSaveFailed("Choose an available storage provider and Mackup folder before saving the config.")
             return
         }
 
-        setupState = .creatingConfig
+        setupState = .savingConfig
 
         do {
+            let existing = try? configEditor.load(path: configPath)
             let config = MackupConfig(
                 fileURL: configPath,
                 storage: storageFromSelection(),
-                applicationsToSync: [],
-                applicationsToIgnore: [],
-                originalText: ""
+                applicationsToSync: existing?.applicationsToSync ?? [],
+                applicationsToIgnore: existing?.applicationsToIgnore ?? [],
+                originalText: existing?.originalText ?? ""
             )
             try configEditor.save(config)
             configState = .present(configPath)
-            setupState = .configCreated(configPath)
+            setupState = .configSaved(configPath)
         } catch {
-            setupState = .configCreateFailed(error.localizedDescription)
+            setupState = .configSaveFailed(error.localizedDescription)
         }
     }
 
@@ -206,7 +209,10 @@ final class DashboardViewModel: ObservableObject {
         case .notFound:
             return .unavailable
         case .invalidVersionOutput(let output):
-            return .invalidVersion(path: report.executableURL, output: output)
+            if let path = report.executableURL {
+                return .invalidVersion(path: path, output: output)
+            }
+            return .failed(path: nil, message: "Mackup version output could not be parsed.")
         case .failed(let message):
             return .failed(path: report.executableURL, message: message)
         }
@@ -232,6 +238,46 @@ final class DashboardViewModel: ObservableObject {
                 .standardizedFileURL
                 .path
         }
+    }
+
+    private func loadExistingConfigIntoSelection() {
+        guard fileManager.fileExists(atPath: configPath.path) else {
+            return
+        }
+
+        guard let existing = try? configEditor.load(path: configPath) else {
+            return
+        }
+
+        let engine = existing.storage.engine
+        if engine == .fileSystem || storageAvailability.first(where: { $0.engine == engine })?.isAvailable == true {
+            selectedStorageEngine = engine
+        }
+
+        let folderPath = unifiedStorageFolderPath(for: existing.storage)
+        if !folderPath.isEmpty {
+            selectedStorageFolderPath = folderPath
+        }
+    }
+
+    private func unifiedStorageFolderPath(for storage: MackupStorage) -> String {
+        let directory = storage.directory ?? "Mackup"
+
+        if let path = storage.path, !path.isEmpty {
+            return URL(fileURLWithPath: path)
+                .appendingPathComponent(directory, isDirectory: true)
+                .standardizedFileURL
+                .path
+        }
+
+        if let detectedPath = storageAvailability.first(where: { $0.engine == storage.engine })?.detectedPath {
+            return URL(fileURLWithPath: detectedPath)
+                .appendingPathComponent(directory, isDirectory: true)
+                .standardizedFileURL
+                .path
+        }
+
+        return ""
     }
 
     private func storageFromSelection() -> MackupStorage {
@@ -272,14 +318,5 @@ final class DashboardViewModel: ObservableObject {
         }
 
         return relativePath.isEmpty ? nil : relativePath
-    }
-}
-
-private extension DashboardViewModel.CLIState {
-    static func invalidVersion(path: URL?, output: String) -> DashboardViewModel.CLIState {
-        if let path {
-            return .invalidVersion(path: path, output: output)
-        }
-        return .failed(path: nil, message: "Mackup version output could not be parsed.")
     }
 }

@@ -38,7 +38,6 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Add one-click selected Mackup installer action.
 - [x] Make Homebrew/pipx a single selected install method.
 - [x] Add guided creation for missing `.mackup.cfg`.
-- [x] Add development reset to simulate first-run state.
 - [x] Keep graphical storage config editing after `.mackup.cfg` creation.
 - [x] Show friendly storage provider names instead of raw Mackup config values.
 - [x] Load supported applications even when user storage config breaks `mackup list`.
@@ -47,3 +46,6 @@ Status: `[ ]` todo, `[~]` doing, `[x]` done.
 - [x] Make sidebar rows selectable across their full width.
 - [x] Tighten main UI spacing and add lightweight state animations.
 - [x] Make Preferences reset delete the selected/default `.mackup.cfg`.
+- [x] Replace Applications list with installed/Mackup-supported intersection plus per-row sync toggle that writes `[applications_to_sync]`.
+- [x] Fold Storage editor into Dashboard as a create-or-modify flow and remove the standalone Storage section.
+- [x] Remove development reset (`resetForFirstRunSimulation`) from Preferences and tighten Preferences layout.

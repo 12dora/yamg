@@ -43,6 +43,7 @@ final class DashboardViewModelTests: XCTestCase {
             .available(path: executableURL, version: MackupVersion(major: 0, minor: 10, patch: 3))
         )
         XCTAssertEqual(viewModel.configState, .present(configPath))
+        XCTAssertEqual(viewModel.saveButtonTitleKey, "setup.config.update")
     }
 
     func testRefreshReportsMissingCLIAndMissingConfig() async {
@@ -66,6 +67,7 @@ final class DashboardViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.configState, .missing(configPath))
         XCTAssertTrue(viewModel.shouldShowInstallGuide)
         XCTAssertEqual(viewModel.selectedStorageEngine, .fileSystem)
+        XCTAssertEqual(viewModel.saveButtonTitleKey, "setup.config.create")
     }
 
     func testRefreshReportsInvalidVersionOutput() async {
@@ -159,7 +161,7 @@ final class DashboardViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.setupState, .installFailed("no brew"))
     }
 
-    func testCreateDefaultConfigWritesMackupSupportedFieldsOnly() throws {
+    func testSaveStorageConfigCreatesNewFileWithMackupSupportedFieldsOnly() throws {
         let editor = CapturingConfigEditor()
         let configPath = temporaryDirectory.appendingPathComponent(".mackup.cfg")
         let viewModel = DashboardViewModel(
@@ -200,7 +202,7 @@ final class DashboardViewModelTests: XCTestCase {
         viewModel.selectStorageEngine(.iCloud)
         viewModel.selectStorageFolder(temporaryDirectory.appendingPathComponent("iCloud/Mackup"))
 
-        viewModel.createDefaultConfig()
+        viewModel.saveStorageConfig()
 
         let saved = try XCTUnwrap(editor.savedConfig)
         XCTAssertEqual(saved.fileURL, configPath)
@@ -208,10 +210,10 @@ final class DashboardViewModelTests: XCTestCase {
         XCTAssertEqual(saved.applicationsToSync, [])
         XCTAssertEqual(saved.applicationsToIgnore, [])
         XCTAssertEqual(viewModel.configState, .present(configPath))
-        XCTAssertEqual(viewModel.setupState, .configCreated(configPath))
+        XCTAssertEqual(viewModel.setupState, .configSaved(configPath))
     }
 
-    func testCreateDefaultConfigRequiresStorageProviderAndFolder() {
+    func testSaveStorageConfigRequiresStorageProviderAndFolder() {
         let editor = CapturingConfigEditor()
         let configPath = temporaryDirectory.appendingPathComponent(".mackup.cfg")
         let viewModel = DashboardViewModel(
@@ -230,16 +232,48 @@ final class DashboardViewModelTests: XCTestCase {
             configPath: configPath
         )
 
-        viewModel.createDefaultConfig()
+        viewModel.saveStorageConfig()
 
         XCTAssertNil(editor.savedConfig)
         XCTAssertEqual(
             viewModel.setupState,
-            .configCreateFailed("Choose an available storage provider and Mackup folder before creating the config.")
+            .configSaveFailed("Choose an available storage provider and Mackup folder before saving the config.")
         )
     }
 
-    func testCreateDefaultConfigWritesFileSystemPathAndDirectory() throws {
+    func testSaveStorageConfigPreservesExistingApplicationLists() throws {
+        let configPath = temporaryDirectory.appendingPathComponent(".mackup.cfg")
+        try "[storage]\nengine = dropbox\n[applications_to_sync]\ngit\n[applications_to_ignore]\nxcode\n"
+            .write(to: configPath, atomically: true, encoding: .utf8)
+
+        let editor = MackupConfigEditor()
+        let viewModel = DashboardViewModel(
+            detector: FakeExecutableResolver(
+                report: MackupDetectionReport(status: .notFound, executableURL: nil, version: nil, checkedURLs: [])
+            ),
+            configEditor: editor,
+            storageDetector: FakeStorageDetector(
+                items: [
+                    MackupStorageAvailability(engine: .dropbox, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .googleDrive, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .iCloud, detectedPath: nil, isAvailable: false, detail: "missing"),
+                    MackupStorageAvailability(engine: .fileSystem, detectedPath: nil, isAvailable: true, detail: "Choose")
+                ]
+            ),
+            configPath: configPath
+        )
+        viewModel.selectStorageEngine(.fileSystem)
+        viewModel.selectStorageFolder(temporaryDirectory.appendingPathComponent("Backup/Mackup"))
+
+        viewModel.saveStorageConfig()
+
+        let reloaded = try editor.load(path: configPath)
+        XCTAssertEqual(reloaded.storage.engine, .fileSystem)
+        XCTAssertEqual(reloaded.applicationsToSync, ["git"])
+        XCTAssertEqual(reloaded.applicationsToIgnore, ["xcode"])
+    }
+
+    func testSaveStorageConfigWritesFileSystemPathAndDirectory() throws {
         let editor = CapturingConfigEditor()
         let configPath = temporaryDirectory.appendingPathComponent(".mackup.cfg")
         let viewModel = DashboardViewModel(
@@ -260,7 +294,7 @@ final class DashboardViewModelTests: XCTestCase {
         viewModel.selectStorageEngine(.fileSystem)
         viewModel.selectStorageFolder(URL(fileURLWithPath: "/Users/test/Sync/Mackup"))
 
-        viewModel.createDefaultConfig()
+        viewModel.saveStorageConfig()
 
         XCTAssertEqual(
             try XCTUnwrap(editor.savedConfig).storage,
@@ -268,7 +302,7 @@ final class DashboardViewModelTests: XCTestCase {
         )
     }
 
-    func testCreateDefaultConfigWritesAutomaticProviderRelativeDirectory() throws {
+    func testSaveStorageConfigWritesAutomaticProviderRelativeDirectory() throws {
         let editor = CapturingConfigEditor()
         let configPath = temporaryDirectory.appendingPathComponent(".mackup.cfg")
         let viewModel = DashboardViewModel(
@@ -289,7 +323,7 @@ final class DashboardViewModelTests: XCTestCase {
         viewModel.selectStorageEngine(.dropbox)
         viewModel.selectStorageFolder(URL(fileURLWithPath: "/Users/test/Dropbox/Dotfiles/Mackup"))
 
-        viewModel.createDefaultConfig()
+        viewModel.saveStorageConfig()
 
         XCTAssertEqual(
             try XCTUnwrap(editor.savedConfig).storage,

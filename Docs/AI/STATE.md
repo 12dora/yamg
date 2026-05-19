@@ -26,5 +26,7 @@ Keep this file short. Read first when resuming.
 
 ## Next Best Step
 
-Create Xcode SwiftUI macOS project matching `Docs/Engineering/SCAFFOLD.md`, then implement P0 modules from `Docs/AI/TASKS.md`.
+Sidebar is Dashboard / Applications / Logs / Preferences (plus Link Mode when enabled). Dashboard owns CLI status, the create-or-modify Mackup storage editor, and backup/restore flows. Applications now lists installed apps that Mackup supports with per-row sync toggles writing `[applications_to_sync]`. Preferences no longer has a development reset.
+
+Pick the next item from `Docs/AI/TASKS.md` (currently bug fixes or polish on the new flows).
 

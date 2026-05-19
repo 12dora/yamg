@@ -3,123 +3,138 @@ import XCTest
 
 @MainActor
 final class ApplicationsListViewModelTests: XCTestCase {
-    func testRefreshLoadsInstalledApplicationsFromScanner() async {
+    func testRefreshLoadsIntersectionWithSyncFlagsFromConfig() async {
+        let editor = FakeMackupConfigEditor(
+            config: MackupConfig(
+                fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                applicationsToSync: ["git"],
+                applicationsToIgnore: [],
+                originalText: ""
+            )
+        )
         let viewModel = ApplicationsListViewModel(
-            installedApplicationScanner: FakeInstalledApplicationScanner(
+            installedScanner: FakeInstalledApplicationScanner(
                 applications: [
-                    MackupApplication(name: "raycast", displayName: "Raycast"),
-                    MackupApplication(name: "visual-studio-code", displayName: "Visual Studio Code")
+                    MackupApplication(name: "git", displayName: "Git"),
+                    MackupApplication(name: "raycast", displayName: "Raycast")
                 ]
-            )
-        )
-
-        await viewModel.refresh()
-
-        XCTAssertEqual(
-            viewModel.state,
-            .loaded([
-                MackupApplication(name: "raycast", displayName: "Raycast"),
-                MackupApplication(name: "visual-studio-code", displayName: "Visual Studio Code")
-            ])
-        )
-    }
-
-    func testRefreshLoadsApplicationsFromListOutput() async {
-        let viewModel = ApplicationsListViewModel(
-            runner: FakeMackupCommandRunner(
-                events: [
-                    .output("Supported applications:\n - git\n", stream: .stdout),
-                    .output(" - zsh\n", stream: .stdout),
-                    .finished(ProcessResult(exitCode: 0, terminationReason: .exit))
-                ]
-            )
-        )
-
-        await viewModel.refresh()
-
-        XCTAssertEqual(
-            viewModel.state,
-            .loaded([
-                MackupApplication(name: "git"),
-                MackupApplication(name: "zsh")
-            ])
-        )
-    }
-
-    func testRefreshReportsNonZeroExitAsFailure() async {
-        let viewModel = ApplicationsListViewModel(
-            runner: FakeMackupCommandRunner(
-                events: [
-                    .output("boom\n", stream: .stderr),
-                    .finished(ProcessResult(exitCode: 1, terminationReason: .exit))
-                ]
-            )
-        )
-
-        await viewModel.refresh()
-
-        XCTAssertEqual(viewModel.state, .failed("boom"))
-    }
-
-    func testRefreshRetriesInIsolatedListEnvironmentWhenUserConfigBreaksList() async {
-        let executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/mackup")
-        var primaryURLs: [URL] = []
-        var isolatedURLs: [URL] = []
-        let viewModel = ApplicationsListViewModel(
-            detector: FakeApplicationsExecutableResolver(
-                report: MackupDetectionReport(
-                    status: .found,
-                    executableURL: executableURL,
-                    version: MackupVersion(major: 0, minor: 10, patch: 3),
-                    checkedURLs: [executableURL]
-                )
             ),
-            makeRunner: { url in
-                primaryURLs.append(url)
-                return FakeMackupCommandRunner(
-                    events: [
-                        .output("Error: Unable to find your Google Drive install =(\n", stream: .stderr),
-                        .finished(ProcessResult(exitCode: 1, terminationReason: .exit))
-                    ]
-                )
-            },
-            makeIsolatedListRunner: { url in
-                isolatedURLs.append(url)
-                return FakeMackupCommandRunner(
-                    events: [
-                        .output("Supported applications:\n - git\n - raycast\n", stream: .stdout),
-                        .finished(ProcessResult(exitCode: 0, terminationReason: .exit))
-                    ]
-                )
-            }
+            catalog: FakeCatalog(identifiers: ["git", "raycast", "iterm2"]),
+            configEditor: editor
         )
 
         await viewModel.refresh()
 
-        XCTAssertEqual(primaryURLs, [executableURL])
-        XCTAssertEqual(isolatedURLs, [executableURL])
         XCTAssertEqual(
             viewModel.state,
             .loaded([
-                MackupApplication(name: "git"),
-                MackupApplication(name: "raycast")
+                SyncableApplication(identifier: "git", displayName: "Git", isSynced: true),
+                SyncableApplication(identifier: "raycast", displayName: "Raycast", isSynced: false)
             ])
         )
     }
 
-    func testRefreshReportsEmptyList() async {
+    func testRefreshReportsEmptyWhenNoIntersection() async {
         let viewModel = ApplicationsListViewModel(
-            runner: FakeMackupCommandRunner(
-                events: [
-                    .output("Supported applications:\n", stream: .stdout),
-                    .finished(ProcessResult(exitCode: 0, terminationReason: .exit))
-                ]
+            installedScanner: FakeInstalledApplicationScanner(applications: [
+                MackupApplication(name: "novel", displayName: "Novel")
+            ]),
+            catalog: FakeCatalog(identifiers: ["git"]),
+            configEditor: FakeMackupConfigEditor(
+                config: MackupConfig(
+                    fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                    storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                    applicationsToSync: [],
+                    applicationsToIgnore: [],
+                    originalText: ""
+                )
             )
         )
 
         await viewModel.refresh()
 
         XCTAssertEqual(viewModel.state, .empty)
+    }
+
+    func testRefreshReportsFailureWhenCatalogThrows() async {
+        let viewModel = ApplicationsListViewModel(
+            installedScanner: FakeInstalledApplicationScanner(applications: [
+                MackupApplication(name: "git", displayName: "Git")
+            ]),
+            catalog: FakeCatalog(error: MackupSupportedApplicationCatalogError.mackupUnavailable("missing")),
+            configEditor: FakeMackupConfigEditor(
+                config: MackupConfig(
+                    fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                    storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                    applicationsToSync: [],
+                    applicationsToIgnore: [],
+                    originalText: ""
+                )
+            )
+        )
+
+        await viewModel.refresh()
+
+        XCTAssertEqual(viewModel.state, .failed("missing"))
+    }
+
+    func testTogglingSyncOnWritesApplicationToSyncList() async throws {
+        let editor = FakeMackupConfigEditor(
+            config: MackupConfig(
+                fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                storage: MackupStorage(engine: .fileSystem, path: "/Sync", directory: "Mackup"),
+                applicationsToSync: [],
+                applicationsToIgnore: ["xcode"],
+                originalText: "[storage]\nengine = file_system\n"
+            )
+        )
+        let viewModel = ApplicationsListViewModel(
+            installedScanner: FakeInstalledApplicationScanner(applications: [
+                MackupApplication(name: "git", displayName: "Git")
+            ]),
+            catalog: FakeCatalog(identifiers: ["git"]),
+            configEditor: editor
+        )
+        await viewModel.refresh()
+
+        XCTAssertTrue(viewModel.setSync(identifier: "git", isOn: true))
+
+        let saved = try XCTUnwrap(editor.savedConfig)
+        XCTAssertEqual(saved.applicationsToSync, ["git"])
+        XCTAssertEqual(saved.applicationsToIgnore, ["xcode"])
+        XCTAssertEqual(saved.storage, MackupStorage(engine: .fileSystem, path: "/Sync", directory: "Mackup"))
+        if case .loaded(let apps) = viewModel.state {
+            XCTAssertEqual(apps.first?.isSynced, true)
+        } else {
+            XCTFail("Expected loaded state")
+        }
+    }
+
+    func testTogglingSyncOffRemovesApplicationFromSyncList() async throws {
+        let editor = FakeMackupConfigEditor(
+            config: MackupConfig(
+                fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                applicationsToSync: ["git", "raycast"],
+                applicationsToIgnore: [],
+                originalText: ""
+            )
+        )
+        let viewModel = ApplicationsListViewModel(
+            installedScanner: FakeInstalledApplicationScanner(applications: [
+                MackupApplication(name: "git", displayName: "Git"),
+                MackupApplication(name: "raycast", displayName: "Raycast")
+            ]),
+            catalog: FakeCatalog(identifiers: ["git", "raycast"]),
+            configEditor: editor
+        )
+        await viewModel.refresh()
+
+        XCTAssertTrue(viewModel.setSync(identifier: "git", isOn: false))
+
+        let saved = try XCTUnwrap(editor.savedConfig)
+        XCTAssertEqual(saved.applicationsToSync, ["raycast"])
     }
 }
 
@@ -131,25 +146,42 @@ private struct FakeInstalledApplicationScanner: InstalledApplicationScanning {
     }
 }
 
-private struct FakeApplicationsExecutableResolver: MackupExecutableResolving {
-    let report: MackupDetectionReport
+private struct FakeCatalog: MackupSupportedApplicationCataloging {
+    let identifiers: [String]
+    let error: Error?
 
-    func detect(preferredPath: URL?) async -> MackupDetectionReport {
-        report
+    init(identifiers: [String]) {
+        self.identifiers = identifiers
+        self.error = nil
+    }
+
+    init(error: Error) {
+        self.identifiers = []
+        self.error = error
+    }
+
+    func supportedApplicationIdentifiers() async throws -> [String] {
+        if let error {
+            throw error
+        }
+        return identifiers
     }
 }
 
-private struct FakeMackupCommandRunner: MackupCommandRunning {
-    let events: [ProcessEvent]
+private final class FakeMackupConfigEditor: MackupConfigEditing {
+    private var config: MackupConfig
+    private(set) var savedConfig: MackupConfig?
 
-    func run(_ command: MackupCommand) -> AsyncThrowingStream<ProcessEvent, Error> {
-        XCTAssertEqual(command, MackupCommand.list())
+    init(config: MackupConfig) {
+        self.config = config
+    }
 
-        return AsyncThrowingStream { continuation in
-            for event in events {
-                continuation.yield(event)
-            }
-            continuation.finish()
-        }
+    func load(path: URL?) throws -> MackupConfig {
+        config
+    }
+
+    func save(_ config: MackupConfig) throws {
+        self.config = config
+        savedConfig = config
     }
 }

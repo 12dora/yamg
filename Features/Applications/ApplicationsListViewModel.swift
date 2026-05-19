@@ -5,234 +5,125 @@ final class ApplicationsListViewModel: ObservableObject {
     enum State: Equatable {
         case idle
         case loading
-        case loaded([MackupApplication])
+        case loaded([SyncableApplication])
         case empty
         case failed(String)
     }
 
     @Published private(set) var state: State = .idle
 
-    private let injectedRunner: MackupCommandRunning?
-    private let installedApplicationScanner: InstalledApplicationScanning?
-    private let detector: MackupExecutableResolving
-    private let parser: MackupApplicationListParser
-    private let preferredCLIPath: URL?
-    private let makeRunner: (URL) -> MackupCommandRunning
-    private let makeIsolatedListRunner: (URL) throws -> MackupCommandRunning
-
-    init(preferredCLIPath: URL? = nil) {
-        self.injectedRunner = nil
-        self.installedApplicationScanner = InstalledApplicationScanner()
-        self.detector = MackupDetector()
-        self.parser = MackupApplicationListParser()
-        self.preferredCLIPath = preferredCLIPath
-        self.makeRunner = { MackupProcessRunner(executableURL: $0) }
-        self.makeIsolatedListRunner = { try MackupIsolatedListRunnerFactory.makeRunner(executableURL: $0) }
-    }
+    private let installedScanner: InstalledApplicationScanning
+    private let catalog: MackupSupportedApplicationCataloging
+    private let configEditor: MackupConfigEditing
+    private let configFilePath: URL?
+    private var loadedConfig: MackupConfig?
 
     init(
-        runner: MackupCommandRunning,
-        parser: MackupApplicationListParser = MackupApplicationListParser(),
-        preferredCLIPath: URL? = nil,
-        makeIsolatedListRunner: @escaping (URL) throws -> MackupCommandRunning = {
-            try MackupIsolatedListRunnerFactory.makeRunner(executableURL: $0)
-        }
+        installedScanner: InstalledApplicationScanning = InstalledApplicationScanner(),
+        catalog: MackupSupportedApplicationCataloging? = nil,
+        configEditor: MackupConfigEditing = MackupConfigEditor(),
+        configFilePath: URL? = nil,
+        preferredCLIPath: URL? = nil
     ) {
-        self.injectedRunner = runner
-        self.installedApplicationScanner = nil
-        self.detector = MackupDetector()
-        self.parser = parser
-        self.preferredCLIPath = preferredCLIPath
-        self.makeRunner = { MackupProcessRunner(executableURL: $0) }
-        self.makeIsolatedListRunner = makeIsolatedListRunner
-    }
-
-    init(installedApplicationScanner: InstalledApplicationScanning) {
-        self.injectedRunner = nil
-        self.installedApplicationScanner = installedApplicationScanner
-        self.detector = MackupDetector()
-        self.parser = MackupApplicationListParser()
-        self.preferredCLIPath = nil
-        self.makeRunner = { MackupProcessRunner(executableURL: $0) }
-        self.makeIsolatedListRunner = { try MackupIsolatedListRunnerFactory.makeRunner(executableURL: $0) }
-    }
-
-    init(
-        detector: MackupExecutableResolving,
-        parser: MackupApplicationListParser = MackupApplicationListParser(),
-        preferredCLIPath: URL? = nil,
-        makeRunner: @escaping (URL) -> MackupCommandRunning,
-        makeIsolatedListRunner: @escaping (URL) throws -> MackupCommandRunning
-    ) {
-        self.injectedRunner = nil
-        self.installedApplicationScanner = nil
-        self.detector = detector
-        self.parser = parser
-        self.preferredCLIPath = preferredCLIPath
-        self.makeRunner = makeRunner
-        self.makeIsolatedListRunner = makeIsolatedListRunner
+        self.installedScanner = installedScanner
+        self.catalog = catalog ?? MackupSupportedApplicationCatalog(preferredCLIPath: preferredCLIPath)
+        self.configEditor = configEditor
+        self.configFilePath = configFilePath
     }
 
     func refresh() async {
         state = .loading
 
-        if let installedApplicationScanner {
+        let installed: [MackupApplication]
+        do {
+            installed = try installedScanner.scanInstalledApplications()
+        } catch {
+            state = .failed(error.localizedDescription)
+            return
+        }
+
+        let supportedIdentifiers: [String]
+        do {
+            supportedIdentifiers = try await catalog.supportedApplicationIdentifiers()
+        } catch {
+            state = .failed(error.localizedDescription)
+            return
+        }
+
+        let config: MackupConfig
+        do {
+            config = try configEditor.load(path: configFilePath)
+        } catch {
+            state = .failed(error.localizedDescription)
+            return
+        }
+        loadedConfig = config
+
+        let matches = SyncableApplicationMatcher.intersect(
+            supportedIdentifiers: supportedIdentifiers,
+            installed: installed
+        )
+
+        guard !matches.isEmpty else {
+            state = .empty
+            return
+        }
+
+        let syncedSet = Set(config.applicationsToSync)
+        let syncables = matches.map { match in
+            SyncableApplication(
+                identifier: match.identifier,
+                displayName: match.displayName,
+                isSynced: syncedSet.contains(match.identifier)
+            )
+        }
+
+        state = .loaded(syncables)
+    }
+
+    @discardableResult
+    func setSync(identifier: String, isOn: Bool) -> Bool {
+        guard case .loaded(var apps) = state,
+              let index = apps.firstIndex(where: { $0.identifier == identifier }) else {
+            return false
+        }
+
+        apps[index].isSynced = isOn
+
+        let baseConfig: MackupConfig
+        if let loadedConfig {
+            baseConfig = loadedConfig
+        } else {
             do {
-                let applications = try installedApplicationScanner.scanInstalledApplications()
-                state = applications.isEmpty ? .empty : .loaded(applications)
+                baseConfig = try configEditor.load(path: configFilePath)
             } catch {
                 state = .failed(error.localizedDescription)
-            }
-            return
-        }
-
-        do {
-            let runner = try await resolvedRunner()
-            let result = try await runList(using: runner)
-
-            if let exitResult = result.exitResult, exitResult.exitCode != 0 {
-                try await refreshWithIsolatedListRunner(afterFailure: result, fallbackRunner: runner)
-                return
-            }
-
-            publish(stdout: result.stdout)
-        } catch MackupApplicationListParserError.noApplicationsFound {
-            state = .empty
-        } catch {
-            state = .failed(error.localizedDescription)
-        }
-    }
-
-    private func resolvedRunner() async throws -> MackupCommandRunning {
-        if let injectedRunner {
-            return injectedRunner
-        }
-
-        let report = await detector.detect(preferredPath: preferredCLIPath)
-        guard report.status == .found, let executableURL = report.executableURL else {
-            throw ApplicationsListError.mackupUnavailable(report.status.userFacingDescription)
-        }
-
-        return makeRunner(executableURL)
-    }
-
-    private func refreshWithIsolatedListRunner(
-        afterFailure failure: ListRunOutput,
-        fallbackRunner: MackupCommandRunning
-    ) async throws {
-        let runner: MackupCommandRunning
-
-        if injectedRunner != nil {
-            runner = fallbackRunner
-        } else {
-            let report = await detector.detect(preferredPath: preferredCLIPath)
-            guard report.status == .found, let executableURL = report.executableURL else {
-                state = .failed(errorMessage(from: failure))
-                return
-            }
-
-            runner = try makeIsolatedListRunner(executableURL)
-        }
-
-        let retry = try await runList(using: runner)
-        if let exitResult = retry.exitResult, exitResult.exitCode != 0 {
-            state = .failed(errorMessage(from: failure))
-            return
-        }
-
-        publish(stdout: retry.stdout)
-    }
-
-    private func runList(using runner: MackupCommandRunning) async throws -> ListRunOutput {
-        var stdout = ""
-        var stderr = ""
-        var exitResult: ProcessResult?
-
-        for try await event in runner.run(MackupCommand.list()) {
-            switch event {
-            case .output(let output, .stdout):
-                stdout += output
-            case .output(let output, .stderr):
-                stderr += output
-            case .finished(let result):
-                exitResult = result
+                return false
             }
         }
 
-        return ListRunOutput(stdout: stdout, stderr: stderr, exitResult: exitResult)
-    }
-
-    private func publish(stdout: String) {
-        do {
-            let applications = try parser.parse(stdout)
-            state = applications.isEmpty ? .empty : .loaded(applications)
-        } catch MackupApplicationListParserError.noApplicationsFound {
-            state = .empty
-        } catch {
-            state = .failed(error.localizedDescription)
+        var updatedSync = baseConfig.applicationsToSync.filter { $0 != identifier }
+        if isOn {
+            updatedSync.append(identifier)
         }
-    }
+        updatedSync.sort()
 
-    private func errorMessage(from result: ListRunOutput) -> String {
-        let output = [result.stderr, result.stdout]
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .first { !$0.isEmpty }
-
-        if let output {
-            return output
-        }
-
-        let exitCode = result.exitResult?.exitCode ?? -1
-        return "mackup list exited with status \(exitCode)."
-    }
-}
-
-private struct ListRunOutput {
-    var stdout: String
-    var stderr: String
-    var exitResult: ProcessResult?
-}
-
-private enum ApplicationsListError: LocalizedError, Equatable {
-    case mackupUnavailable(String)
-
-    var errorDescription: String? {
-        switch self {
-        case .mackupUnavailable(let message):
-            return message
-        }
-    }
-}
-
-private enum MackupIsolatedListRunnerFactory {
-    static func makeRunner(executableURL: URL, fileManager: FileManager = .default) throws -> MackupCommandRunning {
-        let rootURL = fileManager.temporaryDirectory
-            .appendingPathComponent("YAMG-MackupList-\(UUID().uuidString)", isDirectory: true)
-        let storageURL = rootURL.appendingPathComponent("storage", isDirectory: true)
-        let configURL = rootURL.appendingPathComponent(".mackup.cfg")
-
-        try fileManager.createDirectory(at: storageURL, withIntermediateDirectories: true)
-
-        let config = """
-        [storage]
-        engine = file_system
-        path = \(storageURL.path)
-        directory = Mackup
-        """
-        try config.write(to: configURL, atomically: true, encoding: .utf8)
-
-        var environment = ProcessInfo.processInfo.environment
-        environment["HOME"] = rootURL.path
-        environment["MACKUP_CONFIG"] = nil
-        environment["XDG_CONFIG_HOME"] = rootURL.appendingPathComponent(".config", isDirectory: true).path
-
-        return MackupProcessRunner(
-            executableURL: executableURL,
-            fileManager: fileManager,
-            launchEnvironment: ProcessLaunchEnvironment(
-                environment: environment,
-                temporaryDirectory: rootURL
-            )
+        let updatedConfig = MackupConfig(
+            fileURL: baseConfig.fileURL,
+            storage: baseConfig.storage,
+            applicationsToSync: updatedSync,
+            applicationsToIgnore: baseConfig.applicationsToIgnore,
+            originalText: baseConfig.originalText
         )
+
+        do {
+            try configEditor.save(updatedConfig)
+            loadedConfig = updatedConfig
+            state = .loaded(apps)
+            return true
+        } catch {
+            state = .failed(error.localizedDescription)
+            return false
+        }
     }
 }

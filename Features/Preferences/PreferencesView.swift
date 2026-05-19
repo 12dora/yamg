@@ -13,42 +13,41 @@ struct PreferencesView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            VStack(alignment: .leading, spacing: 10) {
-                settingRow(label: String(localized: "preferences.cli_path")) {
-                    selectedPathRow(
-                        text: viewModel.cliPath,
-                        placeholder: String(localized: "preferences.cli_path.placeholder"),
-                        systemImage: "terminal"
-                    ) {
-                        chooseFile { url in
-                            viewModel.selectCLIPath(url)
-                        }
+        VStack(alignment: .leading, spacing: 14) {
+            settingField(
+                label: String(localized: "preferences.cli_path"),
+                detail: String(localized: "preferences.cli_path.detail")
+            ) {
+                selectedPathRow(
+                    text: viewModel.cliPath,
+                    placeholder: String(localized: "preferences.cli_path.placeholder"),
+                    systemImage: "terminal"
+                ) {
+                    chooseFile { url in
+                        viewModel.selectCLIPath(url)
                     }
                 }
-
-                detailRow(String(localized: "preferences.cli_path.detail"))
-
-                settingRow(label: String(localized: "preferences.config_path")) {
-                    selectedPathRow(
-                        text: viewModel.configPath,
-                        placeholder: String(localized: "preferences.config_path.placeholder"),
-                        systemImage: "doc.text"
-                    ) {
-                        chooseConfigFile { url in
-                            viewModel.selectConfigPath(url)
-                        }
-                    }
-                }
-
-                detailRow(String(localized: "preferences.config_path.detail"))
-
-                Toggle(String(localized: "preferences.show_link_mode"), isOn: $viewModel.showsLinkMode)
-                    .toggleStyle(.checkbox)
             }
-            .frame(maxWidth: 760, alignment: .leading)
 
-            HStack {
+            settingField(
+                label: String(localized: "preferences.config_path"),
+                detail: String(localized: "preferences.config_path.detail")
+            ) {
+                selectedPathRow(
+                    text: viewModel.configPath,
+                    placeholder: String(localized: "preferences.config_path.placeholder"),
+                    systemImage: "doc.text"
+                ) {
+                    chooseConfigFile { url in
+                        viewModel.selectConfigPath(url)
+                    }
+                }
+            }
+
+            Toggle(String(localized: "preferences.show_link_mode"), isOn: $viewModel.showsLinkMode)
+                .toggleStyle(.checkbox)
+
+            HStack(spacing: 10) {
                 Button(role: .destructive) {
                     viewModel.reset()
                 } label: {
@@ -61,74 +60,43 @@ struct PreferencesView: View {
                     Label(String(localized: "action.save"), systemImage: "square.and.arrow.down")
                 }
                 .keyboardShortcut(.defaultAction)
+
+                stateLabel
             }
-
-            Divider()
-                .frame(maxWidth: 760)
-
-            VStack(alignment: .leading, spacing: 10) {
-                Text(String(localized: "preferences.development.title"))
-                    .font(.headline)
-                Text(String(localized: "preferences.development.detail"))
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-
-                Button(role: .destructive) {
-                    viewModel.resetForFirstRunSimulation()
-                } label: {
-                    Label(String(localized: "preferences.development.reset_first_run"), systemImage: "arrow.counterclockwise.circle")
-                }
-            }
-            .frame(maxWidth: 760, alignment: .leading)
-
-            if viewModel.state == .saved {
-                Label(String(localized: "preferences.saved"), systemImage: "checkmark.circle")
-                    .foregroundStyle(.green)
-            }
-
-            if viewModel.state == .reset {
-                Label(String(localized: "preferences.reset_done"), systemImage: "checkmark.circle")
-                    .foregroundStyle(.green)
-                    .textSelection(.enabled)
-            }
-
-            if viewModel.state == .developmentReset {
-                Label(String(localized: "preferences.development.reset_done"), systemImage: "checkmark.circle")
-                    .foregroundStyle(.green)
-                    .textSelection(.enabled)
-            }
-
-            if case .failed(let message) = viewModel.state {
-                Label(message, systemImage: "exclamationmark.triangle")
-                    .foregroundStyle(.red)
-                    .textSelection(.enabled)
-            }
-
-            Spacer()
         }
+        .frame(maxWidth: 760, alignment: .leading)
         .animation(.easeInOut(duration: 0.18), value: viewModel.state)
     }
 
-    private func settingRow<Content: View>(
-        label: String,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        HStack(alignment: .center, spacing: 12) {
-            Text(label)
-                .foregroundStyle(.secondary)
-                .frame(width: 150, alignment: .leading)
-
-            content()
-                .frame(maxWidth: .infinity, alignment: .leading)
+    @ViewBuilder
+    private var stateLabel: some View {
+        switch viewModel.state {
+        case .saved:
+            Label(String(localized: "preferences.saved"), systemImage: "checkmark.circle")
+                .foregroundStyle(.green)
+        case .reset:
+            Label(String(localized: "preferences.reset_done"), systemImage: "checkmark.circle")
+                .foregroundStyle(.green)
+                .textSelection(.enabled)
+        case .failed(let message):
+            Label(message, systemImage: "exclamationmark.triangle")
+                .foregroundStyle(.red)
+                .textSelection(.enabled)
+        case .editing:
+            EmptyView()
         }
     }
 
-    private func detailRow(_ text: String) -> some View {
-        HStack(spacing: 12) {
-            Color.clear
-                .frame(width: 150, height: 0)
-
-            Text(text)
+    private func settingField<Content: View>(
+        label: String,
+        detail: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .foregroundStyle(.primary)
+            content()
+            Text(detail)
                 .font(.callout)
                 .foregroundStyle(.secondary)
         }

@@ -22,13 +22,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Installed Mac apps with Mackup details where available."
+            "value": "Installed Mac apps that Mackup supports. Toggle sync to write [applications_to_sync]."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已安装的 Mac 应用，并在可用时显示 Mackup 详情。"
+            "value": "本机已安装且 Mackup 支持的应用。开启同步即写入 [applications_to_sync]。"
           }
         }
       }
@@ -173,38 +173,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "偏好设置"
-          }
-        }
-      }
-    },
-    "section.storage.subtitle": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Storage engine and directory settings."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "存储引擎和目录设置。"
-          }
-        }
-      }
-    },
-    "section.storage.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Storage"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "存储"
           }
         }
       }
@@ -433,50 +401,50 @@
         }
       }
     },
-    "setup.config.created %@": {
+    "setup.config.update": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Created %@"
+            "value": "Save config file"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已创建 %@"
+            "value": "保存配置文件"
           }
         }
       }
     },
-    "setup.config.edit_storage": {
+    "setup.config.saved %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Edit storage settings"
+            "value": "Saved %@"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "编辑存储设置"
+            "value": "已保存 %@"
           }
         }
       }
     },
-    "setup.config.creating": {
+    "setup.config.saving": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Creating config file..."
+            "value": "Saving config file..."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在创建配置文件..."
+            "value": "正在保存配置文件..."
           }
         }
       }
@@ -637,70 +605,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "偏好设置已重置，匹配的 .mackup.cfg 如存在已删除。"
-          }
-        }
-      }
-    },
-    "preferences.development.detail": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Use this during development to return the app to the first-run setup state without deleting your real .mackup.cfg."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "开发时可用它让应用回到首次运行配置状态，但不会删除真实的 .mackup.cfg。"
-          }
-        }
-      }
-    },
-    "preferences.development.reset_done": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Development reset applied. Return to Dashboard and refresh."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "开发重置已应用。返回仪表盘并刷新。"
-          }
-        }
-      }
-    },
-    "preferences.development.reset_first_run": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reset to first-run state"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "重置为首次运行状态"
-          }
-        }
-      }
-    },
-    "preferences.development.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Development reset"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "开发重置"
           }
         }
       }

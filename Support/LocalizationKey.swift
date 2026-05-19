@@ -7,8 +7,6 @@ enum LocalizationKey: String {
     case dashboardSubtitle = "section.dashboard.subtitle"
     case applicationsTitle = "section.applications.title"
     case applicationsSubtitle = "section.applications.subtitle"
-    case storageTitle = "section.storage.title"
-    case storageSubtitle = "section.storage.subtitle"
     case linkModeTitle = "section.link_mode.title"
     case linkModeSubtitle = "section.link_mode.subtitle"
     case logsTitle = "section.logs.title"

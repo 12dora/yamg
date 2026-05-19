@@ -6,7 +6,6 @@ final class PreferencesViewModel: ObservableObject {
         case editing
         case saved
         case reset
-        case developmentReset
         case failed(String)
     }
 
@@ -61,14 +60,6 @@ final class PreferencesViewModel: ObservableObject {
         } catch {
             state = .failed(error.localizedDescription)
         }
-    }
-
-    func resetForFirstRunSimulation() {
-        preferences.resetForFirstRunSimulation()
-        cliPath = preferences.preferredCLIPath?.path ?? ""
-        configPath = preferences.configFilePath?.path ?? ""
-        showsLinkMode = preferences.showsLinkMode
-        state = .developmentReset
     }
 
     func selectCLIPath(_ url: URL) {

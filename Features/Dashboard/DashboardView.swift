@@ -55,12 +55,10 @@ struct DashboardView: View {
                         .frame(maxWidth: 780)
                 }
 
-                if viewModel.shouldShowConfigWizard {
-                    configWizard
+                configEditor
 
-                    Divider()
-                        .frame(maxWidth: 780)
-                }
+                Divider()
+                    .frame(maxWidth: 780)
 
                 OperationFlowView(
                     viewModel: OperationFlowViewModel(
@@ -149,7 +147,7 @@ struct DashboardView: View {
         .frame(maxWidth: 720, alignment: .leading)
     }
 
-    private var configWizard: some View {
+    private var configEditor: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(String(localized: "setup.config.title"))
                 .font(.headline)
@@ -181,11 +179,11 @@ struct DashboardView: View {
             }
 
             Button {
-                viewModel.createDefaultConfig()
+                viewModel.saveStorageConfig()
             } label: {
-                Label(String(localized: "setup.config.create"), systemImage: "doc.badge.plus")
+                Label(String(localized: String.LocalizationValue(viewModel.saveButtonTitleKey)), systemImage: "square.and.arrow.down")
             }
-            .disabled(isCreatingConfig || !viewModel.canCreateConfig)
+            .disabled(isSavingConfig || !viewModel.canSaveConfig)
 
             setupStateView
         }
@@ -258,28 +256,14 @@ struct DashboardView: View {
             Label(message, systemImage: "exclamationmark.triangle")
                 .foregroundStyle(.red)
                 .textSelection(.enabled)
-        case .creatingConfig:
-            Label(String(localized: "setup.config.creating"), systemImage: "clock")
+        case .savingConfig:
+            Label(String(localized: "setup.config.saving"), systemImage: "clock")
                 .foregroundStyle(.secondary)
-        case .configCreated(let url):
-            VStack(alignment: .leading, spacing: 8) {
-                Label(String(localized: "setup.config.created \(url.path)"), systemImage: "checkmark.circle")
-                    .foregroundStyle(.green)
-                    .textSelection(.enabled)
-
-                NavigationLink {
-                    VStack(alignment: .leading, spacing: 10) {
-                        sectionHeader(.storage)
-                        StorageView(preferences: preferences)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                } label: {
-                    Label(String(localized: "setup.config.edit_storage"), systemImage: "slider.horizontal.3")
-                }
-            }
-        case .configCreateFailed(let message):
+        case .configSaved(let url):
+            Label(String(localized: "setup.config.saved \(url.path)"), systemImage: "checkmark.circle")
+                .foregroundStyle(.green)
+                .textSelection(.enabled)
+        case .configSaveFailed(let message):
             Label(message, systemImage: "exclamationmark.triangle")
                 .foregroundStyle(.red)
                 .textSelection(.enabled)
@@ -293,8 +277,8 @@ struct DashboardView: View {
         return false
     }
 
-    private var isCreatingConfig: Bool {
-        if case .creatingConfig = viewModel.setupState {
+    private var isSavingConfig: Bool {
+        if case .savingConfig = viewModel.setupState {
             return true
         }
         return false
@@ -322,15 +306,6 @@ struct DashboardView: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
             }
-        }
-    }
-
-    private func sectionHeader(_ section: AppSection) -> some View {
-        Group {
-            Text(section.titleKey.localizedStringKey)
-                .font(.title.weight(.semibold))
-            Text(section.subtitleKey.localizedStringKey)
-                .foregroundStyle(.secondary)
         }
     }
 
