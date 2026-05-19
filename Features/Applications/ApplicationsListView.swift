@@ -34,6 +34,11 @@ struct ApplicationsListView: View {
                         viewModel.selectAll()
                     }
                     .disabled(viewModel.isSyncAllMode)
+
+                    Button(String(localized: "applications.sync_none")) {
+                        viewModel.deselectAll()
+                    }
+                    .disabled(!viewModel.isSyncAllMode && viewModel.state == .idle)
                 }
 
                 Button {

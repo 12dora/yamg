@@ -139,6 +139,33 @@ final class ApplicationsListViewModel: ObservableObject {
         }
     }
 
+    func deselectAll() {
+        guard case .loaded(var apps) = state else { return }
+
+        let baseConfig: MackupConfig
+        if let loadedConfig {
+            baseConfig = loadedConfig
+        } else {
+            guard let loaded = try? configEditor.load(path: configFilePath) else { return }
+            baseConfig = loaded
+        }
+
+        let updatedConfig = MackupConfig(
+            fileURL: baseConfig.fileURL,
+            storage: baseConfig.storage,
+            applicationsToSync: [],
+            applicationsToIgnore: baseConfig.applicationsToIgnore,
+            originalText: baseConfig.originalText
+        )
+
+        guard (try? configEditor.save(updatedConfig)) != nil else { return }
+        loadedConfig = updatedConfig
+
+        for i in apps.indices { apps[i].isSynced = false }
+        isSyncAllMode = false
+        state = .loaded(apps)
+    }
+
     func selectAll() {
         guard case .loaded(var apps) = state else { return }
 

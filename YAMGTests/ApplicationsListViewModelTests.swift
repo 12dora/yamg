@@ -210,6 +210,39 @@ final class ApplicationsListViewModelTests: XCTestCase {
         }
     }
 
+    func testDeselectAllClearsAllApplications() async throws {
+        let editor = FakeMackupConfigEditor(
+            config: MackupConfig(
+                fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                applicationsToSync: [],
+                applicationsToIgnore: [],
+                originalText: ""
+            )
+        )
+        let viewModel = ApplicationsListViewModel(
+            installedScanner: FakeInstalledApplicationScanner(applications: [
+                MackupApplication(name: "git", displayName: "Git"),
+                MackupApplication(name: "raycast", displayName: "Raycast")
+            ]),
+            catalog: FakeCatalog(identifiers: ["git", "raycast"]),
+            configEditor: editor
+        )
+        await viewModel.refresh()
+
+        XCTAssertTrue(viewModel.isSyncAllMode)
+        viewModel.deselectAll()
+
+        let saved = try XCTUnwrap(editor.savedConfig)
+        XCTAssertEqual(saved.applicationsToSync, [])
+        XCTAssertFalse(viewModel.isSyncAllMode)
+        if case .loaded(let apps) = viewModel.state {
+            XCTAssertTrue(apps.allSatisfy { !$0.isSynced })
+        } else {
+            XCTFail("Expected loaded state")
+        }
+    }
+
     func testTogglingSyncOffRemovesApplicationFromSyncList() async throws {
         let editor = FakeMackupConfigEditor(
             config: MackupConfig(

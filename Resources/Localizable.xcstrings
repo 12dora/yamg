@@ -1361,6 +1361,22 @@
         }
       }
     },
+    "applications.sync_none": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync None"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全不同步"
+          }
+        }
+      }
+    },
     "application.detail.configuration_files": {
       "localizations": {
         "en": {
