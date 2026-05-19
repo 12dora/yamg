@@ -3,10 +3,12 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject private var viewModel: DashboardViewModel
     private let preferences: AppPreferencesStoring
+    private let logStore: ProcessLogPersisting
 
     @MainActor
-    init(preferences: AppPreferencesStoring = AppPreferences()) {
+    init(preferences: AppPreferencesStoring = AppPreferences(), logStore: ProcessLogPersisting = ProcessLogStore()) {
         self.preferences = preferences
+        self.logStore = logStore
         _viewModel = StateObject(
             wrappedValue: DashboardViewModel(
                 preferredCLIPath: preferences.preferredCLIPath,
@@ -16,8 +18,9 @@ struct DashboardView: View {
         )
     }
 
-    init(viewModel: DashboardViewModel) {
+    init(viewModel: DashboardViewModel, logStore: ProcessLogPersisting = ProcessLogStore()) {
         self.preferences = AppPreferences()
+        self.logStore = logStore
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
@@ -62,6 +65,7 @@ struct DashboardView: View {
 
                 OperationFlowView(
                     viewModel: OperationFlowViewModel(
+                        logStore: logStore,
                         preferredCLIPath: viewModel.preferredCLIPath,
                         configFilePath: viewModel.configPath
                     )

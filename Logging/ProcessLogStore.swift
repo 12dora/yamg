@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 struct RunRecord: Equatable, Identifiable {
     enum Status: Equatable {
@@ -31,12 +32,13 @@ enum ProcessLogStoreError: Error, Equatable {
     case runNotFound(UUID)
 }
 
-actor ProcessLogStore: ProcessLogPersisting {
-    private var runRecords: [UUID: RunRecord] = [:]
+final class ProcessLogStore: ProcessLogPersisting, ObservableObject {
+    @Published private(set) var runRecords: [UUID: RunRecord] = [:]
     private var runOrder: [UUID] = []
     private var logEntriesByRunID: [UUID: [ProcessLogEntry]] = [:]
     private let now: @Sendable () -> Date
     private let makeID: @Sendable () -> UUID
+    private let lock = NSLock()
 
     init(
         now: @escaping @Sendable () -> Date = { Date() },
@@ -56,15 +58,21 @@ actor ProcessLogStore: ProcessLogPersisting {
             status: .running
         )
 
-        runRecords[id] = record
-        runOrder.append(id)
-        logEntriesByRunID[id] = []
+        lock.withLock {
+            runRecords[id] = record
+            runOrder.append(id)
+            logEntriesByRunID[id] = []
+        }
 
         return record
     }
 
     func append(_ event: ProcessEvent, to runID: UUID) async throws {
-        guard runRecords[runID] != nil else {
+        lock.lock()
+        let exists = runRecords[runID] != nil
+        lock.unlock()
+
+        guard exists else {
             throw ProcessLogStoreError.runNotFound(runID)
         }
 
@@ -75,38 +83,58 @@ actor ProcessLogStore: ProcessLogPersisting {
             event: event
         )
 
-        logEntriesByRunID[runID, default: []].append(entry)
+        lock.withLock {
+            logEntriesByRunID[runID, default: []].append(entry)
+        }
     }
 
     func finish(runID: UUID, result: ProcessResult) async throws {
+        lock.lock()
         guard var record = runRecords[runID] else {
+            lock.unlock()
             throw ProcessLogStoreError.runNotFound(runID)
         }
+        lock.unlock()
 
         record.finishedAt = now()
         record.status = .finished(result)
-        runRecords[runID] = record
+
+        lock.withLock {
+            runRecords[runID] = record
+        }
     }
 
     func fail(runID: UUID, message: String) async throws {
+        lock.lock()
         guard var record = runRecords[runID] else {
+            lock.unlock()
             throw ProcessLogStoreError.runNotFound(runID)
         }
+        lock.unlock()
 
         record.finishedAt = now()
         record.status = .failed(message)
-        runRecords[runID] = record
+
+        lock.withLock {
+            runRecords[runID] = record
+        }
     }
 
     func runs() -> [RunRecord] {
-        runOrder.compactMap { runRecords[$0] }
+        lock.withLock {
+            runOrder.compactMap { runRecords[$0] }
+        }
     }
 
     func run(id: UUID) -> RunRecord? {
-        runRecords[id]
+        lock.withLock {
+            runRecords[id]
+        }
     }
 
     func entries(for runID: UUID) -> [ProcessLogEntry] {
-        logEntriesByRunID[runID, default: []]
+        lock.withLock {
+            logEntriesByRunID[runID, default: []]
+        }
     }
 }

@@ -129,6 +129,27 @@ struct MackupCommand: Equatable {
         options.arguments + action.arguments
     }
 
+    var description: String {
+        switch action {
+        case .version:
+            return "mackup --version"
+        case .list:
+            return "mackup list"
+        case .show(let application):
+            return "mackup show \(application)"
+        case .backup:
+            return "mackup backup"
+        case .restore:
+            return "mackup restore"
+        case .linkInstall:
+            return "mackup link install"
+        case .link:
+            return "mackup link"
+        case .linkUninstall:
+            return "mackup link uninstall"
+        }
+    }
+
     private init(action: Action, uncheckedOptions options: Options) {
         self.action = action
         self.options = options

@@ -3,9 +3,11 @@ import SwiftUI
 struct RootShellView: View {
     @ObservedObject private var preferences: AppPreferences
     @State private var selection: AppSection? = .dashboard
+    private let logStore: ProcessLogPersisting
 
-    init(preferences: AppPreferences = AppPreferences()) {
+    init(preferences: AppPreferences = AppPreferences(), logStore: ProcessLogPersisting = ProcessLogStore()) {
         self.preferences = preferences
+        self.logStore = logStore
     }
 
     var body: some View {
@@ -60,7 +62,7 @@ struct RootShellView: View {
         if section == .dashboard {
             VStack(alignment: .leading, spacing: 10) {
                 sectionHeader(section)
-                DashboardView(preferences: preferences)
+                DashboardView(preferences: preferences, logStore: logStore)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
@@ -92,7 +94,7 @@ struct RootShellView: View {
         } else if section == .logs {
             VStack(alignment: .leading, spacing: 10) {
                 sectionHeader(section)
-                LogsView()
+                LogsView(logStore: logStore)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
