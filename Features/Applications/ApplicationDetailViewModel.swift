@@ -59,6 +59,12 @@ final class ApplicationDetailViewModel: ObservableObject {
                 }
             }
 
+            // `.task(id: selectedApplicationName)` cancels this load when the
+            // selection changes. A consumer-cancelled AsyncThrowingStream ends
+            // without throwing, so without this check we would parse the partial
+            // output and overwrite the newer selection's state with the old app's.
+            if Task.isCancelled { return }
+
             if let exitResult, exitResult.exitCode != 0 {
                 state = .failed(
                     applicationName: applicationName,
@@ -70,6 +76,9 @@ final class ApplicationDetailViewModel: ObservableObject {
             let detail = try parser.parse(stdout, applicationName: applicationName)
             state = .loaded(detail)
         } catch {
+            // Cancellation can surface here (e.g. parse of truncated output) — don't
+            // clobber the newer selection's state with a stale failure.
+            if Task.isCancelled { return }
             state = .failed(applicationName: applicationName, message: error.localizedDescription)
         }
     }

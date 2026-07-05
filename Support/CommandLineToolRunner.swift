@@ -64,6 +64,12 @@ final class CommandLineToolRunner: CommandLineToolRunning {
             process.standardOutput = stdoutPipe
             process.standardError = stderrPipe
 
+            // Consume data inside the readability handler (on the FileHandle's own
+            // queue) so the fd is always drained — never re-firing the level-
+            // triggered source or blocking. Only the append is serialized onto
+            // `queue`. Moving the read itself onto `queue` would let the terminating
+            // drain's O_NONBLOCK guard be defeated by a lingering write end and
+            // could hang, so keep the read here.
             let appendOutput: (Data) -> Void = { data in
                 guard !data.isEmpty else {
                     return

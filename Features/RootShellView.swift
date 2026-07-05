@@ -1,13 +1,48 @@
 import SwiftUI
 
+/// Retains the operation view models for the window lifetime so an in-flight
+/// backup/restore or link operation survives navigating away and back —
+/// otherwise the detail view (and its operation view model) is destroyed,
+/// orphaning the running mackup process and letting a freshly-created panel
+/// launch a second concurrent destructive operation. It exposes no @Published
+/// state, so RootShellView observing it via @StateObject retains the models
+/// WITHOUT re-rendering the whole shell on every streamed output line.
+@MainActor
+final class OperationViewModelStore: ObservableObject {
+    let operationFlow: OperationFlowViewModel
+    let linkMode: LinkModeViewModel
+
+    init(logStore: ProcessLogPersisting, preferredCLIPath: URL?, configFilePath: URL?) {
+        operationFlow = OperationFlowViewModel(
+            logStore: logStore,
+            preferredCLIPath: preferredCLIPath,
+            configFilePath: configFilePath
+        )
+        linkMode = LinkModeViewModel(
+            logStore: logStore,
+            preferredCLIPath: preferredCLIPath,
+            configFilePath: configFilePath
+        )
+    }
+}
+
 struct RootShellView: View {
     @ObservedObject private var preferences: AppPreferences
     @State private var selection: AppSection? = .dashboard
     private let logStore: ProcessLogStore
+    @StateObject private var operations: OperationViewModelStore
 
+    @MainActor
     init(preferences: AppPreferences, logStore: ProcessLogStore) {
         self.preferences = preferences
         self.logStore = logStore
+        _operations = StateObject(
+            wrappedValue: OperationViewModelStore(
+                logStore: logStore,
+                preferredCLIPath: preferences.preferredCLIPath,
+                configFilePath: preferences.configFilePath
+            )
+        )
     }
 
     var body: some View {
@@ -76,7 +111,11 @@ struct RootShellView: View {
         if section == .dashboard {
             VStack(alignment: .leading, spacing: 8) {
                 sectionHeader(section)
-                DashboardView(preferences: preferences, logStore: logStore)
+                DashboardView(
+                    preferences: preferences,
+                    logStore: logStore,
+                    operationFlowViewModel: operations.operationFlow
+                )
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
@@ -92,7 +131,7 @@ struct RootShellView: View {
         } else if section == .linkMode {
             VStack(alignment: .leading, spacing: 8) {
                 sectionHeader(section)
-                LinkModeView(preferences: preferences)
+                LinkModeView(viewModel: operations.linkMode)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)

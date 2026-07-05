@@ -117,6 +117,16 @@ enum MackupIsolatedListRunnerFactory {
 
         try fileManager.createDirectory(at: storageURL, withIntermediateDirectories: true)
 
+        // Ownership of temp-dir cleanup passes to the returned runner. If we throw
+        // before handing it off (e.g. config.write fails after the mkdir), remove
+        // the partially-created directory so it isn't orphaned under NSTemporaryDirectory.
+        var handedOff = false
+        defer {
+            if !handedOff {
+                try? fileManager.removeItem(at: rootURL)
+            }
+        }
+
         let config = """
         [storage]
         engine = file_system
@@ -130,7 +140,7 @@ enum MackupIsolatedListRunnerFactory {
         environment["MACKUP_CONFIG"] = nil
         environment["XDG_CONFIG_HOME"] = rootURL.appendingPathComponent(".config", isDirectory: true).path
 
-        return MackupProcessRunner(
+        let runner = MackupProcessRunner(
             executableURL: executableURL,
             fileManager: fileManager,
             launchEnvironment: ProcessLaunchEnvironment(
@@ -138,5 +148,7 @@ enum MackupIsolatedListRunnerFactory {
                 temporaryDirectory: rootURL
             )
         )
+        handedOff = true
+        return runner
     }
 }

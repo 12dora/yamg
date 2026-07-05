@@ -13,6 +13,13 @@ final class ApplicationsListViewModel: ObservableObject {
     @Published private(set) var state: State = .idle
     @Published private(set) var isSyncAllMode: Bool = true
 
+    /// True when the list is loaded and nothing is synced — used to disable the
+    /// "Sync none" button (mirroring how isSyncAllMode disables "Sync all").
+    var isSyncNoneMode: Bool {
+        guard case .loaded(let apps) = state else { return false }
+        return !isSyncAllMode && apps.allSatisfy { !$0.isSynced }
+    }
+
     private let installedScanner: InstalledApplicationScanning
     private let catalog: MackupSupportedApplicationCataloging
     private let configEditor: MackupConfigEditing
@@ -115,11 +122,27 @@ final class ApplicationsListViewModel: ObservableObject {
             updatedSync = list.sorted()
         }
 
+        var updatedIgnore = baseConfig.applicationsToIgnore
+        // Re-enabling an app must lift any bulk "ignore everything" a prior
+        // deselectAll wrote, otherwise the re-enabled app stays ignored.
+        if isOn {
+            updatedIgnore.removeAll { $0 == identifier }
+        }
+
+        // An empty applications_to_sync means "sync everything" to mackup — the
+        // opposite of what turning off the last synced app intends. Translate it
+        // the same way deselectAll() does: keep the sync list empty but move every
+        // supported app into applications_to_ignore so mackup syncs nothing.
+        let syncNothing = updatedSync.isEmpty
+        if syncNothing {
+            updatedIgnore = Array(Set(updatedIgnore).union(lastSupportedIdentifiers)).sorted()
+        }
+
         let updatedConfig = MackupConfig(
             fileURL: baseConfig.fileURL,
             storage: baseConfig.storage,
             applicationsToSync: updatedSync,
-            applicationsToIgnore: baseConfig.applicationsToIgnore,
+            applicationsToIgnore: updatedIgnore,
             originalText: baseConfig.originalText
         )
 
@@ -128,11 +151,12 @@ final class ApplicationsListViewModel: ObservableObject {
             loadedConfig = updatedConfig
 
             apps[index].isSynced = isOn
-            let newSyncAll = updatedSync.isEmpty
-            if newSyncAll {
-                for i in apps.indices { apps[i].isSynced = true }
+            if syncNothing {
+                for i in apps.indices { apps[i].isSynced = false }
             }
-            isSyncAllMode = newSyncAll
+            // setSync always yields an explicit list (or an explicit "sync nothing"),
+            // never mackup's implicit sync-all.
+            isSyncAllMode = false
             state = .loaded(apps)
             return true
         } catch {

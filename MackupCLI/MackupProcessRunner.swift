@@ -48,6 +48,11 @@ final class MackupProcessRunner: MackupCommandRunning {
     func run(_ command: MackupCommand) -> AsyncThrowingStream<ProcessEvent, Error> {
         AsyncThrowingStream { continuation in
             guard fileManager.isExecutableFile(atPath: executableURL.path) else {
+                // This early return happens before onTermination is registered, so
+                // clean up the isolated temp directory here or it would be orphaned.
+                if let temporaryDirectory = launchEnvironment.temporaryDirectory {
+                    try? fileManager.removeItem(at: temporaryDirectory)
+                }
                 continuation.finish(throwing: MackupProcessRunnerError.executableNotFound(executableURL))
                 return
             }
@@ -63,22 +68,60 @@ final class MackupProcessRunner: MackupCommandRunning {
             process.standardOutput = stdoutPipe
             process.standardError = stderrPipe
 
-            let yieldOutput: (FileHandle, ProcessOutputStream) -> Void = { handle, stream in
-                let data = handle.availableData
-                guard !data.isEmpty, let output = String(data: data, encoding: .utf8), !output.isEmpty else {
-                    return
+            // Per-stream residual byte buffers. Decoding each read chunk in
+            // isolation dropped the whole chunk whenever a multi-byte UTF-8
+            // character straddled a read boundary. Instead we accumulate raw bytes
+            // and only decode the longest complete-UTF-8 prefix, carrying the
+            // trailing partial sequence into the next read. Only ever touched on
+            // `queue`, so no extra locking is needed.
+            var stdoutResidual = Data()
+            var stderrResidual = Data()
+
+            let emit: (Data, ProcessOutputStream, Bool) -> Void = { newData, stream, isFinal in
+                let combined: Data
+                switch stream {
+                case .stdout:
+                    stdoutResidual.append(newData)
+                    combined = stdoutResidual
+                case .stderr:
+                    stderrResidual.append(newData)
+                    combined = stderrResidual
                 }
 
-                queue.async {
-                    continuation.yield(.output(output, stream: stream))
+                guard !combined.isEmpty else { return }
+
+                let text: String
+                let consumed: Int
+                if isFinal {
+                    // Best-effort decode of whatever remains (U+FFFD substitution)
+                    // so no trailing bytes are silently lost at end of stream.
+                    text = String(decoding: combined, as: UTF8.self)
+                    consumed = combined.count
+                } else {
+                    (text, consumed) = MackupProcessRunner.decodableUTF8Prefix(combined)
+                }
+
+                if consumed > 0 {
+                    switch stream {
+                    case .stdout: stdoutResidual.removeFirst(consumed)
+                    case .stderr: stderrResidual.removeFirst(consumed)
+                    }
+                }
+
+                if !text.isEmpty {
+                    continuation.yield(.output(text, stream: stream))
                 }
             }
 
             stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
-                yieldOutput(handle, .stdout)
+                let data = handle.availableData
+                guard !data.isEmpty else { return }
+                queue.async { emit(data, .stdout, false) }
             }
             stderrPipe.fileHandleForReading.readabilityHandler = { handle in
-                yieldOutput(handle, .stderr)
+                let data = handle.availableData
+                guard !data.isEmpty else { return }
+                queue.async { emit(data, .stderr, false) }
             }
 
             process.terminationHandler = { terminatedProcess in
@@ -92,17 +135,8 @@ final class MackupProcessRunner: MackupCommandRunning {
                 // queue.async slips in afterwards see a finished continuation
                 // and their yields are silently dropped.
                 queue.async {
-                    let drain: (FileHandle, ProcessOutputStream) -> Void = { handle, stream in
-                        let data = handle.availableData
-                        guard
-                            !data.isEmpty,
-                            let output = String(data: data, encoding: .utf8),
-                            !output.isEmpty
-                        else { return }
-                        continuation.yield(.output(output, stream: stream))
-                    }
-                    drain(stdoutPipe.fileHandleForReading, .stdout)
-                    drain(stderrPipe.fileHandleForReading, .stderr)
+                    emit(stdoutPipe.fileHandleForReading.availableData, .stdout, true)
+                    emit(stderrPipe.fileHandleForReading.availableData, .stderr, true)
 
                     if let temporaryDirectory = self.launchEnvironment.temporaryDirectory {
                         try? self.fileManager.removeItem(at: temporaryDirectory)
@@ -141,5 +175,32 @@ final class MackupProcessRunner: MackupCommandRunning {
                 continuation.finish(throwing: error)
             }
         }
+    }
+
+    /// Returns the longest prefix of `data` that is valid UTF-8, together with the
+    /// number of bytes it consumed. Any trailing bytes of an incomplete multi-byte
+    /// sequence (at most 3) are left unconsumed so they can be completed by the
+    /// next read.
+    private static func decodableUTF8Prefix(_ data: Data) -> (text: String, consumed: Int) {
+        if data.isEmpty { return ("", 0) }
+
+        if let whole = String(data: data, encoding: .utf8) {
+            return (whole, data.count)
+        }
+
+        // A valid UTF-8 character is at most 4 bytes, so only the last 3 bytes can
+        // be an incomplete trailing sequence — back off up to that far.
+        var length = data.count
+        let minLength = max(0, data.count - 3)
+        while length > minLength {
+            length -= 1
+            if let prefix = String(data: data.prefix(length), encoding: .utf8) {
+                return (prefix, length)
+            }
+        }
+
+        // No valid boundary within the trailing 3 bytes: keep everything buffered
+        // and wait for more bytes (or the best-effort final flush).
+        return ("", 0)
     }
 }

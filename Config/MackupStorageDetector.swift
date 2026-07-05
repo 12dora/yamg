@@ -118,11 +118,14 @@ struct MackupStorageDetector: MackupStorageDetecting {
         }
 
         var database: OpaquePointer?
-        guard sqlite3_open_v2(dbURL.path, &database, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else {
-            return nil
-        }
+        // Install the close before the open guard: sqlite3_open_v2 may allocate a
+        // handle even when it returns an error, and that handle must be released.
+        // sqlite3_close(nil) is a documented no-op, so this is safe on all paths.
         defer {
             sqlite3_close(database)
+        }
+        guard sqlite3_open_v2(dbURL.path, &database, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else {
+            return nil
         }
 
         let query = "SELECT data_value FROM data WHERE entry_key = 'local_sync_root_path';"

@@ -244,6 +244,42 @@ final class ApplicationsListViewModelTests: XCTestCase {
         }
     }
 
+    func testTogglingOffLastExplicitlySyncedAppSyncsNothingNotEverything() async throws {
+        // Explicit sync list of one app; turning it off must NOT collapse into
+        // mackup's "empty means sync everything" — it must ignore all supported apps.
+        let editor = FakeMackupConfigEditor(
+            config: MackupConfig(
+                fileURL: URL(fileURLWithPath: "/tmp/.mackup.cfg"),
+                storage: MackupStorage(engine: .dropbox, path: nil, directory: nil),
+                applicationsToSync: ["git"],
+                applicationsToIgnore: [],
+                originalText: ""
+            )
+        )
+        let viewModel = ApplicationsListViewModel(
+            installedScanner: FakeInstalledApplicationScanner(applications: [
+                MackupApplication(name: "git", displayName: "Git"),
+                MackupApplication(name: "raycast", displayName: "Raycast")
+            ]),
+            catalog: FakeCatalog(identifiers: ["git", "raycast"]),
+            configEditor: editor
+        )
+        await viewModel.refresh()
+
+        XCTAssertFalse(viewModel.isSyncAllMode)
+        XCTAssertTrue(viewModel.setSync(identifier: "git", isOn: false))
+
+        let saved = try XCTUnwrap(editor.savedConfig)
+        XCTAssertEqual(saved.applicationsToSync, [])
+        XCTAssertEqual(saved.applicationsToIgnore, ["git", "raycast"])
+        XCTAssertFalse(viewModel.isSyncAllMode)
+        if case .loaded(let apps) = viewModel.state {
+            XCTAssertTrue(apps.allSatisfy { !$0.isSynced })
+        } else {
+            XCTFail("Expected loaded state")
+        }
+    }
+
     func testTogglingSyncOffRemovesApplicationFromSyncList() async throws {
         let editor = FakeMackupConfigEditor(
             config: MackupConfig(

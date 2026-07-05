@@ -97,6 +97,9 @@ struct PreferencesView: View {
             }
         }
         .frame(maxWidth: 760, alignment: .leading)
+        .onAppear {
+            viewModel.reloadFromStore()
+        }
         .animation(.easeInOut(duration: 0.18), value: viewModel.state)
         .confirmationDialog(
             "preferences.reset.confirm_title",
@@ -123,7 +126,10 @@ struct PreferencesView: View {
                 .foregroundStyle(.green)
                 .textSelection(.enabled)
         case .failed(let message):
-            Label(message, systemImage: "exclamationmark.triangle")
+            // Render through LocalizedStringKey so keys like
+            // "preferences.cli_path.invalid" follow the in-app language; an
+            // already-localized error.localizedDescription simply passes through.
+            Label(LocalizedStringKey(message), systemImage: "exclamationmark.triangle")
                 .foregroundStyle(.red)
                 .textSelection(.enabled)
         case .editing:

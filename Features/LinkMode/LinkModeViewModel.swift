@@ -73,9 +73,11 @@ final class LinkModeViewModel: ObservableObject {
         state = .running(operation)
         output = ""
 
+        var createdRun: RunRecord?
         do {
             let command = command(for: operation)
             let run = try await logStore.createRun(command: command)
+            createdRun = run
             let runner = try await resolvedRunner()
 
             for try await event in runner.run(command) {
@@ -90,6 +92,10 @@ final class LinkModeViewModel: ObservableObject {
                 }
             }
         } catch {
+            // Record the failure so the run isn't stuck as ".running" in the logs.
+            if let createdRun {
+                try? await logStore.fail(runID: createdRun.id, message: error.localizedDescription)
+            }
             state = .failed(operation, error.localizedDescription)
         }
     }

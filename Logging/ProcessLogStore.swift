@@ -26,6 +26,7 @@ protocol ProcessLogPersisting {
     func createRun(command: MackupCommand) async throws -> RunRecord
     func append(_ event: ProcessEvent, to runID: UUID) async throws
     func finish(runID: UUID, result: ProcessResult) async throws
+    func fail(runID: UUID, message: String) async throws
 }
 
 enum ProcessLogStoreError: Error, Equatable {
@@ -87,12 +88,15 @@ final class ProcessLogStore: ProcessLogPersisting, ObservableObject {
             event: event
         )
 
-        var entries = logEntriesByRunID[runID, default: []]
-        entries.append(entry)
-        if entries.count > maxEntriesPerRun {
-            entries.removeFirst(entries.count - maxEntriesPerRun)
+        // logEntriesByRunID is not @Published (to avoid churn), so notify observers
+        // manually — otherwise the Logs detail view never refreshes while a run's
+        // output streams in and only updates when the run finishes.
+        objectWillChange.send()
+        logEntriesByRunID[runID, default: []].append(entry)
+        if logEntriesByRunID[runID, default: []].count > maxEntriesPerRun {
+            let overflow = logEntriesByRunID[runID, default: []].count - maxEntriesPerRun
+            logEntriesByRunID[runID]?.removeFirst(overflow)
         }
-        logEntriesByRunID[runID] = entries
     }
 
     func finish(runID: UUID, result: ProcessResult) async throws {

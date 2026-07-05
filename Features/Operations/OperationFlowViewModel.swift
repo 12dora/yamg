@@ -59,9 +59,11 @@ final class OperationFlowViewModel: ObservableObject {
     }
 
     private func run(_ operation: Operation) async {
+        var createdRun: RunRecord?
         do {
             let command = command(for: operation)
             let run = try await logStore.createRun(command: command)
+            createdRun = run
             let runner = try await resolvedRunner()
 
             for try await event in runner.run(command) {
@@ -76,6 +78,11 @@ final class OperationFlowViewModel: ObservableObject {
                 }
             }
         } catch {
+            // Record the failure in the shared log store, otherwise the run is
+            // stuck as ".running" forever in the Logs history.
+            if let createdRun {
+                try? await logStore.fail(runID: createdRun.id, message: error.localizedDescription)
+            }
             state = .failed(operation, error.localizedDescription)
         }
     }

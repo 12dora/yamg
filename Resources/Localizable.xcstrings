@@ -4,6 +4,22 @@
     "/" : {
 
     },
+    "preferences.cli_path.invalid" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected CLI path is not executable. Please choose a valid Mackup executable."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所选的 CLI 路径不可执行。请选择有效的 Mackup 可执行文件。"
+          }
+        }
+      }
+    },
     "%@ min" : {
 
     },

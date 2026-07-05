@@ -24,6 +24,11 @@ struct MackupStorage: Equatable {
     var engine: MackupStorageEngine
     var path: String?
     var directory: String?
+    /// The verbatim `engine = ...` value when it is not one of the engines YAMG
+    /// models (e.g. mackup's `copy`). Preserved so a round-trip never rewrites or
+    /// drops an engine the user's real config legitimately uses. `nil` when the
+    /// engine matches a known `MackupStorageEngine` case.
+    var rawEngine: String? = nil
 }
 
 struct MackupConfig: Equatable {
@@ -38,10 +43,6 @@ struct MackupConfig: Equatable {
 protocol MackupConfigEditing {
     func load(path: URL?) throws -> MackupConfig
     func save(_ config: MackupConfig) throws
-}
-
-enum MackupConfigError: Error, Equatable {
-    case unsupportedStorageEngine(String)
 }
 
 final class MackupConfigEditor: MackupConfigEditing {
@@ -66,7 +67,7 @@ final class MackupConfigEditor: MackupConfigEditing {
             text = ""
         }
 
-        return try MackupConfigParser.parse(text: text, fileURL: fileURL)
+        return MackupConfigParser.parse(text: text, fileURL: fileURL)
     }
 
     func save(_ config: MackupConfig) throws {
@@ -78,9 +79,10 @@ final class MackupConfigEditor: MackupConfigEditing {
 }
 
 private enum MackupConfigParser {
-    static func parse(text: String, fileURL: URL) throws -> MackupConfig {
+    static func parse(text: String, fileURL: URL) -> MackupConfig {
         var currentSection: String?
         var engine = MackupStorageEngine.dropbox
+        var rawEngine: String?
         var path: String?
         var directory: String?
         var applicationsToSync: [String] = []
@@ -103,10 +105,17 @@ private enum MackupConfigParser {
                 if let keyValue = keyValue(from: trimmed) {
                     switch keyValue.key {
                     case "engine":
-                        guard let parsedEngine = MackupStorageEngine(rawValue: keyValue.value) else {
-                            throw MackupConfigError.unsupportedStorageEngine(keyValue.value)
+                        if let parsedEngine = MackupStorageEngine(rawValue: keyValue.value) {
+                            engine = parsedEngine
+                            rawEngine = nil
+                        } else {
+                            // Never throw on an unrecognized engine: mackup supports
+                            // engines YAMG does not model (e.g. `copy`). Throwing here
+                            // caused the caller's `try?` to swallow the error and
+                            // overwrite the file with an empty config — catastrophic
+                            // data loss. Preserve the raw value instead.
+                            rawEngine = keyValue.value
                         }
-                        engine = parsedEngine
                     case "path":
                         path = keyValue.value
                     case "directory":
@@ -126,7 +135,7 @@ private enum MackupConfigParser {
 
         return MackupConfig(
             fileURL: fileURL,
-            storage: MackupStorage(engine: engine, path: path, directory: directory),
+            storage: MackupStorage(engine: engine, path: path, directory: directory, rawEngine: rawEngine),
             applicationsToSync: applicationsToSync,
             applicationsToIgnore: applicationsToIgnore,
             originalText: text
@@ -147,10 +156,14 @@ private enum MackupConfigParser {
         }
 
         let key = trimmedLine[..<separatorIndex].trimmingCharacters(in: .whitespaces)
-        let rawValue = trimmedLine[trimmedLine.index(after: separatorIndex)...]
+        // Do NOT strip inline comments. mackup uses Python's configparser with the
+        // default inline_comment_prefixes=None, so it treats `#`/`;` inside a value
+        // as literal content. Stripping them here silently corrupted storage paths
+        // like "/Volumes/Backup Drive #2".
+        let value = trimmedLine[trimmedLine.index(after: separatorIndex)...]
             .trimmingCharacters(in: .whitespaces)
 
-        return (key, stripInlineComment(from: rawValue))
+        return (key, value)
     }
 
     static func applicationName(from trimmedLine: String) -> String {
@@ -158,16 +171,6 @@ private enum MackupConfigParser {
             return String(trimmedLine[..<separatorIndex]).trimmingCharacters(in: .whitespaces)
         }
         return trimmedLine
-    }
-
-    private static func stripInlineComment(from value: String) -> String {
-        var result = value
-        for marker in [" #", " ;"] {
-            if let range = result.range(of: marker) {
-                result = String(result[..<range.lowerBound])
-            }
-        }
-        return result.trimmingCharacters(in: .whitespaces)
     }
 }
 
@@ -180,7 +183,14 @@ private enum MackupConfigRenderer {
 
     static func render(_ config: MackupConfig) -> String {
         var output: [String] = []
-        let originalLines = config.originalText.components(separatedBy: .newlines)
+        // Normalize line endings first. CharacterSet.newlines treats CR and LF as
+        // separate members, so splitting a CRLF file on it injects an empty
+        // component between every line — which the verbatim echo below would turn
+        // into spurious blank lines in preserved content.
+        let normalizedText = config.originalText
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+        let originalLines = normalizedText.components(separatedBy: "\n")
         var renderedSections = Set<String>()
         var index = 0
 
@@ -190,7 +200,11 @@ private enum MackupConfigRenderer {
 
             if let section = MackupConfigParser.sectionName(from: trimmed),
                supportedSections.contains(section) {
-                if shouldEmit(section: section, in: config) {
+                // Guard against a config that contains the same supported section
+                // twice: emit it only on first encounter, otherwise it would be
+                // rendered (with the merged body) more than once, producing a file
+                // mackup's strict configparser rejects.
+                if !renderedSections.contains(section), shouldEmit(section: section, in: config) {
                     appendSection(section, config: config, originalLines: originalLines, startIndex: index, to: &output)
                 }
                 renderedSections.insert(section)
@@ -233,7 +247,7 @@ private enum MackupConfigRenderer {
         switch section {
         case "storage":
             output.append("[storage]")
-            output.append("engine = \(config.storage.engine.rawValue)")
+            output.append("engine = \(config.storage.rawEngine ?? config.storage.engine.rawValue)")
 
             if let path = config.storage.path, !path.isEmpty {
                 output.append("path = \(path)")
@@ -246,13 +260,62 @@ private enum MackupConfigRenderer {
             output.append(contentsOf: unsupportedStorageLines(in: originalLines, startIndex: startIndex))
         case "applications_to_sync":
             output.append("[applications_to_sync]")
-            output.append(contentsOf: config.applicationsToSync)
+            output.append(contentsOf: mergedApplicationLines(
+                desired: config.applicationsToSync,
+                originalLines: originalLines,
+                startIndex: startIndex
+            ))
         case "applications_to_ignore":
             output.append("[applications_to_ignore]")
-            output.append(contentsOf: config.applicationsToIgnore)
+            output.append(contentsOf: mergedApplicationLines(
+                desired: config.applicationsToIgnore,
+                originalLines: originalLines,
+                startIndex: startIndex
+            ))
         default:
             break
         }
+    }
+
+    /// Reconciles the desired application list against the section's original body
+    /// so that user comments, blank lines, and formatting inside
+    /// applications_to_sync / applications_to_ignore survive a save. Original app
+    /// lines are kept verbatim when still desired (and dropped when the user
+    /// toggled them off); newly-added apps are appended in the desired order.
+    private static func mergedApplicationLines(
+        desired: [String],
+        originalLines: [String],
+        startIndex: Int
+    ) -> [String] {
+        let desiredSet = Set(desired)
+        var emitted: [String] = []
+        var seen = Set<String>()
+
+        if !originalLines.isEmpty {
+            let endIndex = nextSectionIndex(in: originalLines, after: startIndex + 1)
+            for line in originalLines[(startIndex + 1)..<endIndex] {
+                let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                if trimmed.isEmpty || trimmed.hasPrefix("#") || trimmed.hasPrefix(";") {
+                    emitted.append(line)
+                    continue
+                }
+
+                let name = MackupConfigParser.applicationName(from: trimmed)
+                if desiredSet.contains(name), !seen.contains(name) {
+                    emitted.append(line)
+                    seen.insert(name)
+                }
+                // Otherwise the app was removed from the desired list: drop the line.
+            }
+        }
+
+        for name in desired where !seen.contains(name) {
+            emitted.append(name)
+            seen.insert(name)
+        }
+
+        return emitted
     }
 
     private static func unsupportedStorageLines(in lines: [String], startIndex: Int) -> [String] {

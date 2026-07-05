@@ -58,10 +58,28 @@ final class PreferencesViewModelTests: XCTestCase {
         viewModel.save()
 
         if case .failed(let message) = viewModel.state {
-            XCTAssertTrue(message.contains("not executable"))
+            // The message is now a localization key rendered via LocalizedStringKey
+            // so it follows the in-app language instead of being a hardcoded string.
+            XCTAssertEqual(message, "preferences.cli_path.invalid")
         } else {
             XCTFail("Expected failed state with non-executable path")
         }
+    }
+
+    func testEditingAfterSaveClearsSavedIndicator() throws {
+        let executableFile = temporaryDirectory.appendingPathComponent("mackup")
+        try "#!/bin/bash\necho test".write(to: executableFile, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: executableFile.path)
+
+        let viewModel = PreferencesViewModel(preferences: InMemoryPreferences())
+        viewModel.cliPath = executableFile.path
+        viewModel.save()
+        XCTAssertEqual(viewModel.state, .saved)
+
+        // Editing a field after a successful save must drop the "Saved" indicator
+        // so the UI never claims unsaved values are persisted.
+        viewModel.showsLinkMode = true
+        XCTAssertEqual(viewModel.state, .editing)
     }
 
     func testResetClearsStoredPathsAndDeletesSelectedConfigFile() throws {

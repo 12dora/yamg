@@ -9,9 +9,9 @@ final class PreferencesViewModel: ObservableObject {
         case failed(String)
     }
 
-    @Published var cliPath: String
-    @Published var configPath: String
-    @Published var showsLinkMode: Bool
+    @Published var cliPath: String { didSet { markEdited() } }
+    @Published var configPath: String { didSet { markEdited() } }
+    @Published var showsLinkMode: Bool { didSet { markEdited() } }
     @Published var preferredLanguage: AppLanguage
     @Published private(set) var state: State = .editing
 
@@ -33,11 +33,33 @@ final class PreferencesViewModel: ObservableObject {
         self.preferredLanguage = preferences.preferredLanguage
     }
 
+    /// Reloads the editable fields from the shared store. Called when the pane
+    /// appears so a long-lived Settings window can't overwrite newer values that
+    /// another Preferences surface saved while it was hidden.
+    func reloadFromStore() {
+        cliPath = preferences.preferredCLIPath?.path ?? ""
+        configPath = preferences.configFilePath?.path ?? ""
+        showsLinkMode = preferences.showsLinkMode
+        preferredLanguage = preferences.preferredLanguage
+        state = .editing
+    }
+
+    private func markEdited() {
+        // Clear a stale "Saved"/"Reset done" indicator once the user edits again,
+        // so it never claims the currently-shown values are persisted when they
+        // are not.
+        if state != .editing {
+            state = .editing
+        }
+    }
+
     func save() {
         let cliURL = normalizedURL(from: cliPath)
 
         if let cliURL, !isExecutable(cliURL) {
-            state = .failed("The selected CLI path is not executable. Please choose a valid Mackup executable.")
+            // Carry the localization key (not an English literal) so the message
+            // follows the in-app language when rendered via LocalizedStringKey.
+            state = .failed("preferences.cli_path.invalid")
             return
         }
 

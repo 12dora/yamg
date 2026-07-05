@@ -43,9 +43,16 @@ struct DashboardView: View {
     @StateObject private var viewModel: DashboardViewModel
     private let preferences: AppPreferencesStoring
     private let logStore: ProcessLogPersisting
+    // Injected by the owning shell so it persists across navigation; a fresh one
+    // is created only for standalone/preview use.
+    private let operationFlowViewModel: OperationFlowViewModel
 
     @MainActor
-    init(preferences: AppPreferencesStoring = AppPreferences(), logStore: ProcessLogPersisting = ProcessLogStore()) {
+    init(
+        preferences: AppPreferencesStoring = AppPreferences(),
+        logStore: ProcessLogPersisting = ProcessLogStore(),
+        operationFlowViewModel: OperationFlowViewModel? = nil
+    ) {
         self.preferences = preferences
         self.logStore = logStore
         _viewModel = StateObject(
@@ -55,12 +62,19 @@ struct DashboardView: View {
                     ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".mackup.cfg")
             )
         )
+        self.operationFlowViewModel = operationFlowViewModel ?? OperationFlowViewModel(
+            logStore: logStore,
+            preferredCLIPath: preferences.preferredCLIPath,
+            configFilePath: preferences.configFilePath
+        )
     }
 
+    @MainActor
     init(viewModel: DashboardViewModel, logStore: ProcessLogPersisting = ProcessLogStore()) {
         self.preferences = AppPreferences()
         self.logStore = logStore
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.operationFlowViewModel = OperationFlowViewModel(logStore: logStore)
     }
 
     var body: some View {
@@ -161,11 +175,7 @@ struct DashboardView: View {
                 .frame(width: Layout.scheduledBackupPanelWidth, alignment: .topLeading)
 
             OperationFlowView(
-                viewModel: OperationFlowViewModel(
-                    logStore: logStore,
-                    preferredCLIPath: viewModel.preferredCLIPath,
-                    configFilePath: viewModel.configPath
-                ),
+                viewModel: operationFlowViewModel,
                 layout: OperationFlowView.Layout(
                     panelHeight: Layout.operationPanelHeight,
                     controlsWidth: Layout.operationControlsWidth,
@@ -621,8 +631,17 @@ final class ScheduledBackupManager: ScheduledBackupManaging {
         fileManager.fileExists(atPath: launchAgentPath.path)
     }
 
+    private var logDirectoryPath: String {
+        "\(NSHomeDirectory())/Library/Logs/YAMG"
+    }
+
     private func installLaunchAgent(intervalMinutes: Int) throws {
-        let plistContent = createLaunchAgentPlist(intervalMinutes: intervalMinutes)
+        let plistData: Data
+        do {
+            plistData = try createLaunchAgentPlistData(intervalMinutes: intervalMinutes)
+        } catch {
+            throw ScheduledBackupError.launchAgentCreationFailed(error.localizedDescription)
+        }
 
         // Unload any previous agent first; launchctl ignores parameter changes
         // for an already-loaded label, so a fresh load() against the same path
@@ -632,20 +651,20 @@ final class ScheduledBackupManager: ScheduledBackupManaging {
         do {
             let parentDir = launchAgentPath.deletingLastPathComponent()
             try fileManager.createDirectory(at: parentDir, withIntermediateDirectories: true)
-            try plistContent.write(to: launchAgentPath, atomically: true, encoding: .utf8)
+            // launchd does not create intermediate directories for the log redirect
+            // targets, so create ~/Library/Logs/YAMG or the agent can never write
+            // its stdout/stderr logs (defeating the "fail loudly" fallback above).
+            try fileManager.createDirectory(atPath: logDirectoryPath, withIntermediateDirectories: true)
+            try plistData.write(to: launchAgentPath, options: .atomic)
         } catch {
             throw ScheduledBackupError.launchAgentCreationFailed(error.localizedDescription)
         }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
-        process.arguments = ["load", launchAgentPath.path]
-
-        do {
-            try process.run()
-            process.waitUntilExit()
-        } catch {
-            throw ScheduledBackupError.launchAgentCreationFailed("Failed to load launch agent: \(error.localizedDescription)")
+        // Check the exit status: launchctl returning non-zero (e.g. a rejected
+        // plist) must surface as a failure instead of the UI reporting success.
+        let status = runLaunchctl(arguments: ["load", launchAgentPath.path])
+        if status != 0 {
+            throw ScheduledBackupError.launchAgentCreationFailed("launchctl load exited with status \(status).")
         }
     }
 
@@ -667,15 +686,13 @@ final class ScheduledBackupManager: ScheduledBackupManaging {
     }
 
     private func uninstallLaunchAgent() throws {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
-        process.arguments = ["unload", launchAgentPath.path]
+        runLaunchctl(arguments: ["unload", launchAgentPath.path])
 
-        do {
-            try process.run()
-            process.waitUntilExit()
-        } catch {
-            throw ScheduledBackupError.launchAgentRemovalFailed("Failed to unload launch agent: \(error.localizedDescription)")
+        // Removing an agent that was never installed should be a no-op success,
+        // not a spurious error shown when the user toggles off something that was
+        // never on (e.g. UserDefaults says enabled but the plist is absent).
+        guard fileManager.fileExists(atPath: launchAgentPath.path) else {
+            return
         }
 
         do {
@@ -685,32 +702,18 @@ final class ScheduledBackupManager: ScheduledBackupManaging {
         }
     }
 
-    private func createLaunchAgentPlist(intervalMinutes: Int) -> String {
-        let intervalSeconds = intervalMinutes * 60
-        let mackupPath = resolveMackupPath().path
-
-        return """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>Label</key>
-            <string>\(launchAgentName)</string>
-            <key>ProgramArguments</key>
-            <array>
-                <string>\(mackupPath)</string>
-                <string>backup</string>
-                <string>--force</string>
-            </array>
-            <key>StartInterval</key>
-            <integer>\(intervalSeconds)</integer>
-            <key>StandardOutPath</key>
-            <string>\(NSHomeDirectory())/Library/Logs/YAMG/backup.log</string>
-            <key>StandardErrorPath</key>
-            <string>\(NSHomeDirectory())/Library/Logs/YAMG/backup-error.log</string>
-        </dict>
-        </plist>
-        """
+    private func createLaunchAgentPlistData(intervalMinutes: Int) throws -> Data {
+        // Serialize a real plist dictionary rather than interpolating into an XML
+        // template: paths containing &, <, or > (a legitimate mackup path or home
+        // directory) would otherwise produce malformed XML that launchctl rejects.
+        let plist: [String: Any] = [
+            "Label": launchAgentName,
+            "ProgramArguments": [resolveMackupPath().path, "backup", "--force"],
+            "StartInterval": intervalMinutes * 60,
+            "StandardOutPath": "\(logDirectoryPath)/backup.log",
+            "StandardErrorPath": "\(logDirectoryPath)/backup-error.log"
+        ]
+        return try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
     }
 }
 
@@ -731,6 +734,8 @@ final class ScheduledBackupViewModel: ObservableObject {
     private let manager: ScheduledBackupManaging
     private var pendingIntervalSave: Task<Void, Never>?
     private let intervalSaveDebounceNanoseconds: UInt64 = 450_000_000
+    private var saveTask: Task<Void, Never>?
+    private var saveGeneration = 0
 
     init(manager: ScheduledBackupManaging = ScheduledBackupManager()) {
         self.manager = manager
@@ -748,12 +753,36 @@ final class ScheduledBackupViewModel: ObservableObject {
             intervalMinutes: intervalMinutes
         )
 
-        do {
-            try manager.setConfig(config)
-            isInstalled = manager.isLaunchAgentInstalled()
-            state = .saved
-        } catch {
-            state = .failed(error.localizedDescription)
+        let manager = self.manager
+        // Serialize saves: each awaits the previous so the external side effects
+        // (plist write, launchctl load/unload, UserDefaults) run strictly FIFO —
+        // otherwise a quick enable→disable could interleave and leave the on-disk
+        // agent in a state that contradicts the user's final intent. A generation
+        // token ensures only the most recent save publishes UI state.
+        saveGeneration += 1
+        let generation = saveGeneration
+        let previousSave = saveTask
+        saveTask = Task { [weak self] in
+            await previousSave?.value
+
+            // setConfig writes the plist and blocks on launchctl via
+            // waitUntilExit(); run it off the main actor so the UI never freezes.
+            let outcome: (installed: Bool, error: String?) = await Task.detached {
+                do {
+                    try manager.setConfig(config)
+                    return (manager.isLaunchAgentInstalled(), nil)
+                } catch {
+                    return (false, error.localizedDescription)
+                }
+            }.value
+
+            guard let self, generation == self.saveGeneration else { return }
+            if let message = outcome.error {
+                self.state = .failed(message)
+            } else {
+                self.isInstalled = outcome.installed
+                self.state = .saved
+            }
         }
     }
 

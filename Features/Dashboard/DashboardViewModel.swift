@@ -164,13 +164,24 @@ final class DashboardViewModel: ObservableObject {
         setupState = .savingConfig
 
         do {
-            let existing = try? configEditor.load(path: configPath)
+            // Load with `try`, not `try?`: `load` only throws for an EXISTING file
+            // that cannot be read/parsed (a missing file returns a default empty
+            // config). Swallowing that error and saving from an empty originalText
+            // silently wiped the user's app lists, comments, and unknown sections.
+            let existing = try configEditor.load(path: configPath)
+            // If the existing config uses an engine YAMG does not model (rawEngine
+            // set, e.g. mackup's `copy`), the storage picker can't represent it, so
+            // preserve the original storage block verbatim instead of rewriting it
+            // to a modeled engine — that would silently change where mackup stores.
+            let storage = existing.storage.rawEngine != nil
+                ? existing.storage
+                : storageFromSelection()
             let config = MackupConfig(
                 fileURL: configPath,
-                storage: storageFromSelection(),
-                applicationsToSync: existing?.applicationsToSync ?? [],
-                applicationsToIgnore: existing?.applicationsToIgnore ?? [],
-                originalText: existing?.originalText ?? ""
+                storage: storage,
+                applicationsToSync: existing.applicationsToSync,
+                applicationsToIgnore: existing.applicationsToIgnore,
+                originalText: existing.originalText
             )
             try configEditor.save(config)
             configState = .present(configPath)
